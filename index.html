@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inkoopdashboard - Bourguignon</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F7F7;--surface:#fff;--surface2:#F0F0F0;--surface3:#E5E5E5;
+  --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.15);
+  --text:#111;--muted:#666;--hint:#AAA;
+  --accent:#E8620A;--accent2:#C4510A;--accent-bg:#FFF3EC;
+  --radius:10px;--radius-lg:16px;--radius-xl:20px;
+  --green-bg:#EDFAF1;--green-txt:#145C30;--green-mid:#1E8B47;
+  --amber-bg:#FFF3EC;--amber-txt:#C4510A;--amber-mid:#E8620A;
+  --blue-bg:#EEF4FF;--blue-txt:#1A3A8F;--blue-mid:#2B55C9;
+  --purple-bg:#F5F0FF;--purple-txt:#3D1A8F;--purple-mid:#5B35C9;
+  --red-txt:#A81C1C;--red-bg:#FFF0F0;--red-mid:#C62828;
+  --shadow-lg:0 12px 32px rgba(0,0,0,.14),0 4px 8px rgba(0,0,0,.07);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:#111;border-bottom:1px solid rgba(255,255,255,.08);box-shadow:0 2px 12px rgba(0,0,0,.25);padding:0 2rem;position:sticky;top:0;z-index:50}
+.header-inner{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;gap:1rem}
+.logo-pill{background:#fff;padding:5px 14px;border-radius:8px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.logo-img{height:32px;width:auto;object-fit:contain;display:block}
+.logo-name{font-size:14px;font-weight:600;color:#111;white-space:nowrap}
+.logo-name span{color:#E8620A}
+.hd{width:1px;height:28px;background:rgba(255,255,255,.18);margin:0 4px}
+.ht{font-size:14px;font-weight:500;color:rgba(255,255,255,.55)}
+.ha{display:flex;gap:8px;align-items:center}
+.app{max-width:1440px;margin:0 auto;padding:2rem 2rem 5rem}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:2rem}
+@media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.stats{grid-template-columns:1fr 1fr}}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.375rem;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--sc,#ccc);border-radius:3px 3px 0 0}
+.stat-lbl{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px}
+.stat-val{font-size:26px;font-weight:600;color:var(--text);line-height:1;letter-spacing:-.5px}
+.stat-sub{font-size:12px;color:var(--hint);margin-top:4px}
+.s-or{--sc:#E8620A}
+.s-gr{--sc:#1E8B47}.s-gr .stat-val{color:#145C30}
+.s-am{--sc:#E8620A}.s-am .stat-val{color:#C4510A}
+.s-pu{--sc:#5B35C9}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:1.25rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-lg);padding:.875rem 1.125rem}
+.toolbar input,.toolbar select{font-family:inherit;font-size:13px;padding:7px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);height:36px;outline:none}
+.toolbar input{flex:1;min-width:200px}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--accent);background:var(--surface)}
+.tsep{width:1px;height:24px;background:var(--border2);flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:13px;font-weight:500;padding:0 16px;height:36px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;white-space:nowrap;transition:background .15s}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.btn.primary:hover{background:var(--accent2)}
+.btn.small{font-size:12px;padding:0 11px;height:30px;border-radius:8px}
+.hbtn{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:13px;font-weight:500;padding:0 16px;height:36px;border-radius:var(--radius);border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);cursor:pointer;white-space:nowrap;transition:background .15s}
+.hbtn:hover{background:rgba(255,255,255,.15);color:#fff}
+.hbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.hbtn.primary:hover{background:var(--accent2)}
+.loading{text-align:center;padding:1rem;color:var(--muted);font-size:13px;display:none}
+.tbl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:1180px}
+thead{background:var(--accent)}
+thead tr{border-bottom:1px solid rgba(0,0,0,.1)}
+th{padding:11px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#111;white-space:nowrap}
+td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#FFF6F1}
+.tr{text-align:right}
+.mono{font-family:'DM Mono',monospace;font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.7}
+.b-bestelling{background:var(--blue-bg);color:var(--blue-txt)}
+.b-onderweg{background:var(--amber-bg);color:var(--amber-txt)}
+.b-binnen{background:var(--green-bg);color:var(--green-txt)}
+.b-verkocht{background:var(--purple-bg);color:var(--purple-txt)}
+.rp{color:#1E8B47;font-weight:600;font-family:'DM Mono',monospace;font-size:12px}
+.rn{color:#C62828;font-weight:600;font-family:'DM Mono',monospace;font-size:12px}
+.dm{color:var(--hint)}
+.acell{display:flex;gap:3px;justify-content:flex-end}
+.ib{background:none;border:none;cursor:pointer;padding:5px 7px;border-radius:7px;color:var(--hint);font-size:14px;line-height:1}
+.ib:hover{background:var(--surface2);color:var(--text)}
+.ib.del:hover{background:var(--red-bg);color:var(--red-txt)}
+.erow td{text-align:center;padding:4rem;color:var(--muted);font-size:14px}
+.mbg{display:none;position:fixed;inset:0;background:rgba(24,24,26,.45);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.mbg.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-xl);border:1px solid var(--border);box-shadow:var(--shadow-lg);padding:2rem;width:100%;max-height:92vh;overflow-y:auto}
+.mhdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.75rem}
+.mhdr h2{font-size:18px;font-weight:600;letter-spacing:-.3px}
+.mhdr p{font-size:13px;color:var(--muted);margin-top:3px}
+.xbtn{background:var(--surface2);border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:6px 9px;border-radius:8px;line-height:1;flex-shrink:0;margin-left:1rem}
+.xbtn:hover{background:var(--surface3);color:var(--text)}
+.mftr{display:flex;justify-content:flex-end;gap:8px;margin-top:1.75rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg.full{grid-column:1/-1}
+.fg label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg select,.fg textarea{font-family:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);outline:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);background:var(--surface)}
+.fg textarea{resize:vertical;min-height:70px}
+.fg .hint{font-size:11px;color:var(--hint);margin-top:2px;font-style:italic}
+.sdiv{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin:4px 0}
+.sdiv span{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--hint);white-space:nowrap}
+.sdiv::after{content:'';flex:1;height:1px;background:var(--border)}
+.dropz{border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:2.5rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:1.25rem;background:var(--bg)}
+.dropz:hover,.dropz.drag{background:var(--accent-bg);border-color:var(--accent);border-style:solid}
+.isum{font-size:13px;color:var(--muted);margin-bottom:1rem;padding:.875rem 1.125rem;background:var(--surface2);border-radius:var(--radius)}
+.clist{display:flex;flex-direction:column;gap:8px;margin-top:.75rem}
+.citem{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.cinfo strong{display:block;font-size:13px;margin-bottom:4px}
+.cinfo span{display:block;font-size:12px;color:var(--muted);line-height:1.6}
+.cactions{display:flex;gap:6px;flex-shrink:0}
+.nlist{border:1px solid var(--border);border-radius:var(--radius);max-height:180px;overflow-y:auto;margin-top:.5rem}
+.nitem{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:8px 12px;border-bottom:1px solid var(--border)}
+.nitem:last-child{border-bottom:none}
+.toast{position:fixed;bottom:1.75rem;right:1.75rem;background:#111;color:#fff;padding:.75rem 1.375rem;border-radius:var(--radius);font-size:13px;font-weight:500;z-index:500;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+#cfi{display:none}
+@media(max-width:600px){.fgrid{grid-template-columns:1fr}.fg.full{grid-column:1}.app{padding:1rem 1rem 4rem}.header{padding:0 1rem}}
+
+/* Mobile app view */
+@media(max-width:768px){
+  .header{padding:0 1rem}
+  .header-inner{height:56px}
+  .logo-pill{padding:4px 10px}
+  .logo-name{font-size:12px}
+  .ht{display:none}
+  .hd{display:none}
+  .ha .hbtn:not(.primary){display:none}
+  .ha .hbtn.primary{font-size:12px;padding:0 12px;height:32px}
+  .app{padding:1rem .75rem 5rem}
+  .stats{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+  .stat{padding:.875rem 1rem}
+  .stat-val{font-size:20px}
+  .stat-sub{font-size:11px}
+  .toolbar{padding:.75rem;gap:8px;border-radius:10px}
+  .toolbar input{min-width:0;font-size:14px}
+  .toolbar select{font-size:13px}
+  .tsep{display:none}
+  #fm{display:none}
+  #sort{font-size:12px}
+  .tbl-card{border-radius:12px}
+  .tbl-wrap{overflow-x:visible}
+  table{min-width:0;width:100%}
+  thead{display:none}
+  tbody tr{display:block;padding:.875rem;border-bottom:1px solid var(--border);position:relative}
+  tbody tr:hover td{background:transparent}
+  tbody tr:active{background:var(--surface2)}
+  td{display:inline;border:none;padding:0;font-size:13px}
+  td:empty{display:none}
+  .card-row{display:block}
+  .mob-kenteken{font-weight:700;font-size:14px;color:var(--text);display:block;margin-bottom:4px}
+  .mob-auto{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+  .mob-details{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;align-items:center}
+  .mob-prijzen{display:flex;gap:12px;margin-bottom:8px;font-size:13px}
+  .mob-bottom{display:flex;align-items:center;justify-content:space-between}
+  .mob-actions{display:flex;gap:4px;position:absolute;top:.875rem;right:.875rem}
+  .ib{padding:6px 8px;font-size:15px}
+}
+
+@media(max-width:768px){
+  .tbl-wrap table,.tbl-wrap thead,.tbl-wrap tbody,.tbl-wrap tr,.tbl-wrap td,.tbl-wrap th{display:block}
+  .tbl-wrap thead tr{display:none}
+  .tbl-wrap tbody tr{
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    padding:1rem;
+    position:relative;
+  }
+  .tbl-wrap tbody tr:last-child{border-bottom:none}
+  .tbl-wrap td{
+    display:block;
+    padding:0;
+    border:none;
+    font-size:13px;
+    line-height:1.5;
+  }
+  .tbl-wrap td.mob-hide{display:none}
+  .tbl-wrap td[data-label]:before{
+    content:attr(data-label);
+    font-size:11px;
+    font-weight:600;
+    color:var(--hint);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    display:block;
+    margin-bottom:2px;
+  }
+  .acell{position:absolute;top:1rem;right:1rem;flex-direction:row}
+  .erow td{text-align:center;padding:2rem 1rem}
+}
+
+.pw-screen{position:fixed;inset:0;background:#111;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem}
+.pw-box{background:#fff;border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:380px;text-align:center}
+.pw-logo{height:40px;margin:0 auto 1.5rem;display:block}
+.pw-box h2{font-size:18px;font-weight:600;margin-bottom:.5rem;color:#111}
+.pw-box p{font-size:13px;color:#666;margin-bottom:1.5rem}
+.pw-box input{width:100%;font-size:15px;padding:10px 14px;border:1px solid rgba(0,0,0,.2);border-radius:10px;outline:none;text-align:center;letter-spacing:2px;font-family:inherit;margin-bottom:1rem}
+.pw-box input:focus{border-color:#E8620A}
+.pw-box button{width:100%;background:#E8620A;color:#fff;border:none;border-radius:10px;padding:11px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.pw-box button:hover{background:#C4510A}
+.pw-error{color:#A81C1C;font-size:13px;margin-top:.75rem;display:none}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="header-inner">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="logo-pill">
+        <img class="logo-img" src="data:image/jpeg;base64,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" alt="Bourguignon">
+        <span class="logo-name">Bourguignon <span>Occasions</span></span>
+      </div>
+      <div class="hd"></div>
+      <span class="ht">Inkoopdashboard</span>
+    </div>
+    <div class="ha">
+      <button class="hbtn" onclick="openImport()">&#8593; Importeer CSV</button>
+      <button class="hbtn" onclick="exportCSV()">&#8595; Export CSV</button>
+      <button class="hbtn primary" onclick="openAdd()">+ Auto toevoegen</button>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+  <div class="stats" id="stats"></div>
+  <div class="toolbar">
+    <svg width="15" height="15" fill="none" stroke="var(--hint)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Zoek kenteken, VIN, merk, type..." oninput="render()">
+    <div class="tsep"></div>
+    <select id="fs" onchange="render()">
+      <option value="">Alle statussen</option>
+      <option value="bestelling">In bestelling</option>
+      <option value="onderweg">Onderweg</option>
+      <option value="binnen">Binnen</option>
+      <option value="verkocht">Verkocht</option>
+    </select>
+    <input type="text" id="fm" placeholder="Filter op merk..." oninput="render()" style="max-width:160px">
+    <div class="tsep"></div>
+    <select id="sort" onchange="render()">
+      <option value="datum_desc">Datum nieuwste eerst</option>
+      <option value="datum_asc">Datum oudste eerst</option>
+      <option value="merk_asc">Merk A-Z</option>
+      <option value="status_asc">Status</option>
+      <option value="inkoop_desc">Inkoop hoog-laag</option>
+      <option value="inkoop_asc">Inkoop laag-hoog</option>
+    </select>
+    <span id="count" style="font-size:12px;color:var(--hint);white-space:nowrap;margin-left:auto"></span>
+  </div>
+  <div id="loading" class="loading">Gegevens laden...</div>
+  <div class="tbl-card">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Kenteken / VIN</th><th>Merk</th><th>Type</th><th>Motor</th><th>BJ</th>
+          <th class="tr">KM-stand</th><th>Inkoopdatum</th>
+          <th class="tr">Inkoop</th><th class="tr">Verkoop</th>
+          <th class="tr">Resultaat</th><th>Status</th><th>Opmerkingen</th>
+          <th style="width:80px"></th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="em">
+  <div class="modal" style="max-width:700px">
+    <div class="mhdr">
+      <div><h2 id="etitle">Auto toevoegen</h2><p id="esubtitle">Vul de gegevens in en sla op</p></div>
+      <button class="xbtn" onclick="cm('em')">&#10005;</button>
+    </div>
+    <div class="fgrid">
+      <div class="fg"><label>Kenteken</label><input id="fk" placeholder="bijv. AB-123-C"><span class="hint">Laat leeg als nog onbekend</span></div>
+      <div class="fg"><label>Chassisnummer (VIN)</label><input id="fv" placeholder="WVWZZZ1KZ8W123456"></div>
+      <div class="sdiv"><span>Voertuig</span></div>
+      <div class="fg"><label>Merk</label><input id="fmk" placeholder="bijv. Volkswagen, Audi, BMW..."></div>
+      <div class="fg"><label>Type / model</label><input id="ft" placeholder="bijv. Golf 8 GTI"></div>
+      <div class="fg"><label>Motor / uitvoering</label><input id="fmo" placeholder="bijv. 2.0 TSI 245pk DSG"></div>
+      <div class="fg"><label>Bouwjaar</label><input id="fb" type="number" placeholder="2022" min="2000" max="2035"></div>
+      <div class="fg"><label>Kilometerstand</label><input id="fkm" type="number" placeholder="45000"></div>
+      <div class="fg"><label>Inkoopdatum</label><input id="fd" type="date"></div>
+      <div class="sdiv"><span>Financieel</span></div>
+      <div class="fg"><label>Inkoopprijs (euro)</label><input id="fi" type="number" placeholder="18500"></div>
+      <div class="fg"><label>Verkoopprijs (euro)</label><input id="fvp" type="number" placeholder="21500"></div>
+      <div class="fg"><label>Resultaat (euro)</label><input id="fr" type="number" placeholder="1850"><span class="hint">Zelf invullen inclusief alle kosten</span></div>
+      <div class="fg"><label>Status</label>
+        <select id="fst"><option value="bestelling">In bestelling</option><option value="onderweg">Onderweg</option><option value="binnen">Binnen</option><option value="verkocht">Verkocht</option></select>
+      </div>
+      <div class="fg"><label>BTW / Marge</label>
+        <select id="fbtw"><option value="">Nog niet bekend</option><option value="btw">BTW auto</option><option value="marge">Marge auto</option></select>
+      </div>
+      <div class="fg full"><label>Opmerkingen</label><textarea id="fo" placeholder="Bijzonderheden, schade, afspraken..."></textarea></div>
+    </div>
+    <div class="mftr">
+      <button class="btn" onclick="cm('em')">Annuleren</button>
+      <button class="btn primary" onclick="save()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="im">
+  <div class="modal" style="max-width:820px">
+    <div class="mhdr">
+      <div><h2>Importeer vanuit Excel / CSV</h2><p>Kolomnamen worden automatisch herkend</p></div>
+      <button class="xbtn" onclick="cm('im')">&#10005;</button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.7;background:var(--surface2);padding:.875rem 1rem;border-radius:var(--radius)">
+      Exporteer je Excel als <strong style="color:var(--text)">CSV</strong> via Bestand &rarr; Opslaan als &rarr; CSV UTF-8.
+      Herkende kolommen: Kenteken, Merk, Type, Motor, Bouwjaar, Km stand, Inkoop datum, Inkoopprijs, Verkoopprijs, Status, Opmerking, Resultaat.
+    </p>
+    <div class="dropz" id="dz" onclick="document.getElementById('cfi').click()" ondragover="dzo(event)" ondragleave="dzl()" ondrop="dzd(event)">
+      <svg width="36" height="36" fill="none" stroke="var(--hint)" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 12px;display:block"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      <strong style="font-size:15px;color:var(--text)">Sleep je CSV hier of klik om te bladeren</strong>
+      <p style="color:var(--muted);font-size:13px;margin-top:.5rem">Puntkomma of komma als scheidingsteken worden beide herkend</p>
+    </div>
+    <input type="file" id="cfi" accept=".csv,.txt" onchange="hf(this.files[0])">
+    <div id="iprev" style="display:none">
+      <div id="isum" class="isum"></div>
+      <div id="csec" style="display:none">
+        <strong style="font-size:14px;font-weight:600">Dubbele kentekens - kies wat je wilt bewaren:</strong>
+        <div class="clist" id="clist"></div>
+      </div>
+      <div id="nsec" style="display:none;margin-top:1.25rem">
+        <strong id="ntitle" style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px"></strong>
+        <div class="nlist" id="nlist"></div>
+      </div>
+    </div>
+    <div class="mftr">
+      <button class="btn" onclick="cm('im')">Annuleren</button>
+      <button class="btn primary" id="icbtn" style="display:none" onclick="doImport()">Importeren</button>
+    </div>
+  </div>
+</div>
+
+<div class="pw-screen" id="pw-screen">
+  <div class="pw-box">
+    <img class="pw-logo" src="data:image/jpeg;base64,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" alt="Bourguignon">
+    <h2>Inkoopdashboard</h2>
+    <p>Voer de toegangscode in</p>
+    <input type="password" id="pw-input" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" onkeydown="if(event.key==='Enter')checkPW()">
+    <button onclick="checkPW()">Inloggen</button>
+    <div class="pw-error" id="pw-error">Onjuiste code, probeer opnieuw</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+
+var SUPA_URL = 'https://wtstkaztqevmztlkkinf.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0c3RrYXp0cWV2bXp0bGtraW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzkwOTIsImV4cCI6MjA5MTMxNTA5Mn0.OS3hpC0TzgfpoY8ylTT2F_9K7N4MNk7eLWls2QzWTDY';
+var cars = [], editId = null, iNew = [], iConflicts = [], cChoices = {};
+
+function apiFetch(method, path, body) {
+  var opts = { method: method, headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': method === 'POST' ? 'return=representation' : '' } };
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(SUPA_URL + '/rest/v1/' + path, opts).then(function(r) {
+    if (r.status === 204 || r.status === 200 && method !== 'GET' && method !== 'POST') return {};
+    var ct = r.headers.get('content-type') || '';
+    if (ct.indexOf('json') > -1) return r.json();
+    return {};
+  });
+}
+
+function load() {
+  showLoading(true);
+  apiFetch('GET', 'autos?order=created_at.desc&select=*').then(function(data) {
+    cars = Array.isArray(data) ? data : [];
+    showLoading(false);
+    render();
+    updateStats();
+  }).catch(function() { showLoading(false); showToast('Fout bij laden'); });
+}
+
+function showLoading(on) { var el = document.getElementById('loading'); if (el) el.style.display = on ? 'block' : 'none'; }
+function mkid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function showToast(m) { var e = document.getElementById('toast'); e.textContent = m; e.classList.add('show'); setTimeout(function(){ e.classList.remove('show'); }, 2600); }
+function nv(v) { if (v===''||v===null||v===undefined||isNaN(Number(v))) return null; return Number(v); }
+function fe(v) { if (nv(v)===null) return '<span class="dm">-</span>'; return 'EUR ' + Number(v).toLocaleString('nl-NL'); }
+function fk(v) { if (!v) return '<span class="dm">-</span>'; return Number(v).toLocaleString('nl-NL') + ' km'; }
+
+function fd(v) {
+  if (!v) return '<span class="dm">-</span>';
+  try {
+    var s = v.toString().trim();
+    var p = s.split('-');
+    if (p.length === 3) {
+      var d = p[0].length === 1 ? '0'+p[0] : p[0];
+      var m = p[1].length === 1 ? '0'+p[1] : p[1];
+      var y = p[2].length === 4 ? p[2] : p[0];
+      if (p[2].length === 4) return d + '-' + m + '-' + y;
+      if (p[0].length === 4) return p[2] + '-' + m + '-' + p[0];
+    }
+    return v;
+  } catch(e) { return v; }
+}
+
+function toSortDate(d) {
+  if (!d) return '';
+  var p = d.toString().trim().split('-');
+  if (p.length === 3 && p[2].length === 4) {
+    var dd = p[0].length===1?'0'+p[0]:p[0];
+    var mm = p[1].length===1?'0'+p[1]:p[1];
+    return p[2]+mm+dd;
+  }
+  if (p.length === 3 && p[0].length === 4) {
+    var mm = p[1].length===1?'0'+p[1]:p[1];
+    var dd = p[2].length===1?'0'+p[2]:p[2];
+    return p[0]+mm+dd;
+  }
+  return d;
+}
+
+function sb(s, eid) {
+  var lbl = {bestelling:'In bestelling', onderweg:'Onderweg', binnen:'Binnen', verkocht:'Verkocht'};
+  var key = s || 'bestelling';
+  return '<span class="badge b-' + key + '" style="cursor:pointer" data-id="' + eid + '" onclick="toggleStatusMenu(event,this)">' + (lbl[key]||key) + ' &#9662;</span>';
+}
+
+function rc(c) {
+  var r = nv(c.resultaat);
+  if (r===null) return '<span class="dm">-</span>';
+  return '<span class="'+(r>=0?'rp':'rn')+'">'+(r>=0?'+':'')+'EUR '+r.toLocaleString('nl-NL')+'</span>';
+}
+
+function toggleStatusMenu(evt, el) {
+  evt.stopPropagation();
+  document.querySelectorAll('.status-menu').forEach(function(m){ m.remove(); });
+  var id = decodeURIComponent(el.dataset.id);
+  var rect = el.getBoundingClientRect();
+  var menu = document.createElement('div');
+  menu.className = 'status-menu';
+  menu.style.cssText = 'position:fixed;top:'+(rect.bottom+4)+'px;left:'+rect.left+'px;background:#fff;border:1px solid rgba(0,0,0,.15);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:9999;min-width:150px;padding:4px 0';
+  var statuses = [['bestelling','In bestelling'],['onderweg','Onderweg'],['binnen','Binnen'],['verkocht','Verkocht']];
+  statuses.forEach(function(s) {
+    var item = document.createElement('div');
+    item.textContent = s[1];
+    item.style.cssText = 'padding:9px 16px;font-size:13px;cursor:pointer;color:#111;font-family:inherit';
+    item.onmouseover = function(){ this.style.background='#FFF6F1'; };
+    item.onmouseout = function(){ this.style.background=''; };
+    item.onclick = function(e) { e.stopPropagation(); menu.remove(); updateStatus(id, s[0]); };
+    menu.appendChild(item);
+  });
+  document.body.appendChild(menu);
+  setTimeout(function(){
+    document.addEventListener('click', function handler(){ menu.remove(); document.removeEventListener('click', handler); });
+  }, 10);
+}
+
+function updateStatus(id, newStatus) {
+  apiFetch('PATCH', 'autos?id=eq.'+id, {status: newStatus}).then(function(){
+    for (var i=0; i<cars.length; i++) {
+      if (cars[i].id === id) { cars[i].status = newStatus; break; }
+    }
+    showToast('Status bijgewerkt');
+    render();
+  });
+}
+
+function render() {
+  var q = (document.getElementById('search').value||'').toLowerCase();
+  var sf = document.getElementById('fs').value;
+  var mf = (document.getElementById('fm').value||'').toLowerCase();
+  var sortVal = document.getElementById('sort').value;
+  var list = cars.filter(function(c){
+    var h = [c.kenteken,c.vin,c.merk,c.type,c.motor,c.opmerkingen].join(' ').toLowerCase();
+    return (!q||h.indexOf(q)>-1) && (!sf||c.status===sf) && (!mf||(c.merk||'').toLowerCase().indexOf(mf)>-1);
+  });
+  list.sort(function(a,b){
+    if (sortVal==='datum_desc') return toSortDate(b.datum).localeCompare(toSortDate(a.datum));
+    if (sortVal==='datum_asc') return toSortDate(a.datum).localeCompare(toSortDate(b.datum));
+    if (sortVal==='merk_asc') return (a.merk||'').localeCompare(b.merk||'');
+    if (sortVal==='status_asc') return (a.status||'').localeCompare(b.status||'');
+    if (sortVal==='inkoop_desc') return (parseFloat(b.inkoop)||0)-(parseFloat(a.inkoop)||0);
+    if (sortVal==='inkoop_asc') return (parseFloat(a.inkoop)||0)-(parseFloat(b.inkoop)||0);
+    return 0;
+  });
+  document.getElementById('count').textContent = list.length + (list.length!==1?" auto's":" auto");
+  var tb = document.getElementById('tbody');
+  if (!list.length) {
+    tb.innerHTML = '<tr class="erow"><td colspan="13">'+(cars.length?'Geen resultaten voor deze filter.':"Nog geen auto's ingevoerd.")+'</td></tr>';
+    updateStats(); return;
+  }
+  var rows = [];
+  for (var ri=0; ri<list.length; ri++) {
+    var c = list[ri];
+    var eid = encodeURIComponent(c.id);
+    var idcell = c.kenteken ? '<span class="mono" style="font-weight:600">'+c.kenteken+'</span>'+(c.vin?'<br><span style="font-size:11px;color:var(--hint)">'+c.vin+'</span>':'') : '<span style="font-size:11px;color:var(--muted)">VIN: '+(c.vin||'-')+'</span>';
+    var opm = c.opmerkingen ? '<span title="'+c.opmerkingen.replace(/"/g,'&quot;')+'" style="cursor:help;border-bottom:1px dotted var(--border2);color:var(--muted)">'+(c.opmerkingen.length>30?c.opmerkingen.slice(0,30)+'...':c.opmerkingen)+'</span>' : '<span class="dm">-</span>';
+    rows.push('<tr>'+
+      '<td data-label="Kenteken">'+idcell+'</td>'+
+      '<td data-label="Merk" style="font-weight:500">'+(c.merk||'<span class="dm">-</span>')+'</td>'+
+      '<td data-label="Type" style="color:var(--muted)">'+(c.type||'<span class="dm">-</span>')+'</td>'+
+      '<td data-label="Motor" style="color:var(--muted);font-size:12px">'+(c.motor||'<span class="dm">-</span>')+'</td>'+
+      '<td data-label="BJ" style="color:var(--muted)">'+(c.bj||'<span class="dm">-</span>')+'</td>'+
+      '<td data-label="KM-stand" class="tr mono">'+fk(c.km)+'</td>'+
+      '<td data-label="Datum" style="color:var(--muted);font-size:12px">'+fd(c.datum)+'</td>'+
+      '<td data-label="Inkoop" class="tr mono">'+fe(c.inkoop)+'</td>'+
+      '<td data-label="Verkoop" class="tr mono">'+fe(c.verkoop)+'</td>'+
+      '<td data-label="Resultaat" class="tr">'+rc(c)+'</td>'+
+      '<td data-label="Status">'+sb(c.status, eid)+'</td>'+
+      '<td data-label="Opmerkingen" style="max-width:160px">'+opm+'</td>'+
+      '<td><div class="acell">'+
+        '<button class="ib" title="Publiceer naar Autotelex" data-id="'+eid+'" onclick="publishToAutotelex(this.dataset.id)" style="font-size:10px;font-weight:700;color:#1a6b1a;padding:4px 6px;background:#edfaf1;border-radius:6px">ADS</button>'+
+        '<button class="ib" title="Bekijk op JPcars" data-kenteken="'+(c.kenteken||'')+'" onclick="openJP(this.dataset.kenteken)" style="font-size:11px;font-weight:600;color:#E8620A;padding:4px 7px">JP</button>'+
+        '<button class="ib" title="Bewerken" data-id="'+eid+'" onclick="editCar(this.dataset.id)">&#9998;</button>'+
+        '<button class="ib del" title="Verwijderen" data-id="'+eid+'" onclick="delCar(this.dataset.id)">&#128465;</button>'+
+      '</div></td>'+
+    '</tr>');
+  }
+  tb.innerHTML = rows.join('');
+  updateStats();
+}
+
+function updateStats() {
+  var t=cars.length, v=cars.filter(function(c){return c.status==='verkocht';}).length;
+  var b=cars.filter(function(c){return c.status==='binnen';}).length;
+  var p=cars.filter(function(c){return c.status==='onderweg'||c.status==='bestelling';}).length;
+  var rs=cars.map(function(c){return nv(c.resultaat);}).filter(function(x){return x!==null;});
+  var tot=rs.reduce(function(a,b){return a+b;},0);
+  var hr=rs.length>0, totStr=hr?(tot>=0?'+':'')+'EUR '+tot.toLocaleString('nl-NL'):'-';
+  var resCls=hr?(tot>=0?'s-gr':'s-am'):'';
+  var resSub=hr?rs.length+(rs.length!==1?" auto's":" auto")+' met resultaat':'nog geen resultaten';
+  document.getElementById('stats').innerHTML=
+    '<div class="stat s-or"><div class="stat-lbl">Totaal ingekocht</div><div class="stat-val">'+t+'</div><div class="stat-sub">in administratie</div></div>'+
+    '<div class="stat s-gr"><div class="stat-lbl">Voorraad</div><div class="stat-val">'+b+'</div><div class="stat-sub">binnen en beschikbaar</div></div>'+
+    '<div class="stat s-am"><div class="stat-lbl">Onderweg / besteld</div><div class="stat-val">'+p+'</div><div class="stat-sub">verwacht</div></div>'+
+    '<div class="stat s-pu"><div class="stat-lbl">Verkocht</div><div class="stat-val">'+v+'</div><div class="stat-sub">afgeleverd</div></div>'+
+    '<div class="stat '+resCls+'"><div class="stat-lbl">Totaal resultaat</div><div class="stat-val">'+totStr+'</div><div class="stat-sub">'+resSub+'</div></div>';
+}
+
+function openAdd() {
+  editId=null;
+  document.getElementById('etitle').textContent='Auto toevoegen';
+  document.getElementById('esubtitle').textContent='Vul de gegevens in en sla op';
+  ['fk','fv','ft','fmo','fb','fkm','fi','fvp','fr','fo'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('fbtw').value='';
+  document.getElementById('fmk').value='';
+  document.getElementById('fd').value=new Date().toISOString().split('T')[0];
+  document.getElementById('fst').value='bestelling';
+  document.getElementById('em').classList.add('open');
+  setTimeout(function(){document.getElementById('fk').focus();},50);
+}
+
+function editCar(eid) {
+  var id=decodeURIComponent(eid), c=null;
+  for(var i=0;i<cars.length;i++){if(cars[i].id===id){c=cars[i];break;}}
+  if(!c) return;
+  editId=id;
+  document.getElementById('etitle').textContent='Auto bewerken';
+  document.getElementById('esubtitle').textContent=(c.kenteken||c.vin||'')+' - '+(c.merk||'')+' '+(c.type||'');
+  document.getElementById('fk').value=c.kenteken||'';
+  document.getElementById('fv').value=c.vin||'';
+  document.getElementById('fmk').value=c.merk||'';
+  document.getElementById('ft').value=c.type||'';
+  document.getElementById('fmo').value=c.motor||'';
+  document.getElementById('fb').value=c.bj||'';
+  document.getElementById('fkm').value=c.km||'';
+  var datumVal='';
+  if(c.datum){
+    var dp=c.datum.toString().trim().split('-');
+    if(dp.length===3&&dp[2].length===4){var dd=dp[0].length===1?'0'+dp[0]:dp[0];var mm=dp[1].length===1?'0'+dp[1]:dp[1];datumVal=dp[2]+'-'+mm+'-'+dd;}
+    else datumVal=c.datum;
+  }
+  document.getElementById('fd').value=datumVal;
+  document.getElementById('fi').value=c.inkoop||'';
+  document.getElementById('fvp').value=c.verkoop||'';
+  document.getElementById('fr').value=c.resultaat||'';
+  document.getElementById('fst').value=c.status||'bestelling';
+  document.getElementById('fbtw').value=c.btw_marge||'';
+  document.getElementById('fo').value=c.opmerkingen||'';
+  document.getElementById('em').classList.add('open');
+}
+
+function save() {
+  var v=document.getElementById('fd').value;
+  var datumSave=null;
+  if(v){var p=v.split('-');datumSave=(p.length===3&&p[0].length===4)?p[2]+'-'+p[1]+'-'+p[0]:v;}
+  var d={
+    kenteken:document.getElementById('fk').value.trim(),
+    vin:document.getElementById('fv').value.trim(),
+    merk:document.getElementById('fmk').value.trim(),
+    type:document.getElementById('ft').value.trim(),
+    motor:document.getElementById('fmo').value.trim(),
+    bj:document.getElementById('fb').value.trim(),
+    km:document.getElementById('fkm').value.trim(),
+    datum:datumSave,
+    inkoop:document.getElementById('fi').value.trim()||null,
+    verkoop:document.getElementById('fvp').value.trim()||null,
+    resultaat:document.getElementById('fr').value.trim()||null,
+    status:document.getElementById('fst').value,
+    btw_marge:document.getElementById('fbtw').value,
+    opmerkingen:document.getElementById('fo').value.trim()
+  };
+  if(!d.kenteken&&!d.vin){alert('Vul minimaal een kenteken of VIN in.');return;}
+  cm('em');
+  if(editId){
+    apiFetch('PATCH','autos?id=eq.'+editId,d).then(function(){showToast('Auto bijgewerkt');load();}).catch(function(){showToast('Fout bij opslaan');});
+  } else {
+    d.id=mkid();
+    apiFetch('POST','autos',d).then(function(){showToast('Auto toegevoegd');load();}).catch(function(){showToast('Fout bij opslaan');});
+  }
+}
+
+function delCar(eid) {
+  var id=decodeURIComponent(eid),c=null;
+  for(var i=0;i<cars.length;i++){if(cars[i].id===id){c=cars[i];break;}}
+  if(!c) return;
+  if(!confirm('Weet je zeker dat je '+(c.kenteken||c.vin||'deze auto')+' wilt verwijderen?')) return;
+  apiFetch('DELETE','autos?id=eq.'+id,null).then(function(){showToast('Auto verwijderd');load();});
+}
+
+function cm(id){document.getElementById(id).classList.remove('open');}
+document.addEventListener('click',function(e){if(e.target===document.getElementById('em'))cm('em');if(e.target===document.getElementById('im'))cm('im');});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){cm('em');cm('im');}});
+
+var CMAP={'kenteken':'kenteken','merk':'merk','type':'type','motor':'motor','bouwjaar':'bj','km stand':'km','kmstand':'km','km-stand':'km','inkoop datum':'datum','inkoopdatum':'datum','inkoopprijs':'inkoop','verkoopprijs':'verkoop','status':'status','opmerking':'opmerkingen','opmerkingen':'opmerkingen','resultaat':'resultaat','vin':'vin','chassisnummer':'vin'};
+
+function normSt(v){if(!v)return'bestelling';var s=v.toLowerCase().trim();if(s.indexOf('bestell')>-1)return'bestelling';if(s.indexOf('onderweg')>-1)return'onderweg';if(s.indexOf('binnen')>-1)return'binnen';if(s.indexOf('verkocht')>-1)return'verkocht';return'bestelling';}
+
+function spL(line,sep){var r=[],cur='',inq=false;for(var i=0;i<line.length;i++){var ch=line[i];if(ch==='"'){inq=!inq;}else if(ch===sep&&!inq){r.push(cur);cur='';}else{cur+=ch;}}r.push(cur);return r;}
+
+function parseCSV(txt){
+  var fl=txt.split('\n')[0];
+  var sep=(fl.match(/;/g)||[]).length>(fl.match(/,/g)||[]).length?';':',';
+  var lines=txt.split('\n').map(function(l){return l.replace(/\r/,'');});
+  if(lines.length<2)return[];
+  var hdrs=spL(lines[0],sep).map(function(h){return h.replace(/^"|"$/g,'').trim().toLowerCase();});
+  var fm=hdrs.map(function(h){return CMAP[h]||null;});
+  var rows=[];
+  for(var i=1;i<lines.length;i++){
+    var line=lines[i].trim();if(!line)continue;
+    var cells=spL(line,sep).map(function(cell){return cell.replace(/^"|"$/g,'').trim();});
+    var obj={id:mkid()};
+    fm.forEach(function(field,idx){
+      if(field&&cells[idx]!==undefined){
+        var val=cells[idx];
+        if(field==='status')val=normSt(val);
+        if(field==='km')val=val.replace(/\./g,'').replace(/,/g,'').replace(/\s/g,'');
+        if(field==='inkoop'||field==='verkoop'||field==='resultaat'){
+          val=val.replace(/\u20ac/g,'').replace(/EUR/g,'').replace(/\s/g,'');
+          var parts=val.split(',');
+          if(parts.length===2&&parts[1].length<=2){val=parts[0].replace(/\./g,'')+'.'+parts[1];}
+          else{val=val.replace(/\./g,'').replace(',','.');}
+          val=val.replace(/[^0-9.-]/g,'');
+        }
+        obj[field]=val||null;
+      }
+    });
+    if(obj.kenteken||obj.vin)rows.push(obj);
+  }
+  return rows;
+}
+
+function openImport(){iNew=[];iConflicts=[];cChoices={};document.getElementById('iprev').style.display='none';document.getElementById('icbtn').style.display='none';document.getElementById('cfi').value='';document.getElementById('im').classList.add('open');}
+function dzo(e){e.preventDefault();document.getElementById('dz').classList.add('drag');}
+function dzl(){document.getElementById('dz').classList.remove('drag');}
+function dzd(e){e.preventDefault();dzl();var f=e.dataTransfer.files[0];if(f)hf(f);}
+function hf(file){if(!file)return;var r=new FileReader();r.onload=function(ev){processCSV(ev.target.result);};r.readAsText(file,'UTF-8');}
+
+function processCSV(txt){
+  var rows=parseCSV(txt);
+  if(!rows.length){alert('Geen geldige rijen gevonden.');return;}
+  iNew=[];iConflicts=[];
+  rows.forEach(function(inc){
+    var key=(inc.kenteken||'').toLowerCase().replace(/[-\s]/g,'');
+    var ex=null;
+    if(key){for(var i=0;i<cars.length;i++){if((cars[i].kenteken||'').toLowerCase().replace(/[-\s]/g,'')=== key){ex=cars[i];break;}}}
+    if(ex)iConflicts.push({inc:inc,ex:ex});else iNew.push(inc);
+  });
+  renderPrev();
+}
+
+function renderPrev(){
+  var tot=iNew.length+iConflicts.length;
+  document.getElementById('isum').innerHTML='<strong>'+tot+'</strong> rijen gelezen - <strong style="color:var(--green-mid)">'+iNew.length+' nieuw</strong>'+(iConflicts.length?', <strong style="color:var(--amber-txt)">'+iConflicts.length+' dubbel kenteken</strong>':'');
+  var cs=document.getElementById('csec');
+  if(iConflicts.length){
+    cs.style.display='block';
+    var html='';
+    iConflicts.forEach(function(item,idx){
+      cChoices[idx]='keep';
+      var inc=item.inc,ex=item.ex;
+      html+='<div class="citem"><div class="cinfo"><strong>'+(inc.kenteken||inc.vin||'-')+' - '+(inc.merk||'')+' '+(inc.type||'')+'</strong><span>Bestaand: inkoop '+(ex.inkoop?'EUR '+Number(ex.inkoop).toLocaleString('nl-NL'):'-')+' - status: '+(ex.status||'-')+'</span><span>CSV: inkoop '+(inc.inkoop?'EUR '+Number(inc.inkoop).toLocaleString('nl-NL'):'-')+' - status: '+(inc.status||'-')+'</span></div><div class="cactions"><button class="btn small" id="cb'+idx+'k" data-idx="'+idx+'" data-choice="keep" onclick="sc(this)" style="color:var(--green-mid);border-color:var(--green-mid);background:var(--green-bg)">Bewaren</button><button class="btn small" id="cb'+idx+'r" data-idx="'+idx+'" data-choice="replace" onclick="sc(this)">Overschrijven</button></div></div>';
+    });
+    document.getElementById('clist').innerHTML=html;
+  } else {cs.style.display='none';}
+  var ns=document.getElementById('nsec');
+  if(iNew.length){
+    ns.style.display='block';
+    document.getElementById('ntitle').textContent=iNew.length+' nieuwe autos worden toegevoegd';
+    var nhtml='';
+    iNew.forEach(function(c){nhtml+='<div class="nitem"><span><strong>'+(c.kenteken||c.vin||'-')+'</strong> <span style="color:var(--muted)">'+(c.merk||'')+' '+(c.type||'')+'</span></span><span style="color:var(--hint);font-size:12px">'+(c.datum||'')+' '+(c.inkoop?'EUR '+Number(c.inkoop).toLocaleString('nl-NL'):'')+' </span></div>';});
+    document.getElementById('nlist').innerHTML=nhtml;
+  } else {ns.style.display='none';}
+  document.getElementById('iprev').style.display='block';
+  document.getElementById('icbtn').style.display=(iNew.length||iConflicts.length)?'inline-flex':'none';
+}
+
+function sc(btn){
+  var idx=parseInt(btn.dataset.idx),choice=btn.dataset.choice;
+  cChoices[idx]=choice;
+  var k=document.getElementById('cb'+idx+'k'),r=document.getElementById('cb'+idx+'r');
+  if(choice==='keep'){k.style.cssText='color:var(--green-mid);border-color:var(--green-mid);background:var(--green-bg)';r.style.cssText='';}
+  else{r.style.cssText='color:var(--amber-txt);border-color:var(--amber-mid);background:var(--amber-bg)';k.style.cssText='color:var(--green-mid);border-color:var(--green-mid)';}
+}
+
+function doImport(){
+  var toAdd=iNew.slice();
+  iConflicts.forEach(function(item,idx){if(cChoices[idx]==='replace'){apiFetch('DELETE','autos?id=eq.'+item.ex.id,null);toAdd.push(item.inc);}});
+  if(!toAdd.length){showToast('Niets te importeren');cm('im');return;}
+  apiFetch('POST','autos',toAdd).then(function(){showToast('Import klaar: '+toAdd.length+' verwerkt');cm('im');load();});
+}
+
+function exportCSV(){
+  var cols=['kenteken','vin','merk','type','motor','bj','km','datum','inkoop','verkoop','resultaat','status','opmerkingen'];
+  var hdrs=['Kenteken','VIN','Merk','Type','Motor','Bouwjaar','Km stand','Inkoop datum','Inkoopprijs','Verkoopprijs','Resultaat','Status','Opmerking'];
+  var rows=[hdrs.join(';')];
+  cars.forEach(function(c){rows.push(cols.map(function(k){return'"'+(c[k]||'').toString().replace(/"/g,'""')+'"';}).join(';'));});
+  var blob=new Blob(['\uFEFF'+rows.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='inkoop_bourguignon_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  showToast('CSV geexporteerd');
+}
+
+function openJP(kenteken) {
+  if (kenteken) {
+    try {
+      navigator.clipboard.writeText(kenteken);
+    } catch(e) {}
+  }
+  window.open('https://nl.jp.cars/taxatie?country_tab=nl', '_blank');
+  showToast('JPcars geopend' + (kenteken ? ' - kenteken gekopieerd: ' + kenteken : ''));
+}
+
+var PW_HASH = '5e4b1e3e8f2a9c6d7b0f3a2e1c4d5f6a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3';
+
+function hashStr(s) {
+  var h = 0;
+  for (var i = 0; i < s.length; i++) {
+    h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+  }
+  return Math.abs(h).toString(16);
+}
+
+function checkPW() {
+  var pw = document.getElementById('pw-input').value;
+  var correct = 'Bourguignon2026';
+  if (pw === correct) {
+    localStorage.setItem('bourg_auth', hashStr(correct));
+    document.getElementById('pw-screen').style.display = 'none';
+    load();
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+function initAuth() {
+  var stored = localStorage.getItem('bourg_auth');
+  var correct = hashStr('Bourguignon2026');
+  if (stored === correct) {
+    document.getElementById('pw-screen').style.display = 'none';
+    load();
+  } else {
+    document.getElementById('pw-screen').style.display = 'flex';
+    setTimeout(function(){ document.getElementById('pw-input').focus(); }, 100);
+  }
+}
+
+var ADS_API = 'https://autotelex-proxy.michel-prins.workers.dev';
+var ADS_KEY = '';
+
+function adsApiFetch(method, path, body) {
+  var opts = {
+    method: method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(ADS_API + path, opts).then(function(r) {
+    var status = r.status;
+    return r.text().then(function(text) {
+      if (!text || text.trim() === '') return {status: status};
+      try { return JSON.parse(text); }
+      catch(e) { return {status: status, raw: text}; }
+    });
+  });
+}
+
+function publishToAutotelex(eid) {
+  var id = decodeURIComponent(eid);
+  var c = null;
+  for (var i = 0; i < cars.length; i++) { if (cars[i].id === id) { c = cars[i]; break; } }
+  if (!c) return;
+
+  if (!c.kenteken) {
+    alert('Vul eerst een kenteken in voordat je naar Autotelex publiceert.');
+    return;
+  }
+
+  if (!c.btw_marge) {
+    alert('Vul eerst in of het een BTW of Marge auto is (bewerk de auto).');
+    return;
+  }
+
+  if (!confirm('Auto ' + c.kenteken + ' publiceren naar AutotelexADS?')) return;
+
+  showToast('Bezig met publiceren naar Autotelex...');
+
+  // Step 1: Create vehicle by license plate
+  adsApiFetch('POST', '/api/v2/vehicle/create-by-licenseplate', {
+    licensePlate: c.kenteken.replace(/[-\s]/g, '')
+  }).then(function(data) {
+    console.log('Autotelex response:', JSON.stringify(data));
+    var stockId = data.adsStockId || data.stockId || data.id || data.AdsStockId || data.StockId;
+    if (!stockId) {
+      showToast('Response: ' + JSON.stringify(data).slice(0,120));
+      throw new Error('Geen stockId - zie toast');
+    }
+
+    var promises = [];
+
+    // Step 2: Set price if available
+    if (c.verkoop) {
+      promises.push(adsApiFetch('PUT', '/api/v2/advertisement/' + stockId + '/price', {
+        price: parseFloat(c.verkoop)
+      }));
+    }
+
+    // Step 3: Set BTW/Marge
+    var isVat = c.btw_marge === 'btw' ? 'true' : 'false';
+    promises.push(adsApiFetch('PUT', '/api/v2/vehicle/' + stockId + '/vat-margin/' + isVat, null));
+
+    // Step 4: Set status
+    if (c.status === 'binnen') {
+      promises.push(adsApiFetch('PUT', '/api/v2/stock/' + stockId + '/set-in-stock', null));
+    } else if (c.status === 'bestelling' || c.status === 'onderweg') {
+      // Set as expected with date if available
+      if (c.datum) {
+        var dp = c.datum.toString().split('-');
+        var dateObj;
+        if (dp.length === 3 && dp[2].length === 4) {
+          dateObj = new Date(dp[2], dp[1]-1, dp[0]);
+        } else {
+          dateObj = new Date(c.datum);
+        }
+        var ts = Math.floor(dateObj.getTime() / 1000);
+        promises.push(adsApiFetch('PUT', '/api/v2/stock/' + stockId + '/set-expected/' + ts, null));
+      }
+    }
+
+    return Promise.all(promises).then(function() {
+      // Save stockId to car record
+      apiFetch('PATCH', 'autos?id=eq.' + id, {ads_stock_id: String(stockId)}).then(function(){
+        for (var i=0; i<cars.length; i++) {
+          if (cars[i].id === id) { cars[i].ads_stock_id = String(stockId); break; }
+        }
+      });
+      showToast('Gepubliceerd naar AutotelexADS! StockId: ' + stockId);
+    });
+  }).catch(function(e) {
+    showToast('Fout: ' + (e.message || 'Kon niet publiceren naar Autotelex'));
+    console.error('Autotelex API error:', e);
+  });
+}
+
+initAuth();
+
+</script>
+</body>
+</html>
