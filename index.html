@@ -832,7 +832,7 @@ function publishToAutotelex(eid) {
 
     if (c.status === 'binnen') {
       promises.push(adsApiFetch('PATCH', '/api/v2/stock/' + stockId + '/set-in-stock', null));
-    
+    }
     
     
 
