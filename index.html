@@ -824,16 +824,16 @@ function publishToAutotelex(eid) {
     var promises = [];
 
     if (c.verkoop) {
-      promises.push(adsApiFetch('PUT', '/api/v2/advertisement/' + stockId + '/price', { price: parseFloat(c.verkoop) }));
+      promises.push(adsApiFetch('POST', '/api/v2/advertisement/' + stockId + '/price', { price: parseFloat(c.verkoop) }));
     }
 
     var isVat = c.btw_marge === 'btw' ? 'true' : 'false';
-    promises.push(adsApiFetch('PUT', '/api/v2/vehicle/' + stockId + '/vat-margin/' + isVat, null));
+    promises.push(adsApiFetch('POST', '/api/v2/vehicle/' + stockId + '/vat-margin/' + isVat, null));
 
     if (c.status === 'binnen') {
-      promises.push(adsApiFetch('PUT', '/api/v2/stock/' + stockId + '/set-in-stock', null));
+      promises.push(adsApiFetch('POST', '/api/v2/stock/' + stockId + '/set-in-stock', null));
     } else if (ts) {
-      promises.push(adsApiFetch('PUT', '/api/v2/stock/' + stockId + '/set-expected/' + ts, null));
+      promises.push(adsApiFetch('POST', '/api/v2/stock/' + stockId + '/set-expected/' + ts, null));
     }
 
     return Promise.all(promises).then(function() {
