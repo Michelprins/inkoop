@@ -166,20 +166,21 @@ tbody tr:hover td{background:#FFF6F1}
   .tbl-wrap tbody tr{
     background:var(--surface);
     border-bottom:1px solid var(--border);
-    padding:1rem;
+    padding:.75rem 1rem;
     position:relative;
+    cursor:pointer;
   }
   .tbl-wrap tbody tr:last-child{border-bottom:none}
   .tbl-wrap td{
-    display:block;
-    padding:0;
+    display:none;
+    padding:2px 0;
     border:none;
     font-size:13px;
     line-height:1.5;
   }
-  .tbl-wrap td.mob-hide{display:none}
+  .tbl-wrap td.mob-always{display:block}
   .tbl-wrap td[data-label]:before{
-    content:attr(data-label);
+    content:attr(data-label)': ';
     font-size:11px;
     font-weight:600;
     color:var(--hint);
@@ -188,8 +189,11 @@ tbody tr:hover td{background:#FFF6F1}
     display:block;
     margin-bottom:2px;
   }
-  .acell{position:absolute;top:1rem;right:1rem;flex-direction:row}
-  .erow td{text-align:center;padding:2rem 1rem}
+  .tbl-wrap tbody tr.expanded td{display:block}
+  .tbl-wrap tbody tr.expanded td.mob-always{display:block}
+  .acell{position:absolute;top:.75rem;right:.75rem;flex-direction:row}
+  .erow td{text-align:center;padding:2rem 1rem;display:block!important}
+  #search{font-size:16px!important;height:44px!important}
 }
 
 .pw-screen{position:fixed;inset:0;background:#111;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem}
@@ -487,8 +491,8 @@ function render() {
     var eid = encodeURIComponent(c.id);
     var idcell = c.kenteken ? '<span class="mono" style="font-weight:600">'+c.kenteken+'</span>'+(c.vin?'<br><span style="font-size:11px;color:var(--hint)">'+c.vin+'</span>':'') : '<span style="font-size:11px;color:var(--muted)">VIN: '+(c.vin||'-')+'</span>';
     var opm = c.opmerkingen ? '<span title="'+c.opmerkingen.replace(/"/g,'&quot;')+'" style="cursor:help;border-bottom:1px dotted var(--border2);color:var(--muted)">'+(c.opmerkingen.length>30?c.opmerkingen.slice(0,30)+'...':c.opmerkingen)+'</span>' : '<span class="dm">-</span>';
-    rows.push('<tr>'+
-      '<td data-label="Kenteken">'+idcell+'</td>'+
+    rows.push('<tr onclick="toggleRow(event,this)">'+
+      '<td data-label="Kenteken" class="mob-always">'+idcell+'</td>'+
       '<td data-label="Merk" style="font-weight:500">'+(c.merk||'<span class="dm">-</span>')+'</td>'+
       '<td data-label="Type" style="color:var(--muted)">'+(c.type||'<span class="dm">-</span>')+'</td>'+
       '<td data-label="Motor" style="color:var(--muted);font-size:12px">'+(c.motor||'<span class="dm">-</span>')+'</td>'+
@@ -498,7 +502,7 @@ function render() {
       '<td data-label="Inkoop" class="tr mono">'+fe(c.inkoop)+'</td>'+
       '<td data-label="Verkoop" class="tr mono">'+fe(c.verkoop)+'</td>'+
       '<td data-label="Resultaat" class="tr">'+rc(c)+'</td>'+
-      '<td data-label="Status">'+sb(c.status, eid)+'</td>'+
+      '<td data-label="Status" class="mob-always">'+sb(c.status, eid)+'</td>'+
       '<td data-label="Opmerkingen" style="max-width:160px">'+opm+'</td>'+
       '<td><div class="acell">'+
         '<button class="ib" title="Publiceer naar Autotelex" data-id="'+eid+'" onclick="publishToAutotelex(this.dataset.id)" style="font-size:10px;font-weight:700;color:#1a6b1a;padding:4px 6px;background:#edfaf1;border-radius:6px">ADS</button>'+
@@ -848,7 +852,10 @@ function publishToAutotelex(eid) {
   });
 }
 
-
+function toggleRow(evt, tr) {
+  if (evt.target.closest('.ib') || evt.target.closest('.badge') || evt.target.closest('.acell')) return;
+  tr.classList.toggle('expanded');
+}
 initAuth();
 
 </script>
