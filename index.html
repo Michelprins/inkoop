@@ -817,6 +817,7 @@ function publishToAutotelex(eid) {
   if (c.km) createBody.mileage = parseInt(c.km);
 
   adsApiFetch('POST', '/api/v2/vehicle/create-by-licenseplate', createBody).then(function(data) {
+    console.log('AUTOTELEX RESPONSE:', JSON.stringify(data));
     var stockId = data.stockNumber || data.adsStockId || data.stockId || data.id;
     if (!stockId) { showToast('Fout: geen stockId - ' + JSON.stringify(data).slice(0,80)); throw new Error('Geen stockId'); }
 
