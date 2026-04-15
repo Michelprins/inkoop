@@ -813,7 +813,7 @@ function publishToAutotelex(eid) {
     advertisementCategory: 'Used',
     stockStatus: (c.status === 'binnen') ? 'inStock' : 'expected'
   };
-  if (ts && c.status !== 'binnen') createBody.expectedTimestampUnixUtc = ts;
+  if (c.status !== 'binnen') createBody.expectedDate = expected.toISOString();
   if (c.km) createBody.mileage = parseInt(c.km);
 
   adsApiFetch('POST', '/api/v2/vehicle/create-by-licenseplate', createBody).then(function(data) {
