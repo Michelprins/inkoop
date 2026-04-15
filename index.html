@@ -824,7 +824,7 @@ function publishToAutotelex(eid) {
     var promises = [];
 
     if (c.verkoop) {
-      promises.push(adsApiFetch('PUT', '/api/v2/advertisement/' + stockId + '/price', { amount: parseFloat(c.verkoop), amountExVat: 0, priceType: "None", countryCode: "NL" }));
+      promises.push(adsApiFetch('PUT', '/api/v2/advertisement/' + stockId + '/price', { amount: parseFloat(c.verkoop), amountExVat: 0, priceType: "AskingPrice", countryCode: "NL" }));
     }
 
     var isVat = c.btw_marge === 'btw' ? 'true' : 'false';
