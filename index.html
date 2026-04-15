@@ -805,7 +805,7 @@ function publishToAutotelex(eid) {
   // Verwachte datum = altijd 1 week vanaf vandaag
   var expected = new Date();
   expected.setDate(expected.getDate() + 7);
-  var ts = Math.floor(expected.getTime() / 1000);
+  var ts = expected.getTime();
 
   var createBody = {
     licensePlate: c.kenteken.replace(/-/g, '').replace(/ /g, ''),
@@ -832,9 +832,9 @@ function publishToAutotelex(eid) {
 
     if (c.status === 'binnen') {
       promises.push(adsApiFetch('PATCH', '/api/v2/stock/' + stockId + '/set-in-stock', null));
-    } else if (ts) {
-      promises.push(adsApiFetch('PATCH', '/api/v2/stock/' + stockId + '/set-expected/' + ts, null));
-    }
+    
+    
+    
 
     return Promise.all(promises).then(function() {
       apiFetch('PATCH', 'autos?id=eq.' + id, {ads_stock_id: String(stockId)}).then(function(){
