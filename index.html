@@ -805,7 +805,7 @@ function publishToAutotelex(eid) {
   // Verwachte datum = altijd 1 week vanaf vandaag
   var expected = new Date();
   expected.setDate(expected.getDate() + 7);
-  var ts = expected.getTime();
+  var ts = Math.floor(expected.getTime() / 1000);
 
   var createBody = {
     licensePlate: c.kenteken.replace(/-/g, '').replace(/ /g, ''),
