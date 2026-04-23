@@ -616,6 +616,8 @@ function render() {
         '<button class="ib" title="Documenten" data-id="'+eid+'" data-label="'+(c.kenteken||c.vin||'Auto')+'" onclick="openDocs(this.dataset.id,this.dataset.label)" style="font-size:13px;color:#5B35C9;padding:4px 6px">&#128206;</button>'+
         '<button class="ib" title="Publiceer naar Autotelex" data-id="'+eid+'" onclick="publishToAutotelex(this.dataset.id)" style="font-size:10px;font-weight:700;color:#1a6b1a;padding:4px 6px;background:#edfaf1;border-radius:6px">ADS</button>'+
         '<button class="ib" title="Bekijk op JPcars" data-kenteken="'+(c.kenteken||'')+'" onclick="openJP(this.dataset.kenteken)" style="font-size:11px;font-weight:600;color:#E8620A;padding:4px 7px">JP</button>'+
+              '<button class="ib" title="Bewerken" data-id="'+eid+'" onclick="editCar(this.dataset.id)">&#9998;</button>'+
+'<button class="ib del" title="Verwijderen" data-id="'+eid+'" onclick="delCar(this.dataset.id)">&#128465;</button>'+
         '<button class="ib" title="Bewerken" data-id="'+eid+'" onclick="editCar(this.dataset.id)">&#9998;</button>'+
         '<button class="ib del" title="Verwijderen" data-id="'+eid+'" onclick="delCar(this.dataset.id)">&#128465;</button>'+
       '</div></td>'+
