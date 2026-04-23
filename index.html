@@ -118,6 +118,7 @@ tbody tr:hover td{background:#FFF6F1}
 .toast{position:fixed;bottom:1.75rem;right:1.75rem;background:#111;color:#fff;padding:.75rem 1.375rem;border-radius:var(--radius);font-size:13px;font-weight:500;z-index:500;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none}
 .toast.show{opacity:1;transform:translateY(0)}
 #cfi{display:none}
+#doc-file-input{display:none}
 @media(max-width:600px){.fgrid{grid-template-columns:1fr}.fg.full{grid-column:1}.app{padding:1rem 1rem 4rem}.header{padding:0 1rem}}
 
 /* Mobile app view */
@@ -206,6 +207,27 @@ tbody tr:hover td{background:#FFF6F1}
 .pw-box button{width:100%;background:#E8620A;color:#fff;border:none;border-radius:10px;padding:11px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
 .pw-box button:hover{background:#C4510A}
 .pw-error{color:#A81C1C;font-size:13px;margin-top:.75rem;display:none}
+
+/* ===== DOCUMENT MODAL STYLES ===== */
+.doc-upload-area{border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);margin-bottom:1.25rem}
+.doc-upload-area:hover,.doc-upload-area.drag{background:var(--accent-bg);border-color:var(--accent);border-style:solid}
+.doc-list{display:flex;flex-direction:column;gap:8px}
+.doc-item{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);gap:1rem;transition:background .15s}
+.doc-item:hover{background:var(--surface2)}
+.doc-item-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.doc-type-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.doc-type-pdf{background:#FFF0F0;color:#C62828}
+.doc-type-img{background:#EEF4FF;color:#2B55C9}
+.doc-type-other{background:var(--surface2);color:var(--muted)}
+.doc-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
+.doc-meta{font-size:11px;color:var(--hint);margin-top:1px}
+.doc-item-actions{display:flex;gap:4px;flex-shrink:0}
+.doc-empty{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
+.doc-empty svg{display:block;margin:0 auto 12px;opacity:.3}
+.doc-empty p{font-size:13px}
+.doc-loading{text-align:center;padding:1.5rem;color:var(--hint);font-size:13px}
+/* Knop badge met doc count */
+.doc-count-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;border-radius:10px;font-size:9px;font-weight:700;min-width:14px;height:14px;padding:0 3px;margin-left:2px;line-height:1}
 </style>
 </head>
 <body>
@@ -261,7 +283,7 @@ tbody tr:hover td{background:#FFF6F1}
           <th class="tr">KM-stand</th><th>Inkoopdatum</th>
           <th class="tr">Inkoop</th><th class="tr">Verkoop</th>
           <th class="tr">Resultaat</th><th>Status</th><th>Opmerkingen</th>
-          <th style="width:80px"></th>
+          <th style="width:120px"></th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -269,6 +291,7 @@ tbody tr:hover td{background:#FFF6F1}
   </div>
 </div>
 
+<!-- AUTO TOEVOEGEN / BEWERKEN MODAL -->
 <div class="mbg" id="em">
   <div class="modal" style="max-width:700px">
     <div class="mhdr">
@@ -304,6 +327,7 @@ tbody tr:hover td{background:#FFF6F1}
   </div>
 </div>
 
+<!-- IMPORT MODAL -->
 <div class="mbg" id="im">
   <div class="modal" style="max-width:820px">
     <div class="mhdr">
@@ -338,6 +362,43 @@ tbody tr:hover td{background:#FFF6F1}
   </div>
 </div>
 
+<!-- DOCUMENT MODAL -->
+<div class="mbg" id="dm">
+  <div class="modal" style="max-width:600px">
+    <div class="mhdr">
+      <div>
+        <h2>&#128206; Documenten</h2>
+        <p id="dm-subtitle">Onderhoudshistorie, SOH-certificaat, factuur...</p>
+      </div>
+      <button class="xbtn" onclick="cm('dm')">&#10005;</button>
+    </div>
+
+    <!-- Upload zone -->
+    <div class="doc-upload-area" id="doc-dropzone"
+         onclick="document.getElementById('doc-file-input').click()"
+         ondragover="docDzo(event)" ondragleave="docDzl()" ondrop="docDzd(event)">
+      <svg width="32" height="32" fill="none" stroke="var(--hint)" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 10px;display:block"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      <strong style="font-size:14px;color:var(--text)">Klik of sleep bestanden hier</strong>
+      <p style="font-size:12px;color:var(--muted);margin-top:4px">PDF, JPG, PNG — max 20MB per bestand</p>
+    </div>
+    <input type="file" id="doc-file-input" accept=".pdf,.jpg,.jpeg,.png,.heic" multiple onchange="docHandleFiles(this.files)">
+
+    <!-- Bestandenlijst -->
+    <div id="doc-list-wrap">
+      <div class="doc-loading" id="doc-loading">Laden...</div>
+      <div class="doc-list" id="doc-list"></div>
+      <div class="doc-empty" id="doc-empty" style="display:none">
+        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <p>Nog geen documenten voor deze auto</p>
+      </div>
+    </div>
+
+    <div class="mftr">
+      <button class="btn" onclick="cm('dm')">Sluiten</button>
+    </div>
+  </div>
+</div>
+
 <div class="pw-screen" id="pw-screen">
   <div class="pw-box">
     <img class="pw-logo" src="data:image/jpeg;base64,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" alt="Bourguignon">
@@ -354,6 +415,7 @@ tbody tr:hover td{background:#FFF6F1}
 var SUPA_URL = 'https://wtstkaztqevmztlkkinf.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0c3RrYXp0cWV2bXp0bGtraW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzkwOTIsImV4cCI6MjA5MTMxNTA5Mn0.OS3hpC0TzgfpoY8ylTT2F_9K7N4MNk7eLWls2QzWTDY';
 var cars = [], editId = null, iNew = [], iConflicts = [], cChoices = {};
+var docCarId = null, docCarLabel = '';
 
 function apiFetch(method, path, body) {
   var opts = { method: method, headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': method === 'POST' ? 'return=representation' : '' } };
@@ -505,6 +567,7 @@ function render() {
       '<td data-label="Status" class="mob-always">'+sb(c.status, eid)+'</td>'+
       '<td data-label="Opmerkingen" style="max-width:160px">'+opm+'</td>'+
       '<td><div class="acell">'+
+        '<button class="ib" title="Documenten" data-id="'+eid+'" data-label="'+(c.kenteken||c.vin||'Auto')+'" onclick="openDocs(this.dataset.id,this.dataset.label)" style="font-size:13px;color:#5B35C9;padding:4px 6px">&#128206;</button>'+
         '<button class="ib" title="Publiceer naar Autotelex" data-id="'+eid+'" onclick="publishToAutotelex(this.dataset.id)" style="font-size:10px;font-weight:700;color:#1a6b1a;padding:4px 6px;background:#edfaf1;border-radius:6px">ADS</button>'+
         '<button class="ib" title="Bekijk op JPcars" data-kenteken="'+(c.kenteken||'')+'" onclick="openJP(this.dataset.kenteken)" style="font-size:11px;font-weight:600;color:#E8620A;padding:4px 7px">JP</button>'+
         '<button class="ib" title="Bewerken" data-id="'+eid+'" onclick="editCar(this.dataset.id)">&#9998;</button>'+
@@ -615,8 +678,8 @@ function delCar(eid) {
 }
 
 function cm(id){document.getElementById(id).classList.remove('open');}
-document.addEventListener('click',function(e){if(e.target===document.getElementById('em'))cm('em');if(e.target===document.getElementById('im'))cm('im');});
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){cm('em');cm('im');}});
+document.addEventListener('click',function(e){if(e.target===document.getElementById('em'))cm('em');if(e.target===document.getElementById('im'))cm('im');if(e.target===document.getElementById('dm'))cm('dm');});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){cm('em');cm('im');cm('dm');}});
 
 var CMAP={'kenteken':'kenteken','merk':'merk','type':'type','motor':'motor','bouwjaar':'bj','km stand':'km','kmstand':'km','km-stand':'km','inkoop datum':'datum','inkoopdatum':'datum','inkoopprijs':'inkoop','verkoopprijs':'verkoop','status':'status','opmerking':'opmerkingen','opmerkingen':'opmerkingen','resultaat':'resultaat','vin':'vin','chassisnummer':'vin'};
 
@@ -728,13 +791,185 @@ function exportCSV(){
 
 function openJP(kenteken) {
   if (kenteken) {
-    try {
-      navigator.clipboard.writeText(kenteken);
-    } catch(e) {}
+    try { navigator.clipboard.writeText(kenteken); } catch(e) {}
   }
   window.open('https://nl.jp.cars/taxatie?country_tab=nl', '_blank');
   showToast('JPcars geopend' + (kenteken ? ' - kenteken gekopieerd: ' + kenteken : ''));
 }
+
+// ===== DOCUMENT FUNCTIES =====
+
+var DOC_BUCKET = 'auto-docs';
+
+function storageHeaders() {
+  return {
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + SUPA_KEY
+  };
+}
+
+function openDocs(eid, label) {
+  docCarId = decodeURIComponent(eid);
+  docCarLabel = label || docCarId;
+  document.getElementById('dm-subtitle').textContent = docCarLabel + ' — documenten';
+  document.getElementById('doc-list').innerHTML = '';
+  document.getElementById('doc-empty').style.display = 'none';
+  document.getElementById('doc-loading').style.display = 'block';
+  document.getElementById('dm').classList.add('open');
+  loadDocs();
+}
+
+function loadDocs() {
+  fetch(SUPA_URL + '/storage/v1/object/list/' + DOC_BUCKET, {
+    method: 'POST',
+    headers: Object.assign({'Content-Type': 'application/json'}, storageHeaders()),
+    body: JSON.stringify({ prefix: docCarId + '/', limit: 100, offset: 0 })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(files) {
+    document.getElementById('doc-loading').style.display = 'none';
+    if (!Array.isArray(files) || files.length === 0) {
+      document.getElementById('doc-empty').style.display = 'block';
+      document.getElementById('doc-list').innerHTML = '';
+      return;
+    }
+    document.getElementById('doc-empty').style.display = 'none';
+    renderDocList(files);
+  })
+  .catch(function(e) {
+    document.getElementById('doc-loading').style.display = 'none';
+    document.getElementById('doc-empty').style.display = 'block';
+    console.error('Docs laden mislukt:', e);
+  });
+}
+
+function renderDocList(files) {
+  var html = '';
+  files.forEach(function(f) {
+    if (!f.name) return;
+    var ext = f.name.split('.').pop().toLowerCase();
+    var isPdf = ext === 'pdf';
+    var isImg = ['jpg','jpeg','png','heic','webp'].indexOf(ext) > -1;
+    var iconClass = isPdf ? 'doc-type-pdf' : (isImg ? 'doc-type-img' : 'doc-type-other');
+    var iconChar = isPdf ? '📄' : (isImg ? '🖼' : '📎');
+    var sizeStr = f.metadata && f.metadata.size ? formatBytes(f.metadata.size) : '';
+    var safeName = f.name.replace(/'/g, "\\'");
+    html += '<div class="doc-item">' +
+      '<div class="doc-item-left">' +
+        '<div class="doc-type-icon ' + iconClass + '">' + iconChar + '</div>' +
+        '<div>' +
+          '<div class="doc-name" title="' + f.name + '">' + f.name + '</div>' +
+          (sizeStr ? '<div class="doc-meta">' + sizeStr + '</div>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="doc-item-actions">' +
+        '<button class="btn small" onclick="downloadDoc(\'' + safeName + '\')" title="Downloaden" style="color:var(--blue-mid);border-color:var(--blue-mid)">&#8595; Download</button>' +
+        '<button class="btn small del" onclick="deleteDoc(\'' + safeName + '\')" title="Verwijderen" style="color:var(--red-mid)">&#128465;</button>' +
+      '</div>' +
+    '</div>';
+  });
+  document.getElementById('doc-list').innerHTML = html;
+}
+
+function formatBytes(bytes) {
+  if (!bytes) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+function downloadDoc(filename) {
+  var path = docCarId + '/' + filename;
+  var url = SUPA_URL + '/storage/v1/object/' + DOC_BUCKET + '/' + path;
+  // Fetch with auth header and create blob download
+  fetch(url, { headers: storageHeaders() })
+  .then(function(r) {
+    if (!r.ok) throw new Error('Download mislukt');
+    return r.blob();
+  })
+  .then(function(blob) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast('Bestand gedownload: ' + filename);
+  })
+  .catch(function(e) {
+    showToast('Download mislukt — controleer Supabase bucket rechten');
+    console.error(e);
+  });
+}
+
+function deleteDoc(filename) {
+  if (!confirm('Weet je zeker dat je "' + filename + '" wilt verwijderen?')) return;
+  var path = docCarId + '/' + filename;
+  fetch(SUPA_URL + '/storage/v1/object/' + DOC_BUCKET, {
+    method: 'DELETE',
+    headers: Object.assign({'Content-Type': 'application/json'}, storageHeaders()),
+    body: JSON.stringify({ prefixes: [path] })
+  })
+  .then(function(r) {
+    showToast(filename + ' verwijderd');
+    loadDocs();
+  })
+  .catch(function(e) {
+    showToast('Verwijderen mislukt');
+    console.error(e);
+  });
+}
+
+function docHandleFiles(files) {
+  if (!files || !files.length) return;
+  var arr = Array.from(files);
+  var total = arr.length;
+  var done = 0;
+  arr.forEach(function(file) {
+    uploadDoc(file, function() {
+      done++;
+      if (done === total) {
+        showToast(total === 1 ? file.name + ' geupload' : total + ' bestanden geupload');
+        loadDocs();
+      }
+    });
+  });
+}
+
+function uploadDoc(file, callback) {
+  if (file.size > 20 * 1024 * 1024) {
+    alert(file.name + ' is te groot (max 20MB)');
+    return;
+  }
+  // Sanitize filename
+  var safeName = file.name.replace(/[^a-zA-Z0-9._\-() ]/g, '_');
+  var path = docCarId + '/' + Date.now() + '_' + safeName;
+  showToast('Uploaden: ' + file.name + '...');
+  fetch(SUPA_URL + '/storage/v1/object/' + DOC_BUCKET + '/' + path, {
+    method: 'POST',
+    headers: Object.assign({'Content-Type': file.type || 'application/octet-stream', 'x-upsert': 'true'}, storageHeaders()),
+    body: file
+  })
+  .then(function(r) {
+    if (!r.ok) {
+      return r.text().then(function(t) { throw new Error(t); });
+    }
+    if (callback) callback();
+  })
+  .catch(function(e) {
+    showToast('Upload mislukt: ' + file.name);
+    console.error('Upload error:', e);
+  });
+}
+
+function docDzo(e) { e.preventDefault(); document.getElementById('doc-dropzone').classList.add('drag'); }
+function docDzl() { document.getElementById('doc-dropzone').classList.remove('drag'); }
+function docDzd(e) {
+  e.preventDefault(); docDzl();
+  var files = e.dataTransfer.files;
+  if (files && files.length) docHandleFiles(files);
+}
+
+// ===== EINDE DOCUMENT FUNCTIES =====
 
 var PW_HASH = '5e4b1e3e8f2a9c6d7b0f3a2e1c4d5f6a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3';
 
@@ -806,10 +1041,8 @@ function publishToAutotelex(eid) {
 
   showToast('Bezig met publiceren naar Autotelex...');
 
-  // Verwachte datum = altijd 1 week vanaf vandaag
   var expected = new Date();
   expected.setDate(expected.getDate() + 7);
-  var ts = expected.getTime();
 
   var createBody = {
     licensePlate: c.kenteken.replace(/-/g, '').replace(/ /g, ''),
@@ -837,8 +1070,6 @@ function publishToAutotelex(eid) {
     if (c.status === 'binnen') {
       promises.push(adsApiFetch('PATCH', '/api/v2/stock/' + stockId + '/set-in-stock', null));
     }
-    
-    
 
     return Promise.all(promises).then(function() {
       apiFetch('PATCH', 'autos?id=eq.' + id, {ads_stock_id: String(stockId)}).then(function(){
