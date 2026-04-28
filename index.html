@@ -136,23 +136,58 @@ tbody tr:hover td{background:#FFF6F1}
 .bulk-sel{width:180px;font-family:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text);outline:none}
 .bulk-sel:focus{border-color:var(--accent)}
 
-/* Chart modal */
-.chart-wrap{margin-top:1.25rem}
-.chart-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.chart-label{font-size:13px;font-weight:500;width:140px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chart-bar-bg{flex:1;background:var(--surface2);border-radius:6px;height:28px;position:relative;overflow:hidden}
-.chart-bar-fill{height:100%;border-radius:6px;transition:width .6s ease;display:flex;align-items:center;padding:0 10px}
-.chart-bar-fill.pos{background:linear-gradient(90deg,#1E8B47,#27c063)}
-.chart-bar-fill.neg{background:linear-gradient(90deg,#C62828,#e84040)}
-.chart-bar-val{font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
-.chart-meta{font-size:12px;color:var(--muted);width:100px;text-align:right;flex-shrink:0}
-.chart-tabs{display:flex;gap:8px;margin-bottom:1.25rem}
-.chart-tab{font-family:inherit;font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);cursor:pointer}
-.chart-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.chart-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.5rem}
-.cs-card{background:var(--surface2);border-radius:var(--radius);padding:1rem;text-align:center}
-.cs-card .val{font-size:20px;font-weight:600;letter-spacing:-.5px}
-.cs-card .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+/* ===== ANALYTICS MODAL ===== */
+.analytics-modal{background:var(--bg);border-radius:var(--radius-xl);border:1px solid var(--border);box-shadow:var(--shadow-lg);padding:0;width:100%;max-width:1200px;max-height:94vh;overflow-y:auto}
+.analytics-header{background:#111;border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding:1.25rem 1.75rem;display:flex;align-items:center;justify-content:space-between}
+.analytics-header h2{font-size:17px;font-weight:600;color:#fff;letter-spacing:-.3px}
+.analytics-header p{font-size:12px;color:rgba(255,255,255,.45);margin-top:2px}
+.analytics-body{padding:1.5rem}
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem}
+.analytics-grid.full{grid-template-columns:1fr}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem}
+.chart-card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:1rem}
+.chart-card-title span{font-size:16px;font-weight:600;color:var(--text);text-transform:none;letter-spacing:-.3px;display:block;margin-top:2px}
+
+/* Bar chart */
+.bc-wrap{display:flex;align-items:flex-end;gap:4px;height:120px;padding-bottom:20px;position:relative}
+.bc-wrap::after{content:'';position:absolute;bottom:20px;left:0;right:0;height:1px;background:var(--border)}
+.bc-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
+.bc-bar{width:100%;border-radius:4px 4px 0 0;min-height:2px;position:relative;cursor:default;transition:opacity .15s}
+.bc-bar:hover{opacity:.8}
+.bc-bar-val{font-size:9px;font-weight:600;color:var(--muted);position:absolute;top:-14px;left:50%;transform:translateX(-50%);white-space:nowrap}
+.bc-label{font-size:9px;color:var(--hint);position:absolute;bottom:-18px;left:50%;transform:translateX(-50%) rotate(-35deg);transform-origin:top center;white-space:nowrap}
+
+/* Horizontal bar chart */
+.hbc-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.hbc-label{font-size:11px;font-weight:500;width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.hbc-bar-bg{flex:1;background:var(--surface2);border-radius:4px;height:22px;position:relative;overflow:hidden}
+.hbc-bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;transition:width .5s ease;min-width:30px}
+.hbc-bar-fill.pos{background:linear-gradient(90deg,#1E8B47,#34c96e)}
+.hbc-bar-fill.neg{background:linear-gradient(90deg,#C62828,#e84040)}
+.hbc-bar-fill.neu{background:linear-gradient(90deg,#2B55C9,#5b82f0)}
+.hbc-val{font-size:11px;font-weight:600;color:#fff;white-space:nowrap}
+.hbc-meta{font-size:10px;color:var(--hint);width:55px;text-align:right;flex-shrink:0}
+
+/* Donut chart */
+.donut-wrap{display:flex;align-items:center;gap:1.5rem}
+.donut-legend{display:flex;flex-direction:column;gap:8px;flex:1}
+.donut-legend-item{display:flex;align-items:center;gap:8px;font-size:12px}
+.donut-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.donut-legend-label{flex:1;color:var(--text)}
+.donut-legend-val{font-weight:600;color:var(--text)}
+.donut-legend-pct{color:var(--hint);font-size:11px}
+
+/* KPI row */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.25rem}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.125rem;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kc,#ccc);border-radius:3px 3px 0 0}
+.kpi-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.kpi-val{font-size:22px;font-weight:600;letter-spacing:-.5px}
+.kpi-sub{font-size:11px;color:var(--hint);margin-top:3px}
+
+.analytics-tabs{display:flex;gap:6px;margin-bottom:1.25rem}
+.analytics-tab{font-family:inherit;font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--surface);color:var(--muted);cursor:pointer}
+.analytics-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
 /* Leverancier beheer in modal */
 .lev-list-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px}
@@ -444,21 +479,21 @@ tbody tr:hover td{background:#FFF6F1}
   </div>
 </div>
 
-<!-- Grafiek modal -->
+<!-- Analytics dashboard modal -->
 <div class="mbg" id="chart-modal">
-  <div class="modal" style="max-width:680px">
-    <div class="mhdr">
-      <div><h2>Resultaat per leverancier</h2><p>Alleen auto's met ingevuld resultaat</p></div>
-      <button class="xbtn" onclick="cm('chart-modal')">&#10005;</button>
+  <div class="modal analytics-modal">
+    <div class="analytics-header">
+      <div><h2>📊 Analyse dashboard</h2><p>Realtime overzicht op basis van alle ingevoerde data</p></div>
+      <button class="xbtn" onclick="cm('chart-modal')" style="background:rgba(255,255,255,.1);color:#fff">&#10005;</button>
     </div>
-    <div class="chart-tabs">
-      <button class="chart-tab active" onclick="setChartTab('totaal',this)">Totaal resultaat</button>
-      <button class="chart-tab" onclick="setChartTab('gemiddeld',this)">Gemiddeld per auto</button>
-      <button class="chart-tab" onclick="setChartTab('aantal',this)">Aantal verkocht</button>
+    <div class="analytics-body">
+      <div class="analytics-tabs">
+        <button class="analytics-tab active" onclick="setAnalyticsTab('overzicht',this)">Overzicht</button>
+        <button class="analytics-tab" onclick="setAnalyticsTab('leveranciers',this)">Leveranciers</button>
+        <button class="analytics-tab" onclick="setAnalyticsTab('inkoop',this)">Inkoop & verkoop</button>
+      </div>
+      <div id="analytics-content"></div>
     </div>
-    <div class="chart-summary" id="chart-summary"></div>
-    <div class="chart-wrap" id="chart-wrap"></div>
-    <p style="font-size:11px;color:var(--hint);margin-top:1rem">Alleen auto's met leverancier EN ingevuld resultaat worden meegenomen.</p>
   </div>
 </div>
 
@@ -478,9 +513,7 @@ tbody tr:hover td{background:#FFF6F1}
 var SUPA_URL = 'https://wtstkaztqevmztlkkinf.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0c3RrYXp0cWV2bXp0bGtraW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzkwOTIsImV4cCI6MjA5MTMxNTA5Mn0.OS3hpC0TzgfpoY8ylTT2F_9K7N4MNk7eLWls2QzWTDY';
 var cars = [], editId = null, iNew = [], iConflicts = [], cChoices = {};
-var chartTab = 'totaal';
-
-// ===== LEVERANCIERS (opgeslagen in localStorage) =====
+var analyticsTab = 'overzicht';
 var DEFAULT_LEVS = ['In de Wal','Autotaxatiepartners','Dealerwel','Dealerdirect','VWPFS','Bleeker en de Jong','Particuliere inkoop','Via PON','Wevi','De Autogroothandel','BLV','Ayvens','Athlon','Van Mossel','Auto Hoogenboom','Sixt Rental','Snijders van Dijk','GWI','Vehicx','Autodeals XL','Auto Talsma','Huiskes Kokkeler','Zenith Portugal','BCA','Carcollect','Van der Woude Auto\'s','Marco van Schaik','Just Trading Cars','Carlinking','Autogroothandel Groep Twente','KG Flamina','Edwin Louissen'];
 
 function getLeveranciers() {
@@ -652,91 +685,271 @@ function saveBulkLev() {
   if(!updates.length){cm('bulk-lev-modal');}
 }
 
-// ===== GRAFIEK =====
-var CHART_COLORS = ['#E8620A','#1E8B47','#2B55C9','#8B1A8B','#C62828','#0A8B8B','#8B6A0A','#4A4A4A'];
+// ===== ANALYTICS =====
+var analyticsTab = 'overzicht';
+var CHART_COLORS = ['#E8620A','#1E8B47','#2B55C9','#8B1A8B','#C62828','#0A8B8B','#8B6A0A','#4A4A4A','#E8A20A','#0A5C8B','#5C0A8B','#8B0A3C'];
 
-function openChart() {
-  renderChart();
-  document.getElementById('chart-modal').classList.add('open');
-}
+function openChart() { renderAnalytics(); document.getElementById('chart-modal').classList.add('open'); }
 
-function setChartTab(tab, btn) {
-  chartTab = tab;
-  document.querySelectorAll('.chart-tab').forEach(function(b){ b.classList.remove('active'); });
+function setAnalyticsTab(tab, btn) {
+  analyticsTab = tab;
+  document.querySelectorAll('.analytics-tab').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
-  renderChart();
+  renderAnalytics();
 }
 
-function renderChart() {
-  // Build data per leverancier — alleen auto's met resultaat EN leverancier
+function renderAnalytics() {
+  var el = document.getElementById('analytics-content');
+  if (analyticsTab === 'overzicht') el.innerHTML = buildOverzicht();
+  else if (analyticsTab === 'leveranciers') el.innerHTML = buildLeveranciers();
+  else el.innerHTML = buildInkoopVerkoop();
+}
+
+function buildOverzicht() {
+  var total = cars.length;
+  var verkocht = cars.filter(function(c){ return c.status==='verkocht'; }).length;
+  var binnen = cars.filter(function(c){ return c.status==='binnen'; }).length;
+  var onderweg = cars.filter(function(c){ return c.status==='onderweg'||c.status==='bestelling'; }).length;
+  var resultaten = cars.map(function(c){ return parseFloat(c.resultaat); }).filter(function(x){ return !isNaN(x); });
+  var totRes = resultaten.reduce(function(a,b){return a+b;},0);
+  var gemRes = resultaten.length ? totRes/resultaten.length : 0;
+  var bestRes = resultaten.length ? Math.max.apply(null,resultaten) : 0;
+  var inkoopVals = cars.map(function(c){ return parseFloat(c.inkoop); }).filter(function(x){ return !isNaN(x); });
+  var totInkoop = inkoopVals.reduce(function(a,b){return a+b;},0);
+
+  var html = '<div class="kpi-row">' +
+    kpi('#E8620A','Totaal ingekocht', total, 'voertuigen in systeem') +
+    kpi('#5B35C9','Verkocht', verkocht, Math.round(verkocht/total*100||0)+'% van totaal') +
+    kpi('#1E8B47','Totaal resultaat', (totRes>=0?'+':'')+'€'+Math.round(totRes).toLocaleString('nl-NL'), resultaten.length+' auto\'s met resultaat') +
+    kpi('#2B55C9','Gem. resultaat', (gemRes>=0?'+':'')+'€'+Math.round(gemRes).toLocaleString('nl-NL'), 'per verkochte auto') +
+  '</div>';
+
+  // Status donut
+  var statusData = [
+    {label:'Binnen', val:binnen, color:'#1E8B47'},
+    {label:'Verkocht', val:verkocht, color:'#5B35C9'},
+    {label:'Onderweg/Besteld', val:onderweg, color:'#E8620A'},
+  ];
+
+  // Resultaat per maand
+  var maandData = {};
+  cars.forEach(function(c){
+    if (!c.datum || isNaN(parseFloat(c.resultaat))) return;
+    var d = c.datum.toString();
+    var parts = d.split('-');
+    var key, y, m;
+    if (parts.length===3 && parts[2].length===4) { y=parts[2]; m=parts[1].length===1?'0'+parts[1]:parts[1]; }
+    else if (parts.length===3 && parts[0].length===4) { y=parts[0]; m=parts[1].length===1?'0'+parts[1]:parts[1]; }
+    else return;
+    key = y+'-'+m;
+    if (!maandData[key]) maandData[key] = {res:0, count:0};
+    maandData[key].res += parseFloat(c.resultaat);
+    maandData[key].count++;
+  });
+  var maandKeys = Object.keys(maandData).sort().slice(-12);
+
+  html += '<div class="analytics-grid">';
+  html += '<div class="chart-card"><div class="chart-card-title">Status verdeling<span>'+total+' voertuigen</span></div>' + buildDonut(statusData, total) + '</div>';
+  html += '<div class="chart-card"><div class="chart-card-title">Resultaat per maand<span>Laatste 12 maanden</span></div>' + buildBarChart(maandKeys.map(function(k){ return {label:k.slice(0,7), val:maandData[k].res, sub:maandData[k].count+'x'}; }), true) + '</div>';
+  html += '</div>';
+  return html;
+}
+
+function buildLeveranciers() {
   var data = {};
   cars.forEach(function(c){
-    if (!c.leverancier) return;
-    var r = parseFloat(c.resultaat);
-    if (isNaN(r)) return;
-    if (!data[c.leverancier]) data[c.leverancier] = {total:0, count:0, verkocht:0};
-    data[c.leverancier].total += r;
-    data[c.leverancier].count++;
-    if(c.status === 'verkocht') data[c.leverancier].verkocht++;
+    var lev = c.leverancier || '(geen)';
+    if (!data[lev]) data[lev] = {total:0, count:0, verkocht:0, inkoop:0};
+    data[lev].count++;
+    if (!isNaN(parseFloat(c.resultaat))) data[lev].total += parseFloat(c.resultaat);
+    if (c.status==='verkocht') data[lev].verkocht++;
+    if (!isNaN(parseFloat(c.inkoop))) data[lev].inkoop += parseFloat(c.inkoop);
   });
 
-  var entries = Object.keys(data).map(function(k){
-    return {name:k, total:data[k].total, count:data[k].count, avg: data[k].total/data[k].count, verkocht:data[k].verkocht};
-  });
+  var entries = Object.keys(data).filter(function(k){return k!=='(geen)';}).map(function(k){
+    return {name:k, total:data[k].total, count:data[k].count, verkocht:data[k].verkocht, inkoop:data[k].inkoop, avg:data[k].count?data[k].total/data[k].count:0};
+  }).sort(function(a,b){ return b.total-a.total; });
 
-  // Sort by current tab
-  entries.sort(function(a,b){
-    if(chartTab==='totaal') return b.total - a.total;
-    if(chartTab==='gemiddeld') return b.avg - a.avg;
-    return b.count - a.count;
-  });
+  if (!entries.length) return '<p style="color:var(--muted);padding:2rem;text-align:center">Geen leveranciersdata beschikbaar.</p>';
 
-  // Summary cards
-  var totResult = entries.reduce(function(s,e){return s+e.total;},0);
+  var totRes = entries.reduce(function(s,e){return s+e.total;},0);
   var totAutos = entries.reduce(function(s,e){return s+e.count;},0);
-  var levCount = entries.length;
-  document.getElementById('chart-summary').innerHTML =
-    '<div class="cs-card"><div class="val '+(totResult>=0?'rp':'rn')+'">'+(totResult>=0?'+':'')+'€'+Math.round(totResult).toLocaleString('nl-NL')+'</div><div class="lbl">Totaal resultaat</div></div>'+
-    '<div class="cs-card"><div class="val">'+totAutos+'</div><div class="lbl">Auto\'s met resultaat</div></div>'+
-    '<div class="cs-card"><div class="val">'+levCount+'</div><div class="lbl">Leveranciers actief</div></div>';
 
-  if (!entries.length) {
-    document.getElementById('chart-wrap').innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:2rem">Nog geen data — vul leverancier + resultaat in bij verkochte auto\'s.</p>';
-    return;
-  }
+  var html = '<div class="kpi-row">' +
+    kpi('#E8620A','Actieve leveranciers', entries.length, 'met ingekochte auto\'s') +
+    kpi('#1E8B47','Totaal resultaat', (totRes>=0?'+':'')+'€'+Math.round(totRes).toLocaleString('nl-NL'), 'alle leveranciers samen') +
+    kpi('#2B55C9','Meeste auto\'s', entries[0].name, entries[0].count+' ingekocht') +
+    kpi('#5B35C9','Beste marge', entries.slice().sort(function(a,b){return b.avg-a.avg;})[0].name, '€'+Math.round(entries.slice().sort(function(a,b){return b.avg-a.avg;})[0].avg).toLocaleString('nl-NL')+' gem.') +
+  '</div>';
 
-  // Max value for bar scaling
-  var vals = entries.map(function(e){
-    if(chartTab==='totaal') return Math.abs(e.total);
-    if(chartTab==='gemiddeld') return Math.abs(e.avg);
-    return e.count;
-  });
-  var maxVal = Math.max.apply(null, vals) || 1;
-
-  var html = '';
-  entries.forEach(function(e, idx){
-    var val, valStr, metaStr;
-    if(chartTab==='totaal'){
-      val = e.total; valStr = (val>=0?'+':'')+'€'+Math.round(val).toLocaleString('nl-NL'); metaStr = e.count+' auto\'s';
-    } else if(chartTab==='gemiddeld'){
-      val = e.avg; valStr = (val>=0?'+':'')+'€'+Math.round(val).toLocaleString('nl-NL'); metaStr = 'gem. per auto';
-    } else {
-      val = e.count; valStr = val+' auto\'s'; metaStr = 'totaal';
-    }
-    var pct = Math.max(4, Math.abs(val)/maxVal*100);
-    var isPos = val >= 0;
-    var color = CHART_COLORS[idx % CHART_COLORS.length];
-    html += '<div class="chart-bar-row">'+
-      '<div class="chart-label" title="'+e.name+'">'+e.name+'</div>'+
-      '<div class="chart-bar-bg">'+
-        '<div class="chart-bar-fill '+(isPos?'pos':'neg')+'" style="width:'+pct+'%;background:'+(isPos?'linear-gradient(90deg,'+color+','+color+'99)':'linear-gradient(90deg,#C62828,#e84040)')+'">'+
-          '<span class="chart-bar-val">'+valStr+'</span>'+
-        '</div>'+
-      '</div>'+
-      '<div class="chart-meta">'+metaStr+'</div>'+
+  html += '<div class="analytics-grid full"><div class="chart-card"><div class="chart-card-title">Totaal resultaat per leverancier<span>Gesorteerd op hoogste resultaat</span></div>';
+  var maxAbs = Math.max.apply(null, entries.map(function(e){return Math.abs(e.total);})) || 1;
+  entries.forEach(function(e){
+    var pct = Math.max(4, Math.abs(e.total)/maxAbs*100);
+    html += '<div class="hbc-row">'+
+      '<div class="hbc-label" title="'+e.name+'">'+e.name+'</div>'+
+      '<div class="hbc-bar-bg"><div class="hbc-bar-fill '+(e.total>=0?'pos':'neg')+'" style="width:'+pct+'%">'+
+        '<span class="hbc-val">'+(e.total>=0?'+':'')+'€'+Math.round(e.total).toLocaleString('nl-NL')+'</span>'+
+      '</div></div>'+
+      '<div class="hbc-meta">'+e.count+' auto\'s</div>'+
     '</div>';
   });
-  document.getElementById('chart-wrap').innerHTML = html;
+  html += '</div></div>';
+
+  html += '<div class="analytics-grid"><div class="chart-card"><div class="chart-card-title">Gem. marge per leverancier<span>Per ingekochte auto</span></div>';
+  var sortedAvg = entries.slice().sort(function(a,b){return b.avg-a.avg;}).slice(0,10);
+  var maxAvg = Math.max.apply(null, sortedAvg.map(function(e){return Math.abs(e.avg);})) || 1;
+  sortedAvg.forEach(function(e){
+    var pct = Math.max(4, Math.abs(e.avg)/maxAvg*100);
+    html += '<div class="hbc-row">'+
+      '<div class="hbc-label" title="'+e.name+'">'+e.name+'</div>'+
+      '<div class="hbc-bar-bg"><div class="hbc-bar-fill '+(e.avg>=0?'pos':'neg')+'" style="width:'+pct+'%">'+
+        '<span class="hbc-val">'+(e.avg>=0?'+':'')+'€'+Math.round(e.avg).toLocaleString('nl-NL')+'</span>'+
+      '</div></div>'+
+      '<div class="hbc-meta">'+e.count+'x</div>'+
+    '</div>';
+  });
+  html += '</div>';
+
+  html += '<div class="chart-card"><div class="chart-card-title">Aantallen per leverancier<span>Ingekocht totaal</span></div>';
+  var sortedCount = entries.slice().sort(function(a,b){return b.count-a.count;}).slice(0,10);
+  var maxCount = sortedCount[0] ? sortedCount[0].count : 1;
+  sortedCount.forEach(function(e){
+    var pct = Math.max(4, e.count/maxCount*100);
+    html += '<div class="hbc-row">'+
+      '<div class="hbc-label" title="'+e.name+'">'+e.name+'</div>'+
+      '<div class="hbc-bar-bg"><div class="hbc-bar-fill neu" style="width:'+pct+'%">'+
+        '<span class="hbc-val">'+e.count+' auto\'s</span>'+
+      '</div></div>'+
+      '<div class="hbc-meta">'+e.verkocht+' verk.</div>'+
+    '</div>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function buildInkoopVerkoop() {
+  // Inkoop per week — laatste 16 weken
+  var weekData = {};
+  cars.forEach(function(c){
+    if (!c.datum) return;
+    var d = parseDatum(c.datum);
+    if (!d) return;
+    var startOfWeek = new Date(d);
+    startOfWeek.setDate(d.getDate() - d.getDay() + 1);
+    var key = startOfWeek.toISOString().slice(0,10);
+    if (!weekData[key]) weekData[key] = {inkoop:0, verkocht:0, res:0};
+    weekData[key].inkoop++;
+    if (c.status==='verkocht') weekData[key].verkocht++;
+    if (!isNaN(parseFloat(c.resultaat))) weekData[key].res += parseFloat(c.resultaat);
+  });
+  var weekKeys = Object.keys(weekData).sort().slice(-16);
+
+  // Inkoop per maand
+  var maandInkoop = {};
+  cars.forEach(function(c){
+    if (!c.datum) return;
+    var d = parseDatum(c.datum);
+    if (!d) return;
+    var key = d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1);
+    if (!maandInkoop[key]) maandInkoop[key] = {inkoop:0, verkoop:0};
+    maandInkoop[key].inkoop++;
+    if (c.status==='verkocht') maandInkoop[key].verkoop++;
+  });
+  var maandKeys = Object.keys(maandInkoop).sort().slice(-12);
+
+  var totInkoopWeek = weekKeys.reduce(function(s,k){return s+weekData[k].inkoop;},0);
+  var gemPerWeek = weekKeys.length ? Math.round(totInkoopWeek/weekKeys.length*10)/10 : 0;
+  var topWeek = weekKeys.length ? weekKeys.reduce(function(best,k){ return weekData[k].inkoop>weekData[best].inkoop?k:best; }, weekKeys[0]) : null;
+
+  var html = '<div class="kpi-row">' +
+    kpi('#E8620A','Gem. inkoop/week', gemPerWeek, 'laatste '+weekKeys.length+' weken') +
+    kpi('#2B55C9','Drukste week', topWeek ? topWeek.slice(5) : '-', topWeek ? weekData[topWeek].inkoop+' auto\'s' : '') +
+    kpi('#1E8B47','Totaal ingekocht', cars.length, 'alle periodes') +
+    kpi('#5B35C9','Verkocht', cars.filter(function(c){return c.status==='verkocht';}).length, 'afgeleverd') +
+  '</div>';
+
+  html += '<div class="analytics-grid full"><div class="chart-card"><div class="chart-card-title">Inkoop per week<span>Laatste 16 weken</span></div>' +
+    buildBarChart(weekKeys.map(function(k){ return {label:k.slice(5), val:weekData[k].inkoop, sub:weekData[k].inkoop+'x'}; }), false, '#2B55C9') +
+  '</div></div>';
+
+  html += '<div class="analytics-grid"><div class="chart-card"><div class="chart-card-title">Inkoop per maand<span>Laatste 12 maanden</span></div>' +
+    buildBarChart(maandKeys.map(function(k){ return {label:k.slice(5), val:maandInkoop[k].inkoop, sub:maandInkoop[k].inkoop+'x'}; }), false, '#E8620A') +
+  '</div>';
+
+  html += '<div class="chart-card"><div class="chart-card-title">Verkoop per maand<span>Laatste 12 maanden</span></div>' +
+    buildBarChart(maandKeys.map(function(k){ return {label:k.slice(5), val:maandInkoop[k].verkoop, sub:maandInkoop[k].verkoop+'x'}; }), false, '#1E8B47') +
+  '</div></div>';
+
+  return html;
+}
+
+function parseDatum(v) {
+  if (!v) return null;
+  try {
+    var p = v.toString().trim().split('-');
+    if (p.length===3 && p[2].length===4) return new Date(p[2]+'-'+(p[1].length===1?'0':'')+p[1]+'-'+(p[0].length===1?'0':'')+p[0]);
+    if (p.length===3 && p[0].length===4) return new Date(v);
+  } catch(e){}
+  return null;
+}
+
+function kpi(color, label, val, sub) {
+  return '<div class="kpi" style="--kc:'+color+'">'+
+    '<div class="kpi-lbl">'+label+'</div>'+
+    '<div class="kpi-val">'+val+'</div>'+
+    '<div class="kpi-sub">'+sub+'</div>'+
+  '</div>';
+}
+
+function buildBarChart(items, colorByVal, fixedColor) {
+  if (!items.length) return '<p style="color:var(--hint);font-size:12px;text-align:center;padding:1rem">Geen data</p>';
+  var vals = items.map(function(i){return i.val;});
+  var maxV = Math.max.apply(null, vals.map(Math.abs)) || 1;
+  var minV = Math.min.apply(null, vals);
+  var hasNeg = minV < 0;
+  var html = '<div class="bc-wrap" style="height:'+(hasNeg?'150px':'110px')+';align-items:'+(hasNeg?'center':'flex-end')+'">';
+  items.forEach(function(item){
+    var pct = Math.abs(item.val)/maxV*80;
+    var color = fixedColor || (colorByVal ? (item.val>=0?'#1E8B47':'#C62828') : '#E8620A');
+    var valStr = colorByVal ? ((item.val>=0?'+':'')+'€'+Math.round(item.val).toLocaleString('nl-NL')) : item.val;
+    html += '<div class="bc-bar-col">'+
+      '<div class="bc-bar" style="height:'+Math.max(2,pct)+'px;background:'+color+';opacity:'+(0.5+item.val/maxV*0.5)+'" title="'+item.label+': '+valStr+'">'+
+        '<span class="bc-bar-val">'+valStr+'</span>'+
+      '</div>'+
+      '<span class="bc-label">'+item.label+'</span>'+
+    '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function buildDonut(items, total) {
+  var r = 50, cx = 60, cy = 60, stroke = 18;
+  var circ = 2*Math.PI*r;
+  var offset = 0;
+  var svg = '<svg width="120" height="120" viewBox="0 0 120 120">';
+  svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--surface2)" stroke-width="'+stroke+'"/>';
+  items.forEach(function(item){
+    if (!item.val) return;
+    var pct = item.val/total;
+    var dash = pct*circ;
+    svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+item.color+'" stroke-width="'+stroke+'" stroke-dasharray="'+dash+' '+(circ-dash)+'" stroke-dashoffset="'+(-(offset*circ-circ/4))+'" style="transition:all .5s"/>';
+    offset += pct;
+  });
+  svg += '<text x="'+cx+'" y="'+(cy+5)+'" text-anchor="middle" font-size="14" font-weight="600" fill="var(--text)">'+total+'</text>';
+  svg += '</svg>';
+  var legend = '<div class="donut-legend">';
+  items.forEach(function(item){
+    legend += '<div class="donut-legend-item">'+
+      '<div class="donut-legend-dot" style="background:'+item.color+'"></div>'+
+      '<span class="donut-legend-label">'+item.label+'</span>'+
+      '<span class="donut-legend-val">'+item.val+'</span>'+
+      '<span class="donut-legend-pct">'+(Math.round(item.val/total*100)||0)+'%</span>'+
+    '</div>';
+  });
+  legend += '</div>';
+  return '<div class="donut-wrap">'+svg+legend+'</div>';
 }
 
 // ===== CORE FUNCTIONS =====
