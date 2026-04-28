@@ -63,22 +63,22 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .loading{text-align:center;padding:1rem;color:var(--muted);font-size:13px;display:none}
 .tbl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden}
 .tbl-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:1280px}
+table{width:100%;border-collapse:collapse;min-width:960px}
 thead{background:var(--accent)}
 thead tr{border-bottom:1px solid rgba(0,0,0,.1)}
-th{padding:11px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#111;white-space:nowrap}
-td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+th{padding:9px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#111;white-space:nowrap}
+td{padding:8px 10px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:#FFF6F1}
 .tr{text-align:right}
-.mono{font-family:'DM Mono',monospace;font-size:12px}
+.mono{font-family:'DM Mono',monospace;font-size:11px}
 .badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
 .badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.7}
 .b-bestelling{background:var(--blue-bg);color:var(--blue-txt)}
 .b-onderweg{background:var(--amber-bg);color:var(--amber-txt)}
 .b-binnen{background:var(--green-bg);color:var(--green-txt)}
 .b-verkocht{background:var(--purple-bg);color:var(--purple-txt)}
-.lev-badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.lev-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--surface2);color:var(--muted);white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis}
 .rp{color:#1E8B47;font-weight:600;font-family:'DM Mono',monospace;font-size:12px}
 .rn{color:#C62828;font-weight:600;font-family:'DM Mono',monospace;font-size:12px}
 .dm{color:var(--hint)}
@@ -307,11 +307,11 @@ tbody tr:hover td{background:#FFF6F1}
     <div class="tbl-wrap">
       <table>
         <thead><tr>
-          <th>Kenteken / VIN</th><th>Merk</th><th>Type</th><th>Motor</th><th>BJ</th>
-          <th class="tr">KM-stand</th><th>Inkoopdatum</th>
-          <th class="tr">Inkoop</th><th class="tr">Verkoop</th>
-          <th class="tr">Resultaat</th><th>Status</th><th>Leverancier</th><th>Opmerkingen</th>
-          <th style="width:80px"></th>
+          <th style="min-width:95px">Kenteken / VIN</th><th style="min-width:75px">Merk</th><th style="min-width:75px">Type</th><th style="min-width:110px">Motor</th><th style="width:40px">BJ</th>
+          <th class="tr" style="min-width:75px">KM-stand</th><th style="min-width:80px">Datum</th>
+          <th class="tr" style="min-width:75px">Inkoop</th><th class="tr" style="min-width:75px">Verkoop</th>
+          <th class="tr" style="min-width:75px">Resultaat</th><th style="min-width:105px">Status</th><th style="min-width:105px">Leverancier</th><th style="min-width:90px">Opmerkingen</th>
+          <th style="width:88px"></th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -877,22 +877,22 @@ function render() {
     var c = list[ri];
     var eid = encodeURIComponent(c.id);
     var idcell = c.kenteken ? '<span class="mono" style="font-weight:600">'+c.kenteken+'</span>'+(c.vin?'<br><span style="font-size:11px;color:var(--hint)">'+c.vin+'</span>':'') : '<span style="font-size:11px;color:var(--muted)">VIN: '+(c.vin||'-')+'</span>';
-    var opm = c.opmerkingen ? '<span title="'+c.opmerkingen.replace(/"/g,'&quot;')+'" style="cursor:help;border-bottom:1px dotted var(--border2);color:var(--muted)">'+(c.opmerkingen.length>25?c.opmerkingen.slice(0,25)+'...':c.opmerkingen)+'</span>' : '<span class="dm">-</span>';
+    var opm = c.opmerkingen ? '<span title="'+c.opmerkingen.replace(/"/g,'&quot;')+'" style="cursor:help;border-bottom:1px dotted var(--border2);color:var(--muted)">'+(c.opmerkingen.length>18?c.opmerkingen.slice(0,18)+'…':c.opmerkingen)+'</span>' : '<span class="dm">-</span>';
     var levCell = c.leverancier ? '<span class="lev-badge">'+c.leverancier+'</span>' : '<span class="dm">-</span>';
     rows.push('<tr onclick="toggleRow(event,this)">'+
       '<td data-label="Kenteken" class="mob-always">'+idcell+'</td>'+
       '<td data-label="Merk" style="font-weight:500">'+(c.merk||'<span class="dm">-</span>')+'</td>'+
       '<td data-label="Type" style="color:var(--muted)">'+(c.type||'<span class="dm">-</span>')+'</td>'+
-      '<td data-label="Motor" style="color:var(--muted);font-size:12px">'+(c.motor||'<span class="dm">-</span>')+'</td>'+
+      '<td data-label="Motor" style="color:var(--muted)">'+(c.motor||'<span class="dm">-</span>')+'</td>'+
       '<td data-label="BJ" style="color:var(--muted)">'+(c.bj||'<span class="dm">-</span>')+'</td>'+
       '<td data-label="KM-stand" class="tr mono">'+fk(c.km)+'</td>'+
-      '<td data-label="Datum" style="color:var(--muted);font-size:12px">'+fd(c.datum)+'</td>'+
+      '<td data-label="Datum" style="color:var(--muted)">'+fd(c.datum)+'</td>'+
       '<td data-label="Inkoop" class="tr mono">'+fe(c.inkoop)+'</td>'+
       '<td data-label="Verkoop" class="tr mono">'+fe(c.verkoop)+'</td>'+
       '<td data-label="Resultaat" class="tr">'+rc(c)+'</td>'+
       '<td data-label="Status" class="mob-always">'+sb(c.status, eid)+'</td>'+
       '<td data-label="Leverancier">'+levCell+'</td>'+
-      '<td data-label="Opmerkingen" style="max-width:140px">'+opm+'</td>'+
+      '<td data-label="Opmerkingen">'+opm+'</td>'+
       '<td><div class="acell">'+
         '<button class="ib" title="Publiceer naar Autotelex" data-id="'+eid+'" onclick="publishToAutotelex(this.dataset.id)" style="font-size:10px;font-weight:700;color:#1a6b1a;padding:4px 6px;background:#edfaf1;border-radius:6px">ADS</button>'+
         '<button class="ib" title="Bekijk op JPcars" data-kenteken="'+(c.kenteken||'')+'" onclick="openJP(this.dataset.kenteken)" style="font-size:11px;font-weight:600;color:#E8620A;padding:4px 7px">JP</button>'+
