@@ -31,7 +31,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .hd{width:1px;height:28px;background:rgba(255,255,255,.18);margin:0 4px}
 .ht{font-size:14px;font-weight:500;color:rgba(255,255,255,.55)}
 .ha{display:flex;gap:8px;align-items:center}
-.app{max-width:1440px;margin:0 auto;padding:1rem 1rem 5rem}
+.app{max-width:1440px;margin:0 auto;padding:2rem 2rem 5rem}
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:2rem}
 @media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:600px){.stats{grid-template-columns:1fr 1fr}}
@@ -54,6 +54,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
 .btn.primary:hover{background:var(--accent2)}
 .btn.small{font-size:12px;padding:0 11px;height:30px;border-radius:8px}
+.btn.green{background:var(--green-bg);color:var(--green-txt);border-color:var(--green-mid)}
+.btn.green:hover{background:#d4f5e0}
 .hbtn{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:13px;font-weight:500;padding:0 16px;height:36px;border-radius:var(--radius);border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);cursor:pointer;white-space:nowrap;transition:background .15s}
 .hbtn:hover{background:rgba(255,255,255,.15);color:#fff}
 .hbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
@@ -61,11 +63,11 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(-
 .loading{text-align:center;padding:1rem;color:var(--muted);font-size:13px;display:none}
 .tbl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden}
 .tbl-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:960px}
+table{width:100%;border-collapse:collapse;min-width:1280px}
 thead{background:var(--accent)}
 thead tr{border-bottom:1px solid rgba(0,0,0,.1)}
 th{padding:11px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#111;white-space:nowrap}
-td{padding:8px 10px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle}
+td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:#FFF6F1}
 .tr{text-align:right}
@@ -76,6 +78,7 @@ tbody tr:hover td{background:#FFF6F1}
 .b-onderweg{background:var(--amber-bg);color:var(--amber-txt)}
 .b-binnen{background:var(--green-bg);color:var(--green-txt)}
 .b-verkocht{background:var(--purple-bg);color:var(--purple-txt)}
+.lev-badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--muted);white-space:nowrap}
 .rp{color:#1E8B47;font-weight:600;font-family:'DM Mono',monospace;font-size:12px}
 .rn{color:#C62828;font-weight:600;font-family:'DM Mono',monospace;font-size:12px}
 .dm{color:var(--hint)}
@@ -118,7 +121,45 @@ tbody tr:hover td{background:#FFF6F1}
 .toast{position:fixed;bottom:1.75rem;right:1.75rem;background:#111;color:#fff;padding:.75rem 1.375rem;border-radius:var(--radius);font-size:13px;font-weight:500;z-index:500;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none}
 .toast.show{opacity:1;transform:translateY(0)}
 #cfi{display:none}
-#doc-file-input{display:none}
+
+/* Leverancier dropdown met nieuw toevoegen */
+.lev-wrap{position:relative}
+.lev-custom{display:none;margin-top:8px}
+.lev-custom input{width:100%}
+
+/* Bulk modal */
+.bulk-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.bulk-row:last-child{border-bottom:none}
+.bulk-info{flex:1;min-width:0}
+.bulk-info strong{display:block;font-size:13px}
+.bulk-info span{font-size:12px;color:var(--muted)}
+.bulk-sel{width:180px;font-family:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text);outline:none}
+.bulk-sel:focus{border-color:var(--accent)}
+
+/* Chart modal */
+.chart-wrap{margin-top:1.25rem}
+.chart-bar-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.chart-label{font-size:13px;font-weight:500;width:140px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-bar-bg{flex:1;background:var(--surface2);border-radius:6px;height:28px;position:relative;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:6px;transition:width .6s ease;display:flex;align-items:center;padding:0 10px}
+.chart-bar-fill.pos{background:linear-gradient(90deg,#1E8B47,#27c063)}
+.chart-bar-fill.neg{background:linear-gradient(90deg,#C62828,#e84040)}
+.chart-bar-val{font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
+.chart-meta{font-size:12px;color:var(--muted);width:100px;text-align:right;flex-shrink:0}
+.chart-tabs{display:flex;gap:8px;margin-bottom:1.25rem}
+.chart-tab{font-family:inherit;font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);cursor:pointer}
+.chart-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chart-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.5rem}
+.cs-card{background:var(--surface2);border-radius:var(--radius);padding:1rem;text-align:center}
+.cs-card .val{font-size:20px;font-weight:600;letter-spacing:-.5px}
+.cs-card .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+
+/* Leverancier beheer in modal */
+.lev-list-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px}
+.lev-list-item:last-child{border-bottom:none}
+.lev-list-item .del-lev{background:none;border:none;cursor:pointer;color:var(--hint);font-size:14px;padding:3px 6px;border-radius:6px}
+.lev-list-item .del-lev:hover{color:var(--red-txt);background:var(--red-bg)}
+
 @media(max-width:600px){.fgrid{grid-template-columns:1fr}.fg.full{grid-column:1}.app{padding:1rem 1rem 4rem}.header{padding:0 1rem}}
 
 /* Mobile app view */
@@ -207,40 +248,6 @@ tbody tr:hover td{background:#FFF6F1}
 .pw-box button{width:100%;background:#E8620A;color:#fff;border:none;border-radius:10px;padding:11px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
 .pw-box button:hover{background:#C4510A}
 .pw-error{color:#A81C1C;font-size:13px;margin-top:.75rem;display:none}
-
-/* ===== GRAFIEKEN ===== */
-.charts-toggle{display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:.75rem;padding:.75rem 1.125rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--purple-mid);border-radius:var(--radius-lg);font-size:13px;font-weight:500;color:var(--text);user-select:none;transition:background .15s}
-.charts-toggle:hover{background:var(--surface2)}
-.charts-toggle .ct-arrow{margin-left:auto;font-size:11px;color:var(--hint);transition:transform .2s}
-.charts-toggle.open .ct-arrow{transform:rotate(180deg)}
-.charts-wrap{display:none;margin-bottom:1.25rem}
-.charts-wrap.open{display:block}
-.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:900px){.charts-grid{grid-template-columns:1fr}}
-.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.375rem}
-.chart-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:1rem}
-.chart-canvas-wrap{position:relative;height:200px}
-
-/* ===== DOCUMENT MODAL STYLES ===== */
-.doc-upload-area{border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);margin-bottom:1.25rem}
-.doc-upload-area:hover,.doc-upload-area.drag{background:var(--accent-bg);border-color:var(--accent);border-style:solid}
-.doc-list{display:flex;flex-direction:column;gap:8px}
-.doc-item{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);gap:1rem;transition:background .15s}
-.doc-item:hover{background:var(--surface2)}
-.doc-item-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
-.doc-type-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.doc-type-pdf{background:#FFF0F0;color:#C62828}
-.doc-type-img{background:#EEF4FF;color:#2B55C9}
-.doc-type-other{background:var(--surface2);color:var(--muted)}
-.doc-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
-.doc-meta{font-size:11px;color:var(--hint);margin-top:1px}
-.doc-item-actions{display:flex;gap:4px;flex-shrink:0}
-.doc-empty{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
-.doc-empty svg{display:block;margin:0 auto 12px;opacity:.3}
-.doc-empty p{font-size:13px}
-.doc-loading{text-align:center;padding:1.5rem;color:var(--hint);font-size:13px}
-/* Knop badge met doc count */
-.doc-count-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;border-radius:10px;font-size:9px;font-weight:700;min-width:14px;height:14px;padding:0 3px;margin-left:2px;line-height:1}
 </style>
 </head>
 <body>
@@ -257,6 +264,7 @@ tbody tr:hover td{background:#FFF6F1}
     <div class="ha">
       <button class="hbtn" onclick="openImport()">&#8593; Importeer CSV</button>
       <button class="hbtn" onclick="exportCSV()">&#8595; Export CSV</button>
+      <button class="hbtn" onclick="openBulkLev()">&#9889; Bulk leverancier</button>
       <button class="hbtn primary" onclick="openAdd()">+ Auto toevoegen</button>
     </div>
   </div>
@@ -264,38 +272,6 @@ tbody tr:hover td{background:#FFF6F1}
 
 <div class="app">
   <div class="stats" id="stats"></div>
-
-  <!-- Grafieken -->
-  <div class="charts-toggle" id="charts-toggle" onclick="toggleCharts()">
-    <svg width="15" height="15" fill="none" stroke="var(--purple-mid)" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-    <span>Statistieken &amp; grafieken</span>
-    <span class="ct-arrow">&#9660;</span>
-  </div>
-  <div class="charts-wrap" id="charts-wrap">
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-title">Auto&apos;s ingekocht per week</div>
-        <div style="overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch">
-          <div style="position:relative;height:200px;min-width:100%" id="chart-week-wrap">
-            <canvas id="chart-week"></canvas>
-          </div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Ingekocht per merk</div>
-        <div class="chart-canvas-wrap"><canvas id="chart-merk"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Gem. inkoop vs verkoopprijs per merk</div>
-        <div class="chart-canvas-wrap"><canvas id="chart-prijzen"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Resultaat per maand</div>
-        <div class="chart-canvas-wrap"><canvas id="chart-resultaat"></canvas></div>
-      </div>
-    </div>
-  </div>
-
   <div class="toolbar">
     <svg width="15" height="15" fill="none" stroke="var(--hint)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input type="text" id="search" placeholder="Zoek kenteken, VIN, merk, type..." oninput="render()">
@@ -308,6 +284,9 @@ tbody tr:hover td{background:#FFF6F1}
       <option value="verkocht">Verkocht</option>
     </select>
     <input type="text" id="fm" placeholder="Filter op merk..." oninput="render()" style="max-width:160px">
+    <select id="flev" onchange="render()">
+      <option value="">Alle leveranciers</option>
+    </select>
     <div class="tsep"></div>
     <select id="sort" onchange="render()">
       <option value="datum_desc">Datum nieuwste eerst</option>
@@ -317,6 +296,10 @@ tbody tr:hover td{background:#FFF6F1}
       <option value="inkoop_desc">Inkoop hoog-laag</option>
       <option value="inkoop_asc">Inkoop laag-hoog</option>
     </select>
+    <button class="btn" onclick="openChart()" style="gap:6px">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+      Leverancier grafiek
+    </button>
     <span id="count" style="font-size:12px;color:var(--hint);white-space:nowrap;margin-left:auto"></span>
   </div>
   <div id="loading" class="loading">Gegevens laden...</div>
@@ -327,8 +310,8 @@ tbody tr:hover td{background:#FFF6F1}
           <th>Kenteken / VIN</th><th>Merk</th><th>Type</th><th>Motor</th><th>BJ</th>
           <th class="tr">KM-stand</th><th>Inkoopdatum</th>
           <th class="tr">Inkoop</th><th class="tr">Verkoop</th>
-          <th class="tr">Resultaat</th><th>Status</th><th>Opmerkingen</th>
-          <th style="width:120px"></th>
+          <th class="tr">Resultaat</th><th>Status</th><th>Leverancier</th><th>Opmerkingen</th>
+          <th style="width:80px"></th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -336,7 +319,7 @@ tbody tr:hover td{background:#FFF6F1}
   </div>
 </div>
 
-<!-- AUTO TOEVOEGEN / BEWERKEN MODAL -->
+<!-- Auto toevoegen/bewerken modal -->
 <div class="mbg" id="em">
   <div class="modal" style="max-width:700px">
     <div class="mhdr">
@@ -353,6 +336,19 @@ tbody tr:hover td{background:#FFF6F1}
       <div class="fg"><label>Bouwjaar</label><input id="fb" type="number" placeholder="2022" min="2000" max="2035"></div>
       <div class="fg"><label>Kilometerstand</label><input id="fkm" type="number" placeholder="45000"></div>
       <div class="fg"><label>Inkoopdatum</label><input id="fd" type="date"></div>
+      <div class="sdiv"><span>Leverancier</span></div>
+      <div class="fg full">
+        <label>Leverancier</label>
+        <div class="lev-wrap">
+          <select id="flev-sel" onchange="onLevChange(this)">
+            <option value="">Selecteer leverancier...</option>
+          </select>
+          <div class="lev-custom" id="lev-custom-wrap">
+            <input id="flev-new" placeholder="Naam nieuwe leverancier..." style="margin-top:8px;width:100%">
+            <span class="hint">Wordt opgeslagen als vaste leverancier</span>
+          </div>
+        </div>
+      </div>
       <div class="sdiv"><span>Financieel</span></div>
       <div class="fg"><label>Inkoopprijs (euro)</label><input id="fi" type="number" placeholder="18500"></div>
       <div class="fg"><label>Verkoopprijs (euro)</label><input id="fvp" type="number" placeholder="21500"></div>
@@ -366,13 +362,14 @@ tbody tr:hover td{background:#FFF6F1}
       <div class="fg full"><label>Opmerkingen</label><textarea id="fo" placeholder="Bijzonderheden, schade, afspraken..."></textarea></div>
     </div>
     <div class="mftr">
+      <button class="btn" onclick="openManageLev()" style="margin-right:auto">&#9881; Leveranciers beheren</button>
       <button class="btn" onclick="cm('em')">Annuleren</button>
       <button class="btn primary" onclick="save()">Opslaan</button>
     </div>
   </div>
 </div>
 
-<!-- IMPORT MODAL -->
+<!-- Import modal -->
 <div class="mbg" id="im">
   <div class="modal" style="max-width:820px">
     <div class="mhdr">
@@ -381,7 +378,7 @@ tbody tr:hover td{background:#FFF6F1}
     </div>
     <p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.7;background:var(--surface2);padding:.875rem 1rem;border-radius:var(--radius)">
       Exporteer je Excel als <strong style="color:var(--text)">CSV</strong> via Bestand &rarr; Opslaan als &rarr; CSV UTF-8.
-      Herkende kolommen: Kenteken, Merk, Type, Motor, Bouwjaar, Km stand, Inkoop datum, Inkoopprijs, Verkoopprijs, Status, Opmerking, Resultaat.
+      Herkende kolommen: Kenteken, Merk, Type, Motor, Bouwjaar, Km stand, Inkoop datum, Inkoopprijs, Verkoopprijs, Status, Opmerking, Resultaat, Leverancier.
     </p>
     <div class="dropz" id="dz" onclick="document.getElementById('cfi').click()" ondragover="dzo(event)" ondragleave="dzl()" ondrop="dzd(event)">
       <svg width="36" height="36" fill="none" stroke="var(--hint)" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 12px;display:block"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
@@ -407,40 +404,61 @@ tbody tr:hover td{background:#FFF6F1}
   </div>
 </div>
 
-<!-- DOCUMENT MODAL -->
-<div class="mbg" id="dm">
-  <div class="modal" style="max-width:600px">
+<!-- Bulk leverancier modal -->
+<div class="mbg" id="bulk-lev-modal">
+  <div class="modal" style="max-width:700px">
     <div class="mhdr">
-      <div>
-        <h2>&#128206; Documenten</h2>
-        <p id="dm-subtitle">Onderhoudshistorie, SOH-certificaat, factuur...</p>
-      </div>
-      <button class="xbtn" onclick="cm('dm')">&#10005;</button>
+      <div><h2>Bulk leverancier toewijzen</h2><p>Wijs per auto een leverancier toe — alles in één keer opslaan</p></div>
+      <button class="xbtn" onclick="cm('bulk-lev-modal')">&#10005;</button>
     </div>
-
-    <!-- Upload zone -->
-    <div class="doc-upload-area" id="doc-dropzone"
-         onclick="document.getElementById('doc-file-input').click()"
-         ondragover="docDzo(event)" ondragleave="docDzl()" ondrop="docDzd(event)">
-      <svg width="32" height="32" fill="none" stroke="var(--hint)" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 10px;display:block"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-      <strong style="font-size:14px;color:var(--text)">Klik of sleep bestanden hier</strong>
-      <p style="font-size:12px;color:var(--muted);margin-top:4px">PDF, JPG, PNG — max 20MB per bestand</p>
+    <div style="margin-bottom:1rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <label style="font-size:13px;font-weight:500">Snel invullen voor alle lege:</label>
+      <select id="bulk-quick-lev" style="font-family:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text);outline:none">
+        <option value="">Kies leverancier...</option>
+      </select>
+      <button class="btn small" onclick="bulkFillEmpty()">Toepassen op lege</button>
     </div>
-    <input type="file" id="doc-file-input" accept=".pdf,.jpg,.jpeg,.png,.heic" multiple onchange="docHandleFiles(this.files)">
-
-    <!-- Bestandenlijst -->
-    <div id="doc-list-wrap">
-      <div class="doc-loading" id="doc-loading">Laden...</div>
-      <div class="doc-list" id="doc-list"></div>
-      <div class="doc-empty" id="doc-empty" style="display:none">
-        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        <p>Nog geen documenten voor deze auto</p>
-      </div>
-    </div>
-
+    <div id="bulk-lev-list" style="max-height:420px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius)"></div>
     <div class="mftr">
-      <button class="btn" onclick="cm('dm')">Sluiten</button>
+      <button class="btn" onclick="cm('bulk-lev-modal')">Annuleren</button>
+      <button class="btn primary" onclick="saveBulkLev()">Alles opslaan</button>
     </div>
+  </div>
+</div>
+
+<!-- Leveranciers beheren modal -->
+<div class="mbg" id="manage-lev-modal">
+  <div class="modal" style="max-width:460px">
+    <div class="mhdr">
+      <div><h2>Leveranciers beheren</h2><p>Voeg toe of verwijder vaste leveranciers</p></div>
+      <button class="xbtn" onclick="cm('manage-lev-modal')">&#10005;</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:1rem">
+      <input id="new-lev-input" placeholder="Naam nieuwe leverancier..." style="flex:1;font-family:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);outline:none" onkeydown="if(event.key==='Enter')addLevFromManage()">
+      <button class="btn primary" onclick="addLevFromManage()">Toevoegen</button>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden" id="lev-manage-list"></div>
+    <div class="mftr">
+      <button class="btn primary" onclick="cm('manage-lev-modal')">Klaar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Grafiek modal -->
+<div class="mbg" id="chart-modal">
+  <div class="modal" style="max-width:680px">
+    <div class="mhdr">
+      <div><h2>Resultaat per leverancier</h2><p>Alleen auto's met ingevuld resultaat</p></div>
+      <button class="xbtn" onclick="cm('chart-modal')">&#10005;</button>
+    </div>
+    <div class="chart-tabs">
+      <button class="chart-tab active" onclick="setChartTab('totaal',this)">Totaal resultaat</button>
+      <button class="chart-tab" onclick="setChartTab('gemiddeld',this)">Gemiddeld per auto</button>
+      <button class="chart-tab" onclick="setChartTab('aantal',this)">Aantal verkocht</button>
+    </div>
+    <div class="chart-summary" id="chart-summary"></div>
+    <div class="chart-wrap" id="chart-wrap"></div>
+    <p style="font-size:11px;color:var(--hint);margin-top:1rem">Alleen auto's met leverancier EN ingevuld resultaat worden meegenomen.</p>
   </div>
 </div>
 
@@ -455,14 +473,273 @@ tbody tr:hover td{background:#FFF6F1}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 
 var SUPA_URL = 'https://wtstkaztqevmztlkkinf.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0c3RrYXp0cWV2bXp0bGtraW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzkwOTIsImV4cCI6MjA5MTMxNTA5Mn0.OS3hpC0TzgfpoY8ylTT2F_9K7N4MNk7eLWls2QzWTDY';
 var cars = [], editId = null, iNew = [], iConflicts = [], cChoices = {};
-var docCarId = null, docCarLabel = '';
+var chartTab = 'totaal';
 
+// ===== LEVERANCIERS (opgeslagen in localStorage) =====
+var DEFAULT_LEVS = ['In de Wal','Autotaxatiepartners','Dealerwel','Dealerdirect','VWPFS','Bleeker en de Jong','Particuliere inkoop','Via PON','Wevi','De Autogroothandel','BLV','Ayvens','Athlon','Van Mossel','Auto Hoogenboom','Sixt Rental','Snijders van Dijk','GWI','Vehicx','Autodeals XL','Auto Talsma','Huiskes Kokkeler','Zenith Portugal','BCA','Carcollect','Van der Woude Auto\'s','Marco van Schaik','Just Trading Cars','Carlinking','Autogroothandel Groep Twente','KG Flamina','Edwin Louissen'];
+
+function getLeveranciers() {
+  try {
+    var s = localStorage.getItem('bourg_leveranciers');
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return DEFAULT_LEVS.slice();
+}
+
+function saveLeveranciers(list) {
+  localStorage.setItem('bourg_leveranciers', JSON.stringify(list));
+}
+
+function addLeverancier(name) {
+  name = name.trim();
+  if (!name) return false;
+  var list = getLeveranciers();
+  if (list.indexOf(name) > -1) return false;
+  list.push(name);
+  saveLeveranciers(list);
+  return true;
+}
+
+function removeLeverancier(name) {
+  var list = getLeveranciers().filter(function(l){ return l !== name; });
+  saveLeveranciers(list);
+}
+
+function fillLevDropdowns() {
+  var levs = getLeveranciers();
+  // Main filter dropdown in toolbar
+  var flev = document.getElementById('flev');
+  var curFlev = flev.value;
+  flev.innerHTML = '<option value="">Alle leveranciers</option>';
+  levs.forEach(function(l){
+    var o = document.createElement('option'); o.value = l; o.textContent = l;
+    flev.appendChild(o);
+  });
+  flev.value = curFlev;
+
+  // Edit modal dropdown
+  var flevSel = document.getElementById('flev-sel');
+  var curSel = flevSel ? flevSel.value : '';
+  if (flevSel) {
+    flevSel.innerHTML = '<option value="">Selecteer leverancier...</option>';
+    levs.forEach(function(l){
+      var o = document.createElement('option'); o.value = l; o.textContent = l;
+      flevSel.appendChild(o);
+    });
+    var newOpt = document.createElement('option'); newOpt.value = '__nieuw__'; newOpt.textContent = '+ Nieuwe leverancier toevoegen...';
+    flevSel.appendChild(newOpt);
+    flevSel.value = curSel;
+  }
+
+  // Bulk modal dropdown
+  var bulkQ = document.getElementById('bulk-quick-lev');
+  if (bulkQ) {
+    bulkQ.innerHTML = '<option value="">Kies leverancier...</option>';
+    levs.forEach(function(l){
+      var o = document.createElement('option'); o.value = l; o.textContent = l;
+      bulkQ.appendChild(o);
+    });
+  }
+
+  // Bulk rows dropdowns
+  document.querySelectorAll('.bulk-sel').forEach(function(sel){
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">Geen / onbekend</option>';
+    levs.forEach(function(l){
+      var o = document.createElement('option'); o.value = l; o.textContent = l;
+      sel.appendChild(o);
+    });
+    sel.value = cur;
+  });
+}
+
+function onLevChange(sel) {
+  var wrap = document.getElementById('lev-custom-wrap');
+  if (sel.value === '__nieuw__') {
+    wrap.style.display = 'block';
+    document.getElementById('flev-new').focus();
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function openManageLev() {
+  renderManageLev();
+  document.getElementById('manage-lev-modal').classList.add('open');
+}
+
+function renderManageLev() {
+  var levs = getLeveranciers();
+  var list = document.getElementById('lev-manage-list');
+  if (!levs.length) { list.innerHTML = '<div style="padding:1rem;color:var(--muted);font-size:13px">Geen leveranciers</div>'; return; }
+  list.innerHTML = levs.map(function(l){
+    return '<div class="lev-list-item"><span>'+l+'</span><button class="del-lev" onclick="delLev(\''+l.replace(/'/g,"\\'")+'\')" title="Verwijderen">&#128465;</button></div>';
+  }).join('');
+}
+
+function delLev(name) {
+  if (!confirm('Leverancier "'+name+'" verwijderen?')) return;
+  removeLeverancier(name);
+  renderManageLev();
+  fillLevDropdowns();
+  showToast('Leverancier verwijderd');
+}
+
+function addLevFromManage() {
+  var input = document.getElementById('new-lev-input');
+  var name = input.value.trim();
+  if (!name) return;
+  if (!addLeverancier(name)) { showToast('Bestaat al'); return; }
+  input.value = '';
+  renderManageLev();
+  fillLevDropdowns();
+  showToast('Leverancier toegevoegd: ' + name);
+}
+
+// ===== BULK LEVERANCIER =====
+function openBulkLev() {
+  fillLevDropdowns();
+  var list = document.getElementById('bulk-lev-list');
+  var html = '';
+  cars.forEach(function(c){
+    html += '<div class="bulk-row" data-id="'+encodeURIComponent(c.id)+'">' +
+      '<div class="bulk-info"><strong>'+(c.kenteken||c.vin||'Geen kenteken')+'</strong>' +
+      '<span>'+(c.merk||'')+' '+(c.type||'')+' &nbsp;|&nbsp; '+(c.status||'')+(c.opmerkingen?' &nbsp;|&nbsp; <em>'+c.opmerkingen.slice(0,40)+'</em>':'')+'</span></div>' +
+      '<select class="bulk-sel" data-id="'+encodeURIComponent(c.id)+'">' +
+        '<option value="">Geen / onbekend</option>' +
+      '</select>' +
+    '</div>';
+  });
+  list.innerHTML = html || '<div style="padding:1rem;color:var(--muted);font-size:13px">Geen auto\'s gevonden</div>';
+  fillLevDropdowns();
+  // Set current values
+  cars.forEach(function(c){
+    var sel = list.querySelector('select[data-id="'+encodeURIComponent(c.id)+'"]');
+    if (sel && c.leverancier) sel.value = c.leverancier;
+  });
+  document.getElementById('bulk-lev-modal').classList.add('open');
+}
+
+function bulkFillEmpty() {
+  var val = document.getElementById('bulk-quick-lev').value;
+  if (!val) return;
+  document.querySelectorAll('#bulk-lev-list .bulk-sel').forEach(function(sel){
+    if (!sel.value) sel.value = val;
+  });
+}
+
+function saveBulkLev() {
+  var sels = document.querySelectorAll('#bulk-lev-list .bulk-sel');
+  var updates = [];
+  sels.forEach(function(sel){
+    var id = decodeURIComponent(sel.dataset.id);
+    var lev = sel.value;
+    updates.push({id: id, leverancier: lev || null});
+  });
+  var done = 0;
+  updates.forEach(function(u){
+    apiFetch('PATCH','autos?id=eq.'+u.id,{leverancier: u.leverancier}).then(function(){
+      for(var i=0;i<cars.length;i++){if(cars[i].id===u.id){cars[i].leverancier=u.leverancier;break;}}
+      done++;
+      if(done===updates.length){showToast('Leveranciers opgeslagen');cm('bulk-lev-modal');fillLevDropdowns();render();}
+    });
+  });
+  if(!updates.length){cm('bulk-lev-modal');}
+}
+
+// ===== GRAFIEK =====
+var CHART_COLORS = ['#E8620A','#1E8B47','#2B55C9','#8B1A8B','#C62828','#0A8B8B','#8B6A0A','#4A4A4A'];
+
+function openChart() {
+  renderChart();
+  document.getElementById('chart-modal').classList.add('open');
+}
+
+function setChartTab(tab, btn) {
+  chartTab = tab;
+  document.querySelectorAll('.chart-tab').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderChart();
+}
+
+function renderChart() {
+  // Build data per leverancier — alleen auto's met resultaat EN leverancier
+  var data = {};
+  cars.forEach(function(c){
+    if (!c.leverancier) return;
+    var r = parseFloat(c.resultaat);
+    if (isNaN(r)) return;
+    if (!data[c.leverancier]) data[c.leverancier] = {total:0, count:0, verkocht:0};
+    data[c.leverancier].total += r;
+    data[c.leverancier].count++;
+    if(c.status === 'verkocht') data[c.leverancier].verkocht++;
+  });
+
+  var entries = Object.keys(data).map(function(k){
+    return {name:k, total:data[k].total, count:data[k].count, avg: data[k].total/data[k].count, verkocht:data[k].verkocht};
+  });
+
+  // Sort by current tab
+  entries.sort(function(a,b){
+    if(chartTab==='totaal') return b.total - a.total;
+    if(chartTab==='gemiddeld') return b.avg - a.avg;
+    return b.count - a.count;
+  });
+
+  // Summary cards
+  var totResult = entries.reduce(function(s,e){return s+e.total;},0);
+  var totAutos = entries.reduce(function(s,e){return s+e.count;},0);
+  var levCount = entries.length;
+  document.getElementById('chart-summary').innerHTML =
+    '<div class="cs-card"><div class="val '+(totResult>=0?'rp':'rn')+'">'+(totResult>=0?'+':'')+'€'+Math.round(totResult).toLocaleString('nl-NL')+'</div><div class="lbl">Totaal resultaat</div></div>'+
+    '<div class="cs-card"><div class="val">'+totAutos+'</div><div class="lbl">Auto\'s met resultaat</div></div>'+
+    '<div class="cs-card"><div class="val">'+levCount+'</div><div class="lbl">Leveranciers actief</div></div>';
+
+  if (!entries.length) {
+    document.getElementById('chart-wrap').innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:2rem">Nog geen data — vul leverancier + resultaat in bij verkochte auto\'s.</p>';
+    return;
+  }
+
+  // Max value for bar scaling
+  var vals = entries.map(function(e){
+    if(chartTab==='totaal') return Math.abs(e.total);
+    if(chartTab==='gemiddeld') return Math.abs(e.avg);
+    return e.count;
+  });
+  var maxVal = Math.max.apply(null, vals) || 1;
+
+  var html = '';
+  entries.forEach(function(e, idx){
+    var val, valStr, metaStr;
+    if(chartTab==='totaal'){
+      val = e.total; valStr = (val>=0?'+':'')+'€'+Math.round(val).toLocaleString('nl-NL'); metaStr = e.count+' auto\'s';
+    } else if(chartTab==='gemiddeld'){
+      val = e.avg; valStr = (val>=0?'+':'')+'€'+Math.round(val).toLocaleString('nl-NL'); metaStr = 'gem. per auto';
+    } else {
+      val = e.count; valStr = val+' auto\'s'; metaStr = 'totaal';
+    }
+    var pct = Math.max(4, Math.abs(val)/maxVal*100);
+    var isPos = val >= 0;
+    var color = CHART_COLORS[idx % CHART_COLORS.length];
+    html += '<div class="chart-bar-row">'+
+      '<div class="chart-label" title="'+e.name+'">'+e.name+'</div>'+
+      '<div class="chart-bar-bg">'+
+        '<div class="chart-bar-fill '+(isPos?'pos':'neg')+'" style="width:'+pct+'%;background:'+(isPos?'linear-gradient(90deg,'+color+','+color+'99)':'linear-gradient(90deg,#C62828,#e84040)')+'">'+
+          '<span class="chart-bar-val">'+valStr+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="chart-meta">'+metaStr+'</div>'+
+    '</div>';
+  });
+  document.getElementById('chart-wrap').innerHTML = html;
+}
+
+// ===== CORE FUNCTIONS =====
 function apiFetch(method, path, body) {
   var opts = { method: method, headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': method === 'POST' ? 'return=representation' : '' } };
   if (body) opts.body = JSON.stringify(body);
@@ -479,6 +756,7 @@ function load() {
   apiFetch('GET', 'autos?order=created_at.desc&select=*').then(function(data) {
     cars = Array.isArray(data) ? data : [];
     showLoading(false);
+    fillLevDropdowns();
     render();
     updateStats();
   }).catch(function() { showLoading(false); showToast('Fout bij laden'); });
@@ -573,10 +851,11 @@ function render() {
   var q = (document.getElementById('search').value||'').toLowerCase();
   var sf = document.getElementById('fs').value;
   var mf = (document.getElementById('fm').value||'').toLowerCase();
+  var lf = document.getElementById('flev').value;
   var sortVal = document.getElementById('sort').value;
   var list = cars.filter(function(c){
-    var h = [c.kenteken,c.vin,c.merk,c.type,c.motor,c.opmerkingen].join(' ').toLowerCase();
-    return (!q||h.indexOf(q)>-1) && (!sf||c.status===sf) && (!mf||(c.merk||'').toLowerCase().indexOf(mf)>-1);
+    var h = [c.kenteken,c.vin,c.merk,c.type,c.motor,c.opmerkingen,c.leverancier].join(' ').toLowerCase();
+    return (!q||h.indexOf(q)>-1) && (!sf||c.status===sf) && (!mf||(c.merk||'').toLowerCase().indexOf(mf)>-1) && (!lf||(c.leverancier||'')=== lf);
   });
   list.sort(function(a,b){
     if (sortVal==='datum_desc') return toSortDate(b.datum).localeCompare(toSortDate(a.datum));
@@ -590,7 +869,7 @@ function render() {
   document.getElementById('count').textContent = list.length + (list.length!==1?" auto's":" auto");
   var tb = document.getElementById('tbody');
   if (!list.length) {
-    tb.innerHTML = '<tr class="erow"><td colspan="13">'+(cars.length?'Geen resultaten voor deze filter.':"Nog geen auto's ingevoerd.")+'</td></tr>';
+    tb.innerHTML = '<tr class="erow"><td colspan="14">'+(cars.length?'Geen resultaten voor deze filter.':"Nog geen auto's ingevoerd.")+'</td></tr>';
     updateStats(); return;
   }
   var rows = [];
@@ -598,7 +877,8 @@ function render() {
     var c = list[ri];
     var eid = encodeURIComponent(c.id);
     var idcell = c.kenteken ? '<span class="mono" style="font-weight:600">'+c.kenteken+'</span>'+(c.vin?'<br><span style="font-size:11px;color:var(--hint)">'+c.vin+'</span>':'') : '<span style="font-size:11px;color:var(--muted)">VIN: '+(c.vin||'-')+'</span>';
-    var opm = c.opmerkingen ? '<span title="'+c.opmerkingen.replace(/"/g,'&quot;')+'" style="cursor:help;border-bottom:1px dotted var(--border2);color:var(--muted)">'+(c.opmerkingen.length>30?c.opmerkingen.slice(0,30)+'...':c.opmerkingen)+'</span>' : '<span class="dm">-</span>';
+    var opm = c.opmerkingen ? '<span title="'+c.opmerkingen.replace(/"/g,'&quot;')+'" style="cursor:help;border-bottom:1px dotted var(--border2);color:var(--muted)">'+(c.opmerkingen.length>25?c.opmerkingen.slice(0,25)+'...':c.opmerkingen)+'</span>' : '<span class="dm">-</span>';
+    var levCell = c.leverancier ? '<span class="lev-badge">'+c.leverancier+'</span>' : '<span class="dm">-</span>';
     rows.push('<tr onclick="toggleRow(event,this)">'+
       '<td data-label="Kenteken" class="mob-always">'+idcell+'</td>'+
       '<td data-label="Merk" style="font-weight:500">'+(c.merk||'<span class="dm">-</span>')+'</td>'+
@@ -611,14 +891,13 @@ function render() {
       '<td data-label="Verkoop" class="tr mono">'+fe(c.verkoop)+'</td>'+
       '<td data-label="Resultaat" class="tr">'+rc(c)+'</td>'+
       '<td data-label="Status" class="mob-always">'+sb(c.status, eid)+'</td>'+
-      '<td data-label="Opmerkingen" style="max-width:160px">'+opm+'</td>'+
+      '<td data-label="Leverancier">'+levCell+'</td>'+
+      '<td data-label="Opmerkingen" style="max-width:140px">'+opm+'</td>'+
       '<td><div class="acell">'+
-        '<button class="ib" title="Documenten" data-id="'+eid+'" data-label="'+(c.kenteken||c.vin||'Auto')+'" onclick="openDocs(this.dataset.id,this.dataset.label)" style="font-size:13px;color:#5B35C9;padding:4px 6px">&#128206;</button>'+
         '<button class="ib" title="Publiceer naar Autotelex" data-id="'+eid+'" onclick="publishToAutotelex(this.dataset.id)" style="font-size:10px;font-weight:700;color:#1a6b1a;padding:4px 6px;background:#edfaf1;border-radius:6px">ADS</button>'+
         '<button class="ib" title="Bekijk op JPcars" data-kenteken="'+(c.kenteken||'')+'" onclick="openJP(this.dataset.kenteken)" style="font-size:11px;font-weight:600;color:#E8620A;padding:4px 7px">JP</button>'+
-              '<button class="ib" title="Bewerken" data-id="'+eid+'" onclick="editCar(this.dataset.id)">&#9998;</button>'+
-'<button class="ib del" title="Verwijderen" data-id="'+eid+'" onclick="delCar(this.dataset.id)">&#128465;</button>'+
-        
+        '<button class="ib" title="Bewerken" data-id="'+eid+'" onclick="editCar(this.dataset.id)">&#9998;</button>'+
+        '<button class="ib del" title="Verwijderen" data-id="'+eid+'" onclick="delCar(this.dataset.id)">&#128465;</button>'+
       '</div></td>'+
     '</tr>');
   }
@@ -652,6 +931,10 @@ function openAdd() {
   document.getElementById('fmk').value='';
   document.getElementById('fd').value=new Date().toISOString().split('T')[0];
   document.getElementById('fst').value='bestelling';
+  document.getElementById('flev-sel').value='';
+  document.getElementById('lev-custom-wrap').style.display='none';
+  document.getElementById('flev-new').value='';
+  fillLevDropdowns();
   document.getElementById('em').classList.add('open');
   setTimeout(function(){document.getElementById('fk').focus();},50);
 }
@@ -683,6 +966,10 @@ function editCar(eid) {
   document.getElementById('fst').value=c.status||'bestelling';
   document.getElementById('fbtw').value=c.btw_marge||'';
   document.getElementById('fo').value=c.opmerkingen||'';
+  fillLevDropdowns();
+  document.getElementById('flev-sel').value=c.leverancier||'';
+  document.getElementById('lev-custom-wrap').style.display='none';
+  document.getElementById('flev-new').value='';
   document.getElementById('em').classList.add('open');
 }
 
@@ -690,6 +977,21 @@ function save() {
   var v=document.getElementById('fd').value;
   var datumSave=null;
   if(v){var p=v.split('-');datumSave=(p.length===3&&p[0].length===4)?p[2]+'-'+p[1]+'-'+p[0]:v;}
+
+  // Leverancier: nieuw of bestaande
+  var levSel = document.getElementById('flev-sel').value;
+  var levNew = document.getElementById('flev-new').value.trim();
+  var levFinal = null;
+  if (levSel === '__nieuw__') {
+    if (levNew) {
+      addLeverancier(levNew);
+      levFinal = levNew;
+      fillLevDropdowns();
+    }
+  } else if (levSel) {
+    levFinal = levSel;
+  }
+
   var d={
     kenteken:document.getElementById('fk').value.trim(),
     vin:document.getElementById('fv').value.trim(),
@@ -704,6 +1006,7 @@ function save() {
     resultaat:document.getElementById('fr').value.trim()||null,
     status:document.getElementById('fst').value,
     btw_marge:document.getElementById('fbtw').value,
+    leverancier:levFinal,
     opmerkingen:document.getElementById('fo').value.trim()
   };
   if(!d.kenteken&&!d.vin){alert('Vul minimaal een kenteken of VIN in.');return;}
@@ -725,10 +1028,16 @@ function delCar(eid) {
 }
 
 function cm(id){document.getElementById(id).classList.remove('open');}
-document.addEventListener('click',function(e){if(e.target===document.getElementById('em'))cm('em');if(e.target===document.getElementById('im'))cm('im');if(e.target===document.getElementById('dm'))cm('dm');});
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){cm('em');cm('im');cm('dm');}});
+document.addEventListener('click',function(e){
+  ['em','im','bulk-lev-modal','manage-lev-modal','chart-modal'].forEach(function(id){
+    if(e.target===document.getElementById(id))cm(id);
+  });
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){['em','im','bulk-lev-modal','manage-lev-modal','chart-modal'].forEach(cm);}
+});
 
-var CMAP={'kenteken':'kenteken','merk':'merk','type':'type','motor':'motor','bouwjaar':'bj','km stand':'km','kmstand':'km','km-stand':'km','inkoop datum':'datum','inkoopdatum':'datum','inkoopprijs':'inkoop','verkoopprijs':'verkoop','status':'status','opmerking':'opmerkingen','opmerkingen':'opmerkingen','resultaat':'resultaat','vin':'vin','chassisnummer':'vin'};
+var CMAP={'kenteken':'kenteken','merk':'merk','type':'type','motor':'motor','bouwjaar':'bj','km stand':'km','kmstand':'km','km-stand':'km','inkoop datum':'datum','inkoopdatum':'datum','inkoopprijs':'inkoop','verkoopprijs':'verkoop','status':'status','opmerking':'opmerkingen','opmerkingen':'opmerkingen','resultaat':'resultaat','vin':'vin','chassisnummer':'vin','leverancier':'leverancier'};
 
 function normSt(v){if(!v)return'bestelling';var s=v.toLowerCase().trim();if(s.indexOf('bestell')>-1)return'bestelling';if(s.indexOf('onderweg')>-1)return'onderweg';if(s.indexOf('binnen')>-1)return'binnen';if(s.indexOf('verkocht')>-1)return'verkocht';return'bestelling';}
 
@@ -827,8 +1136,8 @@ function doImport(){
 }
 
 function exportCSV(){
-  var cols=['kenteken','vin','merk','type','motor','bj','km','datum','inkoop','verkoop','resultaat','status','opmerkingen'];
-  var hdrs=['Kenteken','VIN','Merk','Type','Motor','Bouwjaar','Km stand','Inkoop datum','Inkoopprijs','Verkoopprijs','Resultaat','Status','Opmerking'];
+  var cols=['kenteken','vin','merk','type','motor','bj','km','datum','inkoop','verkoop','resultaat','status','leverancier','opmerkingen'];
+  var hdrs=['Kenteken','VIN','Merk','Type','Motor','Bouwjaar','Km stand','Inkoop datum','Inkoopprijs','Verkoopprijs','Resultaat','Status','Leverancier','Opmerking'];
   var rows=[hdrs.join(';')];
   cars.forEach(function(c){rows.push(cols.map(function(k){return'"'+(c[k]||'').toString().replace(/"/g,'""')+'"';}).join(';'));});
   var blob=new Blob(['\uFEFF'+rows.join('\r\n')],{type:'text/csv;charset=utf-8;'});
@@ -843,180 +1152,6 @@ function openJP(kenteken) {
   window.open('https://nl.jp.cars/taxatie?country_tab=nl', '_blank');
   showToast('JPcars geopend' + (kenteken ? ' - kenteken gekopieerd: ' + kenteken : ''));
 }
-
-// ===== DOCUMENT FUNCTIES =====
-
-var DOC_BUCKET = 'auto-docs';
-
-function storageHeaders() {
-  return {
-    'apikey': SUPA_KEY,
-    'Authorization': 'Bearer ' + SUPA_KEY
-  };
-}
-
-function openDocs(eid, label) {
-  docCarId = decodeURIComponent(eid);
-  docCarLabel = label || docCarId;
-  document.getElementById('dm-subtitle').textContent = docCarLabel + ' — documenten';
-  document.getElementById('doc-list').innerHTML = '';
-  document.getElementById('doc-empty').style.display = 'none';
-  document.getElementById('doc-loading').style.display = 'block';
-  document.getElementById('dm').classList.add('open');
-  loadDocs();
-}
-
-function loadDocs() {
-  fetch(SUPA_URL + '/storage/v1/object/list/' + DOC_BUCKET, {
-    method: 'POST',
-    headers: Object.assign({'Content-Type': 'application/json'}, storageHeaders()),
-    body: JSON.stringify({ prefix: docCarId + '/', limit: 100, offset: 0 })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(files) {
-    document.getElementById('doc-loading').style.display = 'none';
-    if (!Array.isArray(files) || files.length === 0) {
-      document.getElementById('doc-empty').style.display = 'block';
-      document.getElementById('doc-list').innerHTML = '';
-      return;
-    }
-    document.getElementById('doc-empty').style.display = 'none';
-    renderDocList(files);
-  })
-  .catch(function(e) {
-    document.getElementById('doc-loading').style.display = 'none';
-    document.getElementById('doc-empty').style.display = 'block';
-    console.error('Docs laden mislukt:', e);
-  });
-}
-
-function renderDocList(files) {
-  var html = '';
-  files.forEach(function(f) {
-    if (!f.name) return;
-    var ext = f.name.split('.').pop().toLowerCase();
-    var isPdf = ext === 'pdf';
-    var isImg = ['jpg','jpeg','png','heic','webp'].indexOf(ext) > -1;
-    var iconClass = isPdf ? 'doc-type-pdf' : (isImg ? 'doc-type-img' : 'doc-type-other');
-    var iconChar = isPdf ? '📄' : (isImg ? '🖼' : '📎');
-    var sizeStr = f.metadata && f.metadata.size ? formatBytes(f.metadata.size) : '';
-    var safeName = f.name.replace(/'/g, "\\'");
-    html += '<div class="doc-item">' +
-      '<div class="doc-item-left">' +
-        '<div class="doc-type-icon ' + iconClass + '">' + iconChar + '</div>' +
-        '<div>' +
-          '<div class="doc-name" title="' + f.name + '">' + f.name + '</div>' +
-          (sizeStr ? '<div class="doc-meta">' + sizeStr + '</div>' : '') +
-        '</div>' +
-      '</div>' +
-      '<div class="doc-item-actions">' +
-        '<button class="btn small" onclick="downloadDoc(\'' + safeName + '\')" title="Downloaden" style="color:var(--blue-mid);border-color:var(--blue-mid)">&#8595; Download</button>' +
-        '<button class="btn small del" onclick="deleteDoc(\'' + safeName + '\')" title="Verwijderen" style="color:var(--red-mid)">&#128465;</button>' +
-      '</div>' +
-    '</div>';
-  });
-  document.getElementById('doc-list').innerHTML = html;
-}
-
-function formatBytes(bytes) {
-  if (!bytes) return '';
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
-  return (bytes/(1024*1024)).toFixed(1) + ' MB';
-}
-
-function downloadDoc(filename) {
-  var path = docCarId + '/' + filename;
-  var url = SUPA_URL + '/storage/v1/object/' + DOC_BUCKET + '/' + path;
-  // Fetch with auth header and create blob download
-  fetch(url, { headers: storageHeaders() })
-  .then(function(r) {
-    if (!r.ok) throw new Error('Download mislukt');
-    return r.blob();
-  })
-  .then(function(blob) {
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(a.href);
-    showToast('Bestand gedownload: ' + filename);
-  })
-  .catch(function(e) {
-    showToast('Download mislukt — controleer Supabase bucket rechten');
-    console.error(e);
-  });
-}
-
-function deleteDoc(filename) {
-  if (!confirm('Weet je zeker dat je "' + filename + '" wilt verwijderen?')) return;
-  var path = docCarId + '/' + filename;
-  fetch(SUPA_URL + '/storage/v1/object/' + DOC_BUCKET, {
-    method: 'DELETE',
-    headers: Object.assign({'Content-Type': 'application/json'}, storageHeaders()),
-    body: JSON.stringify({ prefixes: [path] })
-  })
-  .then(function(r) {
-    showToast(filename + ' verwijderd');
-    loadDocs();
-  })
-  .catch(function(e) {
-    showToast('Verwijderen mislukt');
-    console.error(e);
-  });
-}
-
-function docHandleFiles(files) {
-  if (!files || !files.length) return;
-  var arr = Array.from(files);
-  var total = arr.length;
-  var done = 0;
-  arr.forEach(function(file) {
-    uploadDoc(file, function() {
-      done++;
-      if (done === total) {
-        showToast(total === 1 ? file.name + ' geupload' : total + ' bestanden geupload');
-        loadDocs();
-      }
-    });
-  });
-}
-
-function uploadDoc(file, callback) {
-  if (file.size > 20 * 1024 * 1024) {
-    alert(file.name + ' is te groot (max 20MB)');
-    return;
-  }
-  // Sanitize filename
-  var safeName = file.name.replace(/[^a-zA-Z0-9._\-() ]/g, '_');
-  var path = docCarId + '/' + Date.now() + '_' + safeName;
-  showToast('Uploaden: ' + file.name + '...');
-  fetch(SUPA_URL + '/storage/v1/object/' + DOC_BUCKET + '/' + path, {
-    method: 'POST',
-    headers: Object.assign({'Content-Type': file.type || 'application/octet-stream', 'x-upsert': 'true'}, storageHeaders()),
-    body: file
-  })
-  .then(function(r) {
-    if (!r.ok) {
-      return r.text().then(function(t) { throw new Error(t); });
-    }
-    if (callback) callback();
-  })
-  .catch(function(e) {
-    showToast('Upload mislukt: ' + file.name);
-    console.error('Upload error:', e);
-  });
-}
-
-function docDzo(e) { e.preventDefault(); document.getElementById('doc-dropzone').classList.add('drag'); }
-function docDzl() { document.getElementById('doc-dropzone').classList.remove('drag'); }
-function docDzd(e) {
-  e.preventDefault(); docDzl();
-  var files = e.dataTransfer.files;
-  if (files && files.length) docHandleFiles(files);
-}
-
-// ===== EINDE DOCUMENT FUNCTIES =====
 
 var PW_HASH = '5e4b1e3e8f2a9c6d7b0f3a2e1c4d5f6a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3';
 
@@ -1055,15 +1190,11 @@ function initAuth() {
 }
 
 var ADS_API = 'https://autotelex-proxy.michel-prins.workers.dev';
-var ADS_KEY = '';
 
 function adsApiFetch(method, path, body) {
   var opts = {
     method: method,
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    }
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
   };
   if (body) opts.body = JSON.stringify(body);
   return fetch(ADS_API + path, opts).then(function(r) {
@@ -1081,16 +1212,12 @@ function publishToAutotelex(eid) {
   var c = null;
   for (var i = 0; i < cars.length; i++) { if (cars[i].id === id) { c = cars[i]; break; } }
   if (!c) return;
-
   if (!c.kenteken) { alert('Vul eerst een kenteken in voordat je naar Autotelex publiceert.'); return; }
   if (!c.btw_marge) { alert('Vul eerst in of het een BTW of Marge auto is (bewerk de auto).'); return; }
   if (!confirm('Auto ' + c.kenteken + ' publiceren naar AutotelexADS?')) return;
-
   showToast('Bezig met publiceren naar Autotelex...');
-
   var expected = new Date();
   expected.setDate(expected.getDate() + 7);
-
   var createBody = {
     licensePlate: c.kenteken.replace(/-/g, '').replace(/ /g, ''),
     establishmentId: 8789,
@@ -1099,25 +1226,14 @@ function publishToAutotelex(eid) {
   };
   if (c.status !== 'binnen') createBody.expectedDate = expected.toISOString();
   if (c.km) createBody.mileage = parseInt(c.km);
-
   adsApiFetch('POST', '/api/v2/vehicle/create-by-licenseplate', createBody).then(function(data) {
-    console.log('AUTOTELEX RESPONSE:', JSON.stringify(data));
     var stockId = data.stockNumber || data.adsStockId || data.stockId || data.id;
     if (!stockId) { showToast('Fout: geen stockId - ' + JSON.stringify(data).slice(0,80)); throw new Error('Geen stockId'); }
-
     var promises = [];
-
-    if (c.verkoop) {
-      promises.push(adsApiFetch('PUT', '/api/v2/advertisement/' + stockId + '/price', { amount: parseFloat(c.verkoop), amountExVat: 0, priceType: "AskingPrice", countryCode: "NL" }));
-    }
-
+    if (c.verkoop) promises.push(adsApiFetch('PUT', '/api/v2/advertisement/' + stockId + '/price', { amount: parseFloat(c.verkoop), amountExVat: 0, priceType: "AskingPrice", countryCode: "NL" }));
     var isVat = c.btw_marge === 'btw' ? 'true' : 'false';
     promises.push(adsApiFetch('PATCH', '/api/v2/vehicle/' + stockId + '/vat-margin/' + isVat, null));
-
-    if (c.status === 'binnen') {
-      promises.push(adsApiFetch('PATCH', '/api/v2/stock/' + stockId + '/set-in-stock', null));
-    }
-
+    if (c.status === 'binnen') promises.push(adsApiFetch('PATCH', '/api/v2/stock/' + stockId + '/set-in-stock', null));
     return Promise.all(promises).then(function() {
       apiFetch('PATCH', 'autos?id=eq.' + id, {ads_stock_id: String(stockId)}).then(function(){
         for (var i=0; i<cars.length; i++) { if (cars[i].id === id) { cars[i].ads_stock_id = String(stockId); break; } }
@@ -1126,7 +1242,6 @@ function publishToAutotelex(eid) {
     });
   }).catch(function(e) {
     showToast('Fout: ' + (e.message || 'Kon niet publiceren'));
-    console.error('Autotelex API error:', e);
   });
 }
 
@@ -1134,151 +1249,8 @@ function toggleRow(evt, tr) {
   if (evt.target.closest('.ib') || evt.target.closest('.badge') || evt.target.closest('.acell')) return;
   tr.classList.toggle('expanded');
 }
-// ===== GRAFIEKEN =====
-var chartInstances = {};
-
-function toggleCharts() {
-  var toggle = document.getElementById('charts-toggle');
-  var wrap = document.getElementById('charts-wrap');
-  var isOpen = wrap.classList.toggle('open');
-  toggle.classList.toggle('open', isOpen);
-  if (isOpen) renderCharts();
-}
-
-function destroyChart(id) {
-  if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
-}
-
-function renderCharts() {
-  renderWeekChart();
-  renderMerkChart();
-  renderPrijzenChart();
-  renderResultaatChart();
-}
-
-function getWeekLabel(dateStr) {
-  if (!dateStr) return null;
-  var p = dateStr.toString().trim().split('-');
-  var d;
-  if (p[0].length === 4) d = new Date(p[0], p[1]-1, p[2]);
-  else if (p[2].length === 4) d = new Date(p[2], p[1]-1, p[0]);
-  else return null;
-  if (isNaN(d)) return null;
-  // Get Monday of that week
-  var day = d.getDay(), diff = (day===0?-6:1-day);
-  d.setDate(d.getDate()+diff);
-  return d.toISOString().slice(0,10);
-}
-
-function getMonthLabel(dateStr) {
-  if (!dateStr) return null;
-  var p = dateStr.toString().trim().split('-');
-  var y, m;
-  if (p[0].length === 4) { y=p[0]; m=p[1]; }
-  else if (p[2].length === 4) { y=p[2]; m=p[1]; }
-  else return null;
-  return y + '-' + (m.length===1?'0'+m:m);
-}
-
-function renderWeekChart() {
-  destroyChart('week');
-  var counts = {};
-  cars.forEach(function(c) {
-    var w = getWeekLabel(c.datum);
-    if (w) counts[w] = (counts[w]||0) + 1;
-  });
-  var labels = Object.keys(counts).sort();
-  var data = labels.map(function(l){ return counts[l]; });
-  var fmtLabels = labels.map(function(l){ var p=l.split('-'); return p[2]+'-'+p[1]; });
-
-  // Maak de canvas breed genoeg voor alle weken
-  var barWidth = 40;
-  var minWidth = Math.max(labels.length * barWidth, document.getElementById('chart-week-wrap').offsetWidth);
-  document.getElementById('chart-week').style.width = minWidth + 'px';
-  document.getElementById('chart-week-wrap').style.width = minWidth + 'px';
-
-  var ctx = document.getElementById('chart-week').getContext('2d');
-  chartInstances['week'] = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: fmtLabels, datasets: [{ label: "Auto's", data: data, backgroundColor: '#E8620A', borderRadius: 6, borderSkipped: false }] },
-    options: { responsive: false, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,.06)' } }, x: { ticks: { font: { size: 10 } }, grid: { display: false } } } }
-  });
-
-  // Scroll automatisch naar rechts (meest recente weken)
-  setTimeout(function(){
-    var wrap = document.getElementById('chart-week-wrap').parentElement;
-    wrap.scrollLeft = wrap.scrollWidth;
-  }, 100);
-}
-
-function renderMerkChart() {
-  destroyChart('merk');
-  var counts = {};
-  cars.forEach(function(c) {
-    var m = c.merk || 'Onbekend';
-    counts[m] = (counts[m]||0) + 1;
-  });
-  var sorted = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; }).slice(0,8);
-  var colors = ['#E8620A','#2B55C9','#1E8B47','#5B35C9','#C62828','#0891b2','#d97706','#64748b'];
-  var ctx = document.getElementById('chart-merk').getContext('2d');
-  chartInstances['merk'] = new Chart(ctx, {
-    type: 'doughnut',
-    data: { labels: sorted, datasets: [{ data: sorted.map(function(m){ return counts[m]; }), backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { font: { size: 11 }, boxWidth: 12, padding: 8 } } } }
-  });
-}
-
-function renderPrijzenChart() {
-  destroyChart('prijzen');
-  var merkData = {};
-  cars.forEach(function(c) {
-    var m = c.merk || 'Onbekend';
-    if (!merkData[m]) merkData[m] = { inkoop: [], verkoop: [] };
-    if (c.inkoop) merkData[m].inkoop.push(parseFloat(c.inkoop));
-    if (c.verkoop) merkData[m].verkoop.push(parseFloat(c.verkoop));
-  });
-  var avg = function(arr) { return arr.length ? Math.round(arr.reduce(function(a,b){return a+b;},0)/arr.length) : 0; };
-  var sorted = Object.keys(merkData).filter(function(m){ return merkData[m].inkoop.length > 0; })
-    .sort(function(a,b){ return merkData[b].inkoop.length - merkData[a].inkoop.length; }).slice(0,6);
-  var ctx = document.getElementById('chart-prijzen').getContext('2d');
-  chartInstances['prijzen'] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: sorted,
-      datasets: [
-        { label: 'Gem. inkoop', data: sorted.map(function(m){ return avg(merkData[m].inkoop); }), backgroundColor: '#EEF4FF', borderColor: '#2B55C9', borderWidth: 2, borderRadius: 4 },
-        { label: 'Gem. verkoop', data: sorted.map(function(m){ return avg(merkData[m].verkoop); }), backgroundColor: '#FFF3EC', borderColor: '#E8620A', borderWidth: 2, borderRadius: 4 }
-      ]
-    },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { size: 11 }, boxWidth: 12 } } }, scales: { y: { beginAtZero: false, ticks: { font: { size: 10 }, callback: function(v){ return 'EUR '+v.toLocaleString('nl-NL'); } }, grid: { color: 'rgba(0,0,0,.06)' } }, x: { ticks: { font: { size: 10 } }, grid: { display: false } } } }
-  });
-}
-
-function renderResultaatChart() {
-  destroyChart('resultaat');
-  var maanden = {};
-  cars.forEach(function(c) {
-    if (!c.resultaat) return;
-    var m = getMonthLabel(c.datum);
-    if (!m) return;
-    maanden[m] = (maanden[m]||0) + parseFloat(c.resultaat);
-  });
-  var labels = Object.keys(maanden).sort().slice(-12);
-  var data = labels.map(function(l){ return Math.round(maanden[l]); });
-  var fmtLabels = labels.map(function(l){ var p=l.split('-'); var mn=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']; return mn[parseInt(p[1])-1]+' '+p[0].slice(2); });
-  var bgColors = data.map(function(v){ return v>=0 ? '#EDFAF1' : '#FFF0F0'; });
-  var bdColors = data.map(function(v){ return v>=0 ? '#1E8B47' : '#C62828'; });
-  var ctx = document.getElementById('chart-resultaat').getContext('2d');
-  chartInstances['resultaat'] = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: fmtLabels, datasets: [{ label: 'Resultaat', data: data, backgroundColor: bgColors, borderColor: bdColors, borderWidth: 2, borderRadius: 6, borderSkipped: false }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { font: { size: 10 }, callback: function(v){ return 'EUR '+v.toLocaleString('nl-NL'); } }, grid: { color: 'rgba(0,0,0,.06)' } }, x: { ticks: { font: { size: 10 } }, grid: { display: false } } } }
-  });
-}
-// ===== EINDE GRAFIEKEN =====
 
 initAuth();
-
 </script>
 </body>
 </html>
