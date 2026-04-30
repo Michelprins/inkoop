@@ -1372,10 +1372,7 @@ function exportCSV(){
   showToast('CSV geexporteerd');
 }
 
-function lookupRDW(kenteken) {
-  if (!kenteken) return;
-  var k = kenteken.replace(/-/g,'').replace(/ /g,'').toUpperCase();
-  if (k.length < 4) return;
+
   function lookupRDW(kenteken) {
   if (!kenteken) return;
   var k = kenteken.replace(/-/g,'').replace(/ /g,'').toUpperCase();
