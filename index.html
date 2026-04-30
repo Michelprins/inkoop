@@ -323,6 +323,15 @@ tbody tr:hover td{background:#FFF6F1}
       <option value="">Alle leveranciers</option>
     </select>
     <div class="tsep"></div>
+    <select id="fbrandstof" onchange="render()">
+  <option value="">Alle brandstof</option>
+  <option value="Benzine">Benzine</option>
+  <option value="Diesel">Diesel</option>
+  <option value="Elektrisch">Elektrisch</option>
+  <option value="Plug-in hybride">Plug-in hybride</option>
+  <option value="Hybride">Hybride</option>
+  <option value="LPG">LPG</option>
+</select>
     <select id="sort" onchange="render()">
       <option value="datum_desc">Datum nieuwste eerst</option>
       <option value="datum_asc">Datum oudste eerst</option>
@@ -1076,10 +1085,12 @@ function render() {
   var sf = document.getElementById('fs').value;
   var mf = (document.getElementById('fm').value||'').toLowerCase();
   var lf = document.getElementById('flev').value;
+var brf = document.getElementById('fbrandstof').value;
   var sortVal = document.getElementById('sort').value;
   var list = cars.filter(function(c){
     var h = [c.kenteken,c.vin,c.merk,c.type,c.motor,c.opmerkingen,c.leverancier].join(' ').toLowerCase();
-    return (!q||h.indexOf(q)>-1) && (!sf||c.status===sf) && (!mf||(c.merk||'').toLowerCase().indexOf(mf)>-1) && (!lf||(c.leverancier||'')=== lf);
+    return (!q||h.indexOf(q)>-1) && (!sf||c.status===sf) && (!mf||(c.merk||'').toLowerCase().indexOf(mf)>-1) && (!lf||(c.leverancier||'')=== lf)
+&& (!brf||(c.brandstof||'')=== brf);
   });
   list.sort(function(a,b){
     if (sortVal==='datum_desc') return toSortDate(b.datum).localeCompare(toSortDate(a.datum));
@@ -1138,12 +1149,20 @@ function updateStats() {
   var hr=rs.length>0, totStr=hr?(tot>=0?'+':'')+'EUR '+tot.toLocaleString('nl-NL'):'-';
   var resCls=hr?(tot>=0?'s-gr':'s-am'):'';
   var resSub=hr?rs.length+(rs.length!==1?" auto's":" auto")+' met resultaat':'nog geen resultaten';
+  var ev=cars.filter(function(c){return c.brandstof==='Elektrisch';}).length;
+  var phev=cars.filter(function(c){return c.brandstof==='Plug-in hybride';}).length;
+  var benz=cars.filter(function(c){return c.brandstof==='Benzine';}).length;
+  var dies=cars.filter(function(c){return c.brandstof==='Diesel';}).length;
   document.getElementById('stats').innerHTML=
     '<div class="stat s-or"><div class="stat-lbl">Totaal ingekocht</div><div class="stat-val">'+t+'</div><div class="stat-sub">in administratie</div></div>'+
     '<div class="stat s-gr"><div class="stat-lbl">Voorraad</div><div class="stat-val">'+b+'</div><div class="stat-sub">binnen en beschikbaar</div></div>'+
     '<div class="stat s-am"><div class="stat-lbl">Onderweg / besteld</div><div class="stat-val">'+p+'</div><div class="stat-sub">verwacht</div></div>'+
     '<div class="stat s-pu"><div class="stat-lbl">Verkocht</div><div class="stat-val">'+v+'</div><div class="stat-sub">afgeleverd</div></div>'+
-    '<div class="stat '+resCls+'"><div class="stat-lbl">Totaal resultaat</div><div class="stat-val">'+totStr+'</div><div class="stat-sub">'+resSub+'</div></div>';
+    '<div class="stat '+resCls+'"><div class="stat-lbl">Totaal resultaat</div><div class="stat-val">'+totStr+'</div><div class="stat-sub">'+resSub+'</div></div>'+
+    '<div class="stat" style="--sc:#2B55C9"><div class="stat-lbl">&#9889; Elektrisch</div><div class="stat-val" style="color:#2B55C9">'+ev+'</div><div class="stat-sub">EV in systeem</div></div>'+
+    '<div class="stat" style="--sc:#1E8B47"><div class="stat-lbl">&#128267; Plug-in hybride</div><div class="stat-val" style="color:#1E8B47">'+phev+'</div><div class="stat-sub">PHEV in systeem</div></div>'+
+    '<div class="stat" style="--sc:#E8620A"><div class="stat-lbl">&#9981; Benzine</div><div class="stat-val">'+benz+'</div><div class="stat-sub">in systeem</div></div>'+
+    '<div class="stat" style="--sc:#666"><div class="stat-lbl">&#128701; Diesel</div><div class="stat-val">'+dies+'</div><div class="stat-sub">in systeem</div></div>';
 }
 
 function openAdd() {
