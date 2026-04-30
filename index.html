@@ -362,12 +362,23 @@ tbody tr:hover td{background:#FFF6F1}
       <button class="xbtn" onclick="cm('em')">&#10005;</button>
     </div>
     <div class="fgrid">
-      <div class="fg"><label>Kenteken</label><input id="fk" placeholder="bijv. AB-123-C"><span class="hint">Laat leeg als nog onbekend</span></div>
+      <div class="fg"><label>Kenteken</label><input id="fk" placeholder="bijv. AB-123-C" onblur="lookupRDW(this.value)"><span class="hint">Laat leeg als nog onbekend</span></div>
       <div class="fg"><label>Chassisnummer (VIN)</label><input id="fv" placeholder="WVWZZZ1KZ8W123456"></div>
       <div class="sdiv"><span>Voertuig</span></div>
       <div class="fg"><label>Merk</label><input id="fmk" placeholder="bijv. Volkswagen, Audi, BMW..."></div>
       <div class="fg"><label>Type / model</label><input id="ft" placeholder="bijv. Golf 8 GTI"></div>
       <div class="fg"><label>Motor / uitvoering</label><input id="fmo" placeholder="bijv. 2.0 TSI 245pk DSG"></div>
+      <div class="fg"><label>Brandstof</label>
+        <select id="fbr">
+          <option value="">Onbekend</option>
+          <option value="Benzine">Benzine</option>
+          <option value="Diesel">Diesel</option>
+          <option value="Elektrisch">Elektrisch</option>
+          <option value="Plug-in hybride">Plug-in hybride</option>
+          <option value="Hybride">Hybride</option>
+          <option value="LPG">LPG</option>
+        </select>
+    </div>
       <div class="fg"><label>Bouwjaar</label><input id="fb" type="number" placeholder="2022" min="2000" max="2035"></div>
       <div class="fg"><label>Kilometerstand</label><input id="fkm" type="number" placeholder="45000"></div>
       <div class="fg"><label>Inkoopdatum</label><input id="fd" type="date"></div>
@@ -1141,6 +1152,7 @@ function openAdd() {
   document.getElementById('esubtitle').textContent='Vul de gegevens in en sla op';
   ['fk','fv','ft','fmo','fb','fkm','fi','fvp','fr','fo'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('fbtw').value='';
+  document.getElementById('fbr').value='';
   document.getElementById('fmk').value='';
   document.getElementById('fd').value=new Date().toISOString().split('T')[0];
   document.getElementById('fst').value='bestelling';
@@ -1178,6 +1190,7 @@ function editCar(eid) {
   document.getElementById('fr').value=c.resultaat||'';
   document.getElementById('fst').value=c.status||'bestelling';
   document.getElementById('fbtw').value=c.btw_marge||'';
+  document.getElementById('fbr').value=c.brandstof||'';
   document.getElementById('fo').value=c.opmerkingen||'';
   fillLevDropdowns();
   document.getElementById('flev-sel').value=c.leverancier||'';
@@ -1220,7 +1233,8 @@ function save() {
     status:document.getElementById('fst').value,
     btw_marge:document.getElementById('fbtw').value,
     leverancier:levFinal,
-    opmerkingen:document.getElementById('fo').value.trim()
+    opmerkingen:document.getElementById('fo').value.trim(),
+    brandstof:document.getElementById('fbr').value||null
   };
   if(!d.kenteken&&!d.vin){alert('Vul minimaal een kenteken of VIN in.');return;}
   cm('em');
@@ -1358,7 +1372,39 @@ function exportCSV(){
   showToast('CSV geexporteerd');
 }
 
-function openJP(kenteken) {
+function lookupRDW(kenteken) {
+  if (!kenteken) return;
+  var k = kenteken.replace(/-/g,'').replace(/ /g,'').toUpperCase();
+  if (k.length < 4) return;
+  fetch('https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken=' + k)
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (!data || !data.length) { showToast('Kenteken niet gevonden in RDW'); return; }
+      var v = data[0];
+      if (v.merk && !document.getElementById('fmk').value)
+        document.getElementById('fmk').value = v.merk.charAt(0).toUpperCase() + v.merk.slice(1).toLowerCase();
+      if (v.handelsbenaming && !document.getElementById('ft').value)
+        document.getElementById('ft').value = v.handelsbenaming;
+      if (v.datum_eerste_toelating && !document.getElementById('fb').value)
+        document.getElementById('fb').value = v.datum_eerste_toelating.slice(0,4);
+      if (v.voertuigidentificatienummer && !document.getElementById('fv').value)
+        document.getElementById('fv').value = v.voertuigidentificatienummer;
+      var brandstofMap = {
+        'Benzine':'Benzine','Diesel':'Diesel',
+        'Elektriciteit':'Elektrisch',
+        'Plug-in hybride benzine':'Plug-in hybride',
+        'Plug-in hybride diesel':'Plug-in hybride',
+        'Hybride (benzine)':'Hybride','LPG':'LPG'
+      };
+      if (v.brandstof_omschrijving) {
+        var mapped = brandstofMap[v.brandstof_omschrijving] || null;
+        if (mapped) document.getElementById('fbr').value = mapped;
+      }
+      showToast('RDW gegevens ingeladen ✓');
+    })
+    .catch(function(){ showToast('RDW ophalen mislukt'); });
+}
+  function openJP(kenteken) {
   if (kenteken) {
     try { navigator.clipboard.writeText(kenteken); } catch(e) {}
   }
