@@ -1376,11 +1376,17 @@ function lookupRDW(kenteken) {
   if (!kenteken) return;
   var k = kenteken.replace(/-/g,'').replace(/ /g,'').toUpperCase();
   if (k.length < 4) return;
-  fetch('https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken=' + k)
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-      if (!data || !data.length) { showToast('Kenteken niet gevonden in RDW'); return; }
-      var v = data[0];
+  function lookupRDW(kenteken) {
+  if (!kenteken) return;
+  var k = kenteken.replace(/-/g,'').replace(/ /g,'').toUpperCase();
+  if (k.length < 4) return;
+  var url1 = 'https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken=' + k;
+  var url2 = 'https://opendata.rdw.nl/resource/8ys7-d773.json?kenteken=' + k;
+  Promise.all([fetch(url1).then(function(r){return r.json();}), fetch(url2).then(function(r){return r.json();})])
+    .then(function(results) {
+      var v = (results[0]&&results[0].length) ? results[0][0] : {};
+      var b = (results[1]&&results[1].length) ? results[1][0] : {};
+      if (!Object.keys(v).length && !Object.keys(b).length) { showToast('Kenteken niet gevonden in RDW'); return; }
       if (v.merk && !document.getElementById('fmk').value)
         document.getElementById('fmk').value = v.merk.charAt(0).toUpperCase() + v.merk.slice(1).toLowerCase();
       if (v.handelsbenaming && !document.getElementById('ft').value)
@@ -1396,14 +1402,16 @@ function lookupRDW(kenteken) {
         'Plug-in hybride diesel':'Plug-in hybride',
         'Hybride (benzine)':'Hybride','LPG':'LPG'
       };
-      if (v.brandstof_omschrijving) {
-        var mapped = brandstofMap[v.brandstof_omschrijving] || null;
+      var bBrandstof = b.brandstof_omschrijving || v.brandstof_omschrijving;
+      if (bBrandstof) {
+        var mapped = brandstofMap[bBrandstof] || null;
         if (mapped) document.getElementById('fbr').value = mapped;
       }
       showToast('RDW gegevens ingeladen ✓');
     })
     .catch(function(){ showToast('RDW ophalen mislukt'); });
 }
+   
   function openJP(kenteken) {
   if (kenteken) {
     try { navigator.clipboard.writeText(kenteken); } catch(e) {}
