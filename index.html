@@ -297,7 +297,7 @@ tbody tr:hover td{background:#FFF6F1}
       <span class="ht">Inkoopdashboard</span>
     </div>
     <div class="ha">
-      <button class="hbtn" onclick="openImport()">&#8593; Importeer CSV</button>
+      <button class="hbtn" onclick="bulkRDW()">&#9889; Brandstof ophalen</button><button class="hbtn" onclick="openImport()">&#8593; Importeer CSV</button>
       <button class="hbtn" onclick="exportCSV()">&#8595; Export CSV</button>
       <button class="hbtn" onclick="openBulkLev()">&#9889; Bulk leverancier</button>
       <button class="hbtn primary" onclick="openAdd()">+ Auto toevoegen</button>
@@ -1392,7 +1392,38 @@ function exportCSV(){
 }
 
 
-  function lookupRDW(kenteken) {
+  function bulkRDW() {
+  var todo = cars.filter(function(c){ return c.kenteken && !c.brandstof; });
+  if (!todo.length) { showToast('Alle auto\'s hebben al een brandstof'); return; }
+  if (!confirm(todo.length + ' auto\'s zonder brandstof ophalen uit RDW. Dit kan even duren.')) return;
+  showToast('Bezig met ophalen... (' + todo.length + ' auto\'s)');
+  var i = 0;
+  function next() {
+    if (i >= todo.length) { showToast('Klaar! Brandstof bijgewerkt.'); load(); return; }
+    var c = todo[i++];
+    var k = c.kenteken.replace(/-/g,'').replace(/ /g,'').toUpperCase();
+    fetch('https://opendata.rdw.nl/resource/8ys7-d773.json?kenteken=' + k)
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        var brandstofMap = {
+          'Benzine':'Benzine','Diesel':'Diesel',
+          'Elektriciteit':'Elektrisch',
+          'Plug-in hybride benzine':'Plug-in hybride',
+          'Plug-in hybride diesel':'Plug-in hybride',
+          'Hybride (benzine)':'Hybride','LPG':'LPG'
+        };
+        if (data && data.length && data[0].brandstof_omschrijving) {
+          var mapped = brandstofMap[data[0].brandstof_omschrijving] || null;
+          if (mapped) {
+            apiFetch('PATCH', 'autos?id=eq.' + c.id, {brandstof: mapped});
+          }
+        }
+        setTimeout(next, 200);
+      })
+      .catch(function(){ setTimeout(next, 200); });
+  }
+  next();
+}function lookupRDW(kenteken) {
   if (!kenteken) return;
   var k = kenteken.replace(/-/g,'').replace(/ /g,'').toUpperCase();
   if (k.length < 4) return;
