@@ -1130,6 +1130,7 @@ var brf = document.getElementById('fbrandstof').value;
       '<td data-label="Opmerkingen">'+opm+'</td>'+
       '<td><div class="acell">'+
         '<button class="ib" title="Publiceer naar Autotelex" data-id="'+eid+'" onclick="publishToAutotelex(this.dataset.id)" style="font-size:10px;font-weight:700;color:#1a6b1a;padding:4px 6px;background:#edfaf1;border-radius:6px">ADS</button>'+
+        '<button class="ib" title="Stuur naar Inname dashboard (verwacht)" data-id="'+eid+'" onclick="stuurNaarInname(this.dataset.id)" style="font-size:10px;font-weight:700;color:#7c3aed;padding:4px 6px;background:#f5f0ff;border-radius:6px">INN</button>'+
         '<button class="ib" title="Bekijk op JPcars" data-kenteken="'+(c.kenteken||'')+'" onclick="openJP(this.dataset.kenteken)" style="font-size:11px;font-weight:600;color:#E8620A;padding:4px 7px">JP</button>'+
         '<button class="ib" title="Bewerken" data-id="'+eid+'" onclick="editCar(this.dataset.id)">&#9998;</button>'+
         '<button class="ib del" title="Verwijderen" data-id="'+eid+'" onclick="delCar(this.dataset.id)">&#128465;</button>'+
@@ -1557,6 +1558,63 @@ function publishToAutotelex(eid) {
   }).catch(function(e) {
     showToast('Fout: ' + (e.message || 'Kon niet publiceren'));
   });
+}
+
+function stuurNaarInname(eid) {
+  var id = decodeURIComponent(eid);
+  var c = null;
+  for (var i = 0; i < cars.length; i++) { if (cars[i].id === id) { c = cars[i]; break; } }
+  if (!c) return;
+  if (!c.kenteken) { alert('Geen kenteken gevonden — vul eerst een kenteken in.'); return; }
+  var k = c.kenteken.replace(/-/g,'').replace(/ /g,'').toUpperCase();
+  var base = c.datum ? new Date(
+    c.datum.length === 10 && c.datum[2] === '-'
+      ? c.datum.split('-')[2]+'-'+c.datum.split('-')[1]+'-'+c.datum.split('-')[0]
+      : c.datum
+  ) : new Date();
+  if (isNaN(base.getTime())) base = new Date();
+  base.setDate(base.getDate() + 7);
+  var verwachtDatum = base.toISOString().split('T')[0];
+  fetch('https://wtstkaztqevmztlkkinf.supabase.co/rest/v1/inname_cars?select=data', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+  }).then(function(r){ return r.json(); }).then(function(rows) {
+    var bestaatAl = (rows || []).some(function(row) {
+      return row.data && (row.data.kenteken || '').replace(/-/g,'').toUpperCase() === k;
+    });
+    if (bestaatAl) { showToast('Al aanwezig in Inname dashboard: ' + c.kenteken); return; }
+    if (!confirm('Auto ' + c.kenteken + ' als "verwacht" toevoegen aan het Inname dashboard?')) return;
+    var innameData = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+      kenteken: c.kenteken,
+      merk: c.merk || '',
+      model: c.type || '',
+      verwacht: true,
+      verwachtDatum: verwachtDatum,
+      datumInname: '',
+      deadline: '',
+      info: (c.bj || '') + (c.km ? ' | ' + Number(c.km).toLocaleString('nl-NL') + ' km' : ''),
+      notes: '',
+      repairs: [],
+      checklist: [false, false, false, false, false],
+      createdAt: new Date().toISOString()
+    };
+    fetch('https://wtstkaztqevmztlkkinf.supabase.co/rest/v1/inname_cars', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ id: innameData.id, data: innameData })
+    }).then(function(r) {
+      if (r.ok || r.status === 201) {
+        showToast('✓ ' + c.kenteken + ' toegevoegd aan Inname dashboard (verwacht ' + verwachtDatum + ')');
+      } else {
+        showToast('Fout bij toevoegen aan Inname dashboard');
+      }
+    }).catch(function() { showToast('Verbindingsfout Inname dashboard'); });
+  }).catch(function() { showToast('Kon Inname dashboard niet bereiken'); });
 }
 
 function toggleRow(evt, tr) {
