@@ -283,6 +283,28 @@ tbody tr:hover td{background:#FFF6F1}
 .pw-box button{width:100%;background:#E8620A;color:#fff;border:none;border-radius:10px;padding:11px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
 .pw-box button:hover{background:#C4510A}
 .pw-error{color:#A81C1C;font-size:13px;margin-top:.75rem;display:none}
+
+/* ===== KLANTVRAGEN TAB ===== */
+.main-tabs{display:flex;gap:8px;margin-bottom:1.5rem}
+.main-tab{font-family:inherit;font-size:13px;font-weight:600;padding:9px 18px;border-radius:10px;border:1px solid var(--border2);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:8px}
+.main-tab.active{background:#111;color:#fff;border-color:#111}
+.kv-badge{background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px}
+.kv-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:1.25rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-lg);padding:.875rem 1.125rem;flex-wrap:wrap}
+.kv-toolbar select{font-family:inherit;font-size:13px;padding:7px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);height:36px;outline:none}
+.kv-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.375rem;margin-bottom:1rem}
+.kv-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:.75rem;flex-wrap:wrap}
+.kv-card-title{font-size:15px;font-weight:600}
+.kv-card-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.kv-crit{display:flex;flex-wrap:wrap;gap:6px;margin:.5rem 0 .875rem}
+.kv-tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--surface2);color:var(--text)}
+.kv-section{margin-top:.875rem;padding-top:.875rem;border-top:1px solid var(--border)}
+.kv-section-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.kv-match-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg);border-radius:var(--radius);margin-bottom:6px;font-size:12px;flex-wrap:wrap}
+.kv-match-row a{color:var(--accent2);font-weight:600;text-decoration:none}
+.kv-match-row a:hover{text-decoration:underline}
+.kv-empty{font-size:12px;color:var(--hint);font-style:italic;padding:6px 0}
+.kv-status-sel{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--surface);cursor:pointer}
+@media(max-width:600px){.main-tabs{flex-wrap:wrap}.kv-card-top{flex-direction:column}}
 </style>
 </head>
 <body>
@@ -306,6 +328,11 @@ tbody tr:hover td{background:#FFF6F1}
 </header>
 
 <div class="app">
+  <div class="main-tabs">
+    <button class="main-tab active" id="tab-btn-voorraad" onclick="switchMainTab('voorraad')">&#128663; Voorraad</button>
+    <button class="main-tab" id="tab-btn-klantvragen" onclick="switchMainTab('klantvragen')">&#128269; Klantvragen<span id="kv-open-badge" class="kv-badge" style="display:none;margin-left:4px"></span></button>
+  </div>
+  <div id="view-voorraad">
   <div class="stats" id="stats"></div>
   <div class="toolbar">
     <svg width="15" height="15" fill="none" stroke="var(--hint)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -360,6 +387,21 @@ tbody tr:hover td{background:#FFF6F1}
         <tbody id="tbody"></tbody>
       </table>
     </div>
+  </div>
+  </div>
+  <div id="view-klantvragen" style="display:none">
+    <div class="kv-toolbar">
+      <button class="btn primary" onclick="openKvAdd()">+ Klantvraag toevoegen</button>
+      <select id="kv-filter-status" onchange="renderKlantvragen()">
+        <option value="">Alle klantvragen</option>
+        <option value="open">Open</option>
+        <option value="gevonden">Match gevonden</option>
+        <option value="gesloten">Gesloten</option>
+      </select>
+      <span id="kv-count" style="font-size:12px;color:var(--hint);margin-left:auto"></span>
+    </div>
+    <div id="kv-inbox"></div>
+    <div id="kv-list"></div>
   </div>
 </div>
 
@@ -513,6 +555,70 @@ tbody tr:hover td{background:#FFF6F1}
         <button class="analytics-tab" onclick="setAnalyticsTab('inkoop',this)">Inkoop & verkoop</button>
       </div>
       <div id="analytics-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Klantvraag toevoegen/bewerken modal -->
+<div class="mbg" id="kv-em">
+  <div class="modal" style="max-width:640px">
+    <div class="mhdr">
+      <div><h2 id="kv-etitle">Klantvraag toevoegen</h2><p>Wat zoekt de klant of collega precies?</p></div>
+      <button class="xbtn" onclick="cm('kv-em')">&#10005;</button>
+    </div>
+    <div class="fgrid">
+      <div class="fg"><label>Klant / collega</label><input id="kv-naam" placeholder="bijv. Jansen, of collega Piet"></div>
+      <div class="fg"><label>Contact</label><input id="kv-contact" placeholder="telefoon of e-mail (optioneel)"></div>
+      <div class="sdiv"><span>Gezocht voertuig</span></div>
+      <div class="fg"><label>Merk</label><input id="kv-merk" placeholder="bijv. Volkswagen"></div>
+      <div class="fg"><label>Type / model</label><input id="kv-type" placeholder="bijv. Golf 8 GTI (optioneel)"></div>
+      <div class="fg"><label>Bouwjaar van</label><input id="kv-bjvan" type="number" placeholder="2019"></div>
+      <div class="fg"><label>Bouwjaar tot</label><input id="kv-bjtot" type="number" placeholder="2023"></div>
+      <div class="fg"><label>Max. km-stand</label><input id="kv-kmmax" type="number" placeholder="80000"></div>
+      <div class="fg"><label>Max. prijs (euro)</label><input id="kv-prijsmax" type="number" placeholder="25000"></div>
+      <div class="fg"><label>Brandstof</label>
+        <select id="kv-brandstof">
+          <option value="">Maakt niet uit</option>
+          <option value="Benzine">Benzine</option>
+          <option value="Diesel">Diesel</option>
+          <option value="Elektrisch">Elektrisch</option>
+          <option value="Plug-in hybride">Plug-in hybride</option>
+          <option value="Hybride">Hybride</option>
+          <option value="LPG">LPG</option>
+        </select>
+      </div>
+      <div class="fg"><label>Status</label>
+        <select id="kv-status"><option value="open">Open</option><option value="gevonden">Match gevonden</option><option value="gesloten">Gesloten</option></select>
+      </div>
+      <div class="fg full"><label>Opmerkingen</label><textarea id="kv-opm" placeholder="kleur, opties, uitvoering, bijzonderheden..."></textarea></div>
+    </div>
+    <div class="mftr">
+      <button class="btn" onclick="cm('kv-em')">Annuleren</button>
+      <button class="btn primary" onclick="saveKv()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Externe match handmatig toevoegen -->
+<div class="mbg" id="kv-match-em">
+  <div class="modal" style="max-width:480px">
+    <div class="mhdr">
+      <div><h2>Gevonden auto toevoegen</h2><p>Bijv. uit een AutoScout24/Mobile.de alertmail</p></div>
+      <button class="xbtn" onclick="cm('kv-match-em')">&#10005;</button>
+    </div>
+    <div class="fgrid">
+      <div class="fg"><label>Bron</label>
+        <select id="kvm-bron"><option value="autoscout24">AutoScout24</option><option value="mobile.de">Mobile.de</option><option value="handmatig">Anders</option></select>
+      </div>
+      <div class="fg"><label>Bouwjaar</label><input id="kvm-bj" type="number"></div>
+      <div class="fg full"><label>Titel / omschrijving</label><input id="kvm-titel" placeholder="bijv. VW Golf 8 GTI 245pk"></div>
+      <div class="fg"><label>Prijs (euro)</label><input id="kvm-prijs" type="number"></div>
+      <div class="fg"><label>KM-stand</label><input id="kvm-km" type="number"></div>
+      <div class="fg full"><label>Link naar advertentie</label><input id="kvm-url" placeholder="https://..."></div>
+    </div>
+    <div class="mftr">
+      <button class="btn" onclick="cm('kv-match-em')">Annuleren</button>
+      <button class="btn primary" onclick="saveKvMatch()">Opslaan</button>
     </div>
   </div>
 </div>
@@ -992,6 +1098,7 @@ function load() {
     fillLevDropdowns();
     render();
     updateStats();
+    loadKlantvragen();
   }).catch(function() { showLoading(false); showToast('Fout bij laden'); });
 }
 
@@ -1276,12 +1383,12 @@ function delCar(eid) {
 
 function cm(id){document.getElementById(id).classList.remove('open');}
 document.addEventListener('click',function(e){
-  ['em','im','bulk-lev-modal','manage-lev-modal','chart-modal'].forEach(function(id){
+  ['em','im','bulk-lev-modal','manage-lev-modal','chart-modal','kv-em','kv-match-em'].forEach(function(id){
     if(e.target===document.getElementById(id))cm(id);
   });
 });
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){['em','im','bulk-lev-modal','manage-lev-modal','chart-modal'].forEach(cm);}
+  if(e.key==='Escape'){['em','im','bulk-lev-modal','manage-lev-modal','chart-modal','kv-em','kv-match-em'].forEach(cm);}
 });
 
 var CMAP={'kenteken':'kenteken','merk':'merk','type':'type','motor':'motor','bouwjaar':'bj','km stand':'km','kmstand':'km','km-stand':'km','inkoop datum':'datum','inkoopdatum':'datum','inkoopprijs':'inkoop','verkoopprijs':'verkoop','status':'status','opmerking':'opmerkingen','opmerkingen':'opmerkingen','resultaat':'resultaat','vin':'vin','chassisnummer':'vin','leverancier':'leverancier'};
@@ -1620,6 +1727,275 @@ function stuurNaarInname(eid) {
 function toggleRow(evt, tr) {
   if (evt.target.closest('.ib') || evt.target.closest('.badge') || evt.target.closest('.acell')) return;
   tr.classList.toggle('expanded');
+}
+
+// ===== KLANTVRAGEN =====
+var klantvragen = [], kvMatches = [], editKvId = null, currentMainTab = 'voorraad', kvMatchTargetId = null;
+
+function switchMainTab(tab) {
+  currentMainTab = tab;
+  document.getElementById('tab-btn-voorraad').classList.toggle('active', tab==='voorraad');
+  document.getElementById('tab-btn-klantvragen').classList.toggle('active', tab==='klantvragen');
+  document.getElementById('view-voorraad').style.display = tab==='voorraad' ? '' : 'none';
+  document.getElementById('view-klantvragen').style.display = tab==='klantvragen' ? '' : 'none';
+  if (tab === 'klantvragen') renderKlantvragen();
+}
+
+function loadKlantvragen() {
+  Promise.all([
+    apiFetch('GET','klantvragen?order=created_at.desc&select=*'),
+    apiFetch('GET','klantvraag_matches?order=created_at.desc&select=*')
+  ]).then(function(res){
+    klantvragen = Array.isArray(res[0]) ? res[0] : [];
+    kvMatches = Array.isArray(res[1]) ? res[1] : [];
+    updateKvBadge();
+    if (currentMainTab === 'klantvragen') renderKlantvragen();
+  }).catch(function(){ /* tabellen nog niet aangemaakt in Supabase? stil negeren */ });
+}
+
+function updateKvBadge() {
+  var openCount = klantvragen.filter(function(k){ return k.status==='open'; }).length;
+  var b = document.getElementById('kv-open-badge');
+  if (openCount > 0) { b.textContent = openCount; b.style.display='inline-block'; }
+  else b.style.display='none';
+}
+
+function slugify(s) {
+  return (s||'').toString().toLowerCase()
+    .replace(/[äàâ]/g,'a').replace(/[ëèêé]/g,'e').replace(/[ïìî]/g,'i').replace(/[öòô]/g,'o').replace(/[üùû]/g,'u')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+}
+
+function findInternalMatches(kv) {
+  return cars.filter(function(c){
+    if (c.status === 'verkocht') return false;
+    if (kv.merk && (c.merk||'').toLowerCase().indexOf(kv.merk.toLowerCase()) === -1) return false;
+    if (kv.type && (c.type||'').toLowerCase().indexOf(kv.type.toLowerCase()) === -1) return false;
+    var bj = parseInt(c.bj);
+    if (kv.bouwjaar_van && bj && bj < kv.bouwjaar_van) return false;
+    if (kv.bouwjaar_tot && bj && bj > kv.bouwjaar_tot) return false;
+    var km = parseInt(c.km);
+    if (kv.km_max && km && km > kv.km_max) return false;
+    if (kv.brandstof && c.brandstof && c.brandstof !== kv.brandstof) return false;
+    if (kv.prijs_max) {
+      var prijsRef = nv(c.verkoop) || (nv(c.inkoop) ? nv(c.inkoop)*1.15 : null);
+      if (prijsRef && prijsRef > kv.prijs_max) return false;
+    }
+    return true;
+  });
+}
+
+function buildAutoScoutUrl(kv) {
+  if (!kv.merk) return 'https://www.autoscout24.nl/';
+  var url = 'https://www.autoscout24.nl/lst/' + slugify(kv.merk);
+  if (kv.type) url += '/' + slugify(kv.type);
+  var params = [];
+  if (kv.bouwjaar_van) params.push('fregfrom=' + kv.bouwjaar_van);
+  if (kv.bouwjaar_tot) params.push('fregto=' + kv.bouwjaar_tot);
+  if (kv.km_max) params.push('kmto=' + kv.km_max);
+  if (kv.prijs_max) params.push('priceto=' + kv.prijs_max);
+  if (params.length) url += '?' + params.join('&');
+  return url;
+}
+
+function openAutoScout(id) {
+  var kv = klantvragen.find(function(k){return k.id===id;});
+  if (!kv) return;
+  window.open(buildAutoScoutUrl(kv), '_blank');
+  showToast('Check het vinkje "zoeken in het buitenland" en sla op als zoekopdracht + e-mailalert');
+}
+
+function openMobileDe() {
+  window.open('https://www.mobile.de/', '_blank');
+  showToast('Zoek handmatig en sla op als Suchauftrag met e-mailalert (betrouwbare deeplink kon ik nog niet bouwen)');
+}
+
+function kvCriteriaTags(kv) {
+  var tags = [];
+  if (kv.merk) tags.push(kv.merk + (kv.type?' '+kv.type:''));
+  if (kv.bouwjaar_van || kv.bouwjaar_tot) tags.push('bj ' + (kv.bouwjaar_van||'...') + '-' + (kv.bouwjaar_tot||'...'));
+  if (kv.km_max) tags.push('max ' + Number(kv.km_max).toLocaleString('nl-NL') + ' km');
+  if (kv.prijs_max) tags.push('max EUR ' + Number(kv.prijs_max).toLocaleString('nl-NL'));
+  if (kv.brandstof) tags.push(kv.brandstof);
+  return tags.map(function(t){ return '<span class="kv-tag">'+t+'</span>'; }).join('');
+}
+
+function renderKvInbox() {
+  var unassigned = kvMatches.filter(function(m){ return !m.klantvraag_id; });
+  var el = document.getElementById('kv-inbox');
+  if (!unassigned.length) { el.innerHTML = ''; return; }
+  var openKvs = klantvragen.filter(function(k){ return k.status !== 'gesloten'; });
+  el.innerHTML = '<div class="kv-card" style="border-left:3px solid var(--accent)">' +
+    '<div class="kv-card-title" style="margin-bottom:.5rem">&#128233; Postvak — nog niet toegewezen ('+unassigned.length+')</div>' +
+    '<div class="kv-empty" style="margin-bottom:.5rem">Binnengekomen via de dagelijkse mailcheck. Wijs toe aan de juiste klantvraag.</div>' +
+    unassigned.map(function(m){
+      var opts = '<option value="">Kies klantvraag...</option>' + openKvs.map(function(k){
+        return '<option value="'+k.id+'">'+(k.klant_naam||'?')+' — '+(k.merk||'')+' '+(k.type||'')+'</option>';
+      }).join('');
+      return '<div class="kv-match-row">' +
+        '<span class="lev-badge">'+(m.bron||'')+'</span> ' +
+        (m.url ? '<a href="'+m.url+'" target="_blank">'+(m.titel||m.url)+'</a>' : '<strong>'+(m.titel||'-')+'</strong>') +
+        (m.bouwjaar?' &nbsp;|&nbsp; bj '+m.bouwjaar:'') + (m.km?' &nbsp;|&nbsp; '+fk(m.km):'') + (m.prijs?' &nbsp;|&nbsp; '+fe(m.prijs):'') +
+        ' <select class="bulk-sel" style="width:220px" onchange="if(this.value)assignKvMatch(\''+m.id+'\',this.value)"><option value="">Toewijzen aan...</option>' +
+        openKvs.map(function(k){ return '<option value="'+k.id+'">'+(k.klant_naam||'?')+' — '+(k.merk||'')+' '+(k.type||'')+'</option>'; }).join('') +
+        '</select>' +
+        ' <button class="ib del" title="Verwijderen" onclick="delKvMatch(\''+m.id+'\')">&#128465;</button>' +
+      '</div>';
+    }).join('') +
+  '</div>';
+}
+
+function assignKvMatch(matchId, kvId) {
+  apiFetch('PATCH','klantvraag_matches?id=eq.'+matchId,{klantvraag_id:kvId}).then(function(){ showToast('Toegewezen'); loadKlantvragen(); });
+}
+
+function renderKlantvragen() {
+  renderKvInbox();
+  var sf = document.getElementById('kv-filter-status').value;
+  var list = klantvragen.filter(function(k){ return !sf || k.status === sf; });
+  document.getElementById('kv-count').textContent = list.length + (list.length!==1?' klantvragen':' klantvraag');
+  var el = document.getElementById('kv-list');
+  if (!list.length) { el.innerHTML = '<div class="kv-card"><div class="kv-empty">Nog geen klantvragen ingevoerd.</div></div>'; return; }
+  el.innerHTML = list.map(function(kv){
+    var intMatches = findInternalMatches(kv);
+    var extMatches = kvMatches.filter(function(m){ return m.klantvraag_id === kv.id; });
+    var intHtml = intMatches.length
+      ? intMatches.map(function(c){
+          return '<div class="kv-match-row"><strong>'+(c.kenteken||c.vin||'?')+'</strong> ' +
+            (c.merk||'')+' '+(c.type||'')+' &nbsp;|&nbsp; '+(c.bj||'-')+' &nbsp;|&nbsp; '+fk(c.km)+' &nbsp;|&nbsp; ' +
+            '<span class="badge b-'+(c.status||'bestelling')+'">'+(c.status||'')+'</span></div>';
+        }).join('')
+      : '<div class="kv-empty">Geen match in huidige voorraad/bestelling.</div>';
+    var extHtml = extMatches.length
+      ? extMatches.map(function(m){
+          return '<div class="kv-match-row">' +
+            '<span class="lev-badge">'+(m.bron||'')+'</span> ' +
+            (m.url ? '<a href="'+m.url+'" target="_blank">'+(m.titel||m.url)+'</a>' : '<strong>'+(m.titel||'-')+'</strong>') +
+            (m.bouwjaar?' &nbsp;|&nbsp; bj '+m.bouwjaar:'') + (m.km?' &nbsp;|&nbsp; '+fk(m.km):'') + (m.prijs?' &nbsp;|&nbsp; '+fe(m.prijs):'') +
+            (m.gezien?' &nbsp;<span class="kv-tag" style="background:var(--green-bg);color:var(--green-txt)">gezien</span>':' &nbsp;<button class="btn small" onclick="markKvMatchGezien(\''+m.id+'\')">Markeer gezien</button>') +
+            ' <button class="ib del" title="Verwijderen" onclick="delKvMatch(\''+m.id+'\')">&#128465;</button>' +
+          '</div>';
+        }).join('')
+      : '<div class="kv-empty">Nog geen externe match geregistreerd.</div>';
+    return '<div class="kv-card">' +
+      '<div class="kv-card-top">' +
+        '<div><div class="kv-card-title">'+(kv.klant_naam||'Onbekend')+'</div>' +
+        '<div class="kv-card-sub">'+(kv.contact||'')+(kv.opmerkingen?' &mdash; '+kv.opmerkingen:'')+'</div></div>' +
+        '<div style="display:flex;gap:6px;align-items:center">' +
+          '<select class="kv-status-sel" onchange="updateKvStatus(\''+kv.id+'\',this.value)">' +
+            '<option value="open"'+(kv.status==='open'?' selected':'')+'>Open</option>' +
+            '<option value="gevonden"'+(kv.status==='gevonden'?' selected':'')+'>Match gevonden</option>' +
+            '<option value="gesloten"'+(kv.status==='gesloten'?' selected':'')+'>Gesloten</option>' +
+          '</select>' +
+          '<button class="ib" title="Bewerken" onclick="editKv(\''+kv.id+'\')">&#9998;</button>' +
+          '<button class="ib del" title="Verwijderen" onclick="delKv(\''+kv.id+'\')">&#128465;</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="kv-crit">'+kvCriteriaTags(kv)+'</div>' +
+      '<div class="kv-section"><div class="kv-section-lbl">Match in eigen voorraad/bestelling ('+intMatches.length+')</div>'+intHtml+'</div>' +
+      '<div class="kv-section"><div class="kv-section-lbl">Extern zoeken<span>' +
+        '<button class="btn small" onclick="openAutoScout(\''+kv.id+'\')">AutoScout24 &#8599;</button> ' +
+        '<button class="btn small" onclick="openMobileDe()">Mobile.de &#8599;</button> ' +
+        '<button class="btn small" onclick="openAddKvMatch(\''+kv.id+'\')">+ Gevonden auto</button>' +
+      '</span></div>'+extHtml+'</div>' +
+    '</div>';
+  }).join('');
+}
+
+function updateKvStatus(id, status) {
+  apiFetch('PATCH','klantvragen?id=eq.'+id,{status:status}).then(function(){
+    for (var i=0;i<klantvragen.length;i++){ if(klantvragen[i].id===id){klantvragen[i].status=status;break;} }
+    updateKvBadge(); renderKlantvragen();
+  });
+}
+
+function openKvAdd() {
+  editKvId = null;
+  document.getElementById('kv-etitle').textContent = 'Klantvraag toevoegen';
+  ['kv-naam','kv-contact','kv-merk','kv-type','kv-bjvan','kv-bjtot','kv-kmmax','kv-prijsmax','kv-opm'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('kv-brandstof').value='';
+  document.getElementById('kv-status').value='open';
+  document.getElementById('kv-em').classList.add('open');
+}
+
+function editKv(id) {
+  var kv = klantvragen.find(function(k){return k.id===id;});
+  if (!kv) return;
+  editKvId = id;
+  document.getElementById('kv-etitle').textContent = 'Klantvraag bewerken';
+  document.getElementById('kv-naam').value = kv.klant_naam||'';
+  document.getElementById('kv-contact').value = kv.contact||'';
+  document.getElementById('kv-merk').value = kv.merk||'';
+  document.getElementById('kv-type').value = kv.type||'';
+  document.getElementById('kv-bjvan').value = kv.bouwjaar_van||'';
+  document.getElementById('kv-bjtot').value = kv.bouwjaar_tot||'';
+  document.getElementById('kv-kmmax').value = kv.km_max||'';
+  document.getElementById('kv-prijsmax').value = kv.prijs_max||'';
+  document.getElementById('kv-brandstof').value = kv.brandstof||'';
+  document.getElementById('kv-status').value = kv.status||'open';
+  document.getElementById('kv-opm').value = kv.opmerkingen||'';
+  document.getElementById('kv-em').classList.add('open');
+}
+
+function saveKv() {
+  var d = {
+    klant_naam: document.getElementById('kv-naam').value.trim(),
+    contact: document.getElementById('kv-contact').value.trim(),
+    merk: document.getElementById('kv-merk').value.trim(),
+    type: document.getElementById('kv-type').value.trim(),
+    bouwjaar_van: parseInt(document.getElementById('kv-bjvan').value)||null,
+    bouwjaar_tot: parseInt(document.getElementById('kv-bjtot').value)||null,
+    km_max: parseInt(document.getElementById('kv-kmmax').value)||null,
+    prijs_max: parseFloat(document.getElementById('kv-prijsmax').value)||null,
+    brandstof: document.getElementById('kv-brandstof').value||null,
+    status: document.getElementById('kv-status').value,
+    opmerkingen: document.getElementById('kv-opm').value.trim()
+  };
+  if (!d.merk) { alert('Vul minimaal een merk in.'); return; }
+  cm('kv-em');
+  if (editKvId) {
+    apiFetch('PATCH','klantvragen?id=eq.'+editKvId,d).then(function(){ showToast('Klantvraag bijgewerkt'); loadKlantvragen(); }).catch(function(){ showToast('Fout bij opslaan — is het SQL-script al uitgevoerd in Supabase?'); });
+  } else {
+    d.id = mkid();
+    apiFetch('POST','klantvragen',d).then(function(){ showToast('Klantvraag toegevoegd'); loadKlantvragen(); }).catch(function(){ showToast('Fout bij opslaan — is het SQL-script al uitgevoerd in Supabase?'); });
+  }
+}
+
+function delKv(id) {
+  if (!confirm('Deze klantvraag verwijderen?')) return;
+  apiFetch('DELETE','klantvragen?id=eq.'+id,null).then(function(){ showToast('Klantvraag verwijderd'); loadKlantvragen(); });
+}
+
+function openAddKvMatch(kvId) {
+  kvMatchTargetId = kvId;
+  ['kvm-titel','kvm-prijs','kvm-km','kvm-bj','kvm-url'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('kvm-bron').value = 'autoscout24';
+  document.getElementById('kv-match-em').classList.add('open');
+}
+
+function saveKvMatch() {
+  var d = {
+    id: mkid(),
+    klantvraag_id: kvMatchTargetId,
+    bron: document.getElementById('kvm-bron').value,
+    titel: document.getElementById('kvm-titel').value.trim(),
+    prijs: parseFloat(document.getElementById('kvm-prijs').value)||null,
+    km: parseInt(document.getElementById('kvm-km').value)||null,
+    bouwjaar: parseInt(document.getElementById('kvm-bj').value)||null,
+    url: document.getElementById('kvm-url').value.trim(),
+    gezien: false
+  };
+  cm('kv-match-em');
+  apiFetch('POST','klantvraag_matches',d).then(function(){ showToast('Gevonden auto toegevoegd'); loadKlantvragen(); }).catch(function(){ showToast('Fout bij opslaan'); });
+}
+
+function markKvMatchGezien(id) {
+  apiFetch('PATCH','klantvraag_matches?id=eq.'+id,{gezien:true}).then(function(){ loadKlantvragen(); });
+}
+
+function delKvMatch(id) {
+  if (!confirm('Deze gevonden auto verwijderen?')) return;
+  apiFetch('DELETE','klantvraag_matches?id=eq.'+id,null).then(function(){ loadKlantvragen(); });
 }
 
 initAuth();
