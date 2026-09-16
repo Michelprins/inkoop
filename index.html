@@ -1785,10 +1785,23 @@ function findInternalMatches(kv) {
   });
 }
 
-function buildAutoScoutUrl(kv) {
-  if (!kv.merk) return 'https://www.autoscout24.nl/';
-  var url = 'https://www.autoscout24.nl/lst/' + slugify(kv.merk);
-  if (kv.type) url += '/' + slugify(kv.type);
+// Landspecifieke AutoScout24-domeinen — zo zie je alleen buitenlands aanbod
+// (de site van dat land toont uitsluitend aanbieders uít dat land, geen NL)
+var AUTOSCOUT_DOMEINEN = {
+  de: { host: 'https://www.autoscout24.de', label: 'Duitsland' },
+  be: { host: 'https://www.autoscout24.be/nl', label: 'België' },
+  lu: { host: 'https://www.autoscout24.lu', label: 'Luxemburg' },
+  at: { host: 'https://www.autoscout24.at', label: 'Oostenrijk' }
+};
+
+function buildAutoScoutUrl(kv, land) {
+  // Alleen het merk in de URL: modelnamen hebben op AutoScout24 soms een
+  // afwijkende schrijfwijze (bijv. "ID.7" staat als "id-7") die niet
+  // betrouwbaar te raden is vanuit vrije tekst. Merk-only geeft altijd een
+  // geldige pagina; het exacte model kies je zelf via het filter op de site.
+  var d = AUTOSCOUT_DOMEINEN[land] || AUTOSCOUT_DOMEINEN.de;
+  if (!kv.merk) return d.host + '/';
+  var url = d.host + '/lst/' + slugify(kv.merk);
   var params = [];
   if (kv.bouwjaar_van) params.push('fregfrom=' + kv.bouwjaar_van);
   if (kv.bouwjaar_tot) params.push('fregto=' + kv.bouwjaar_tot);
@@ -1798,11 +1811,12 @@ function buildAutoScoutUrl(kv) {
   return url;
 }
 
-function openAutoScout(id) {
+function openAutoScout(id, land) {
   var kv = klantvragen.find(function(k){return k.id===id;});
   if (!kv) return;
-  window.open(buildAutoScoutUrl(kv), '_blank');
-  showToast('Check het vinkje "zoeken in het buitenland" en sla op als zoekopdracht + e-mailalert');
+  window.open(buildAutoScoutUrl(kv, land), '_blank');
+  var modelHint = kv.type ? ' Kies daar zelf nog "' + kv.type + '" in het modelfilter (die naam kan ik niet altijd goed omzetten naar hun URL).' : '';
+  showToast('Bouwjaar/km/prijs staan al goed.' + modelHint + ' Sla op als zoekopdracht + e-mailalert naar je klantvraag-mailadres');
 }
 
 function openMobileDe() {
@@ -1893,8 +1907,11 @@ function renderKlantvragen() {
       '</div>' +
       '<div class="kv-crit">'+kvCriteriaTags(kv)+'</div>' +
       '<div class="kv-section"><div class="kv-section-lbl">Match in eigen voorraad/bestelling ('+intMatches.length+')</div>'+intHtml+'</div>' +
-      '<div class="kv-section"><div class="kv-section-lbl">Extern zoeken<span>' +
-        '<button class="btn small" onclick="openAutoScout(\''+kv.id+'\')">AutoScout24 &#8599;</button> ' +
+      '<div class="kv-section"><div class="kv-section-lbl">Extern zoeken (buitenland)<span>' +
+        '<button class="btn small" onclick="openAutoScout(\''+kv.id+'\',\'de\')">AutoScout24 DE &#8599;</button> ' +
+        '<button class="btn small" onclick="openAutoScout(\''+kv.id+'\',\'be\')">AutoScout24 BE &#8599;</button> ' +
+        '<button class="btn small" onclick="openAutoScout(\''+kv.id+'\',\'lu\')">AutoScout24 LU &#8599;</button> ' +
+        '<button class="btn small" onclick="openAutoScout(\''+kv.id+'\',\'at\')">AutoScout24 AT &#8599;</button> ' +
         '<button class="btn small" onclick="openMobileDe()">Mobile.de &#8599;</button> ' +
         '<button class="btn small" onclick="openAddKvMatch(\''+kv.id+'\')">+ Gevonden auto</button>' +
       '</span></div>'+extHtml+'</div>' +
