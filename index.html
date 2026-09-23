@@ -1942,6 +1942,7 @@ function testAdsKoppeling(){
   el.innerHTML='<p style="font-size:13px;color:var(--muted)">Bezig met ophalen...</p>';
   adsApiFetch('GET','/api/v2/stock/by-establishment/'+PC_EST+'?isAdvertised=true', null).catch(function(e){ return {fout:String(e)}; }).then(function(r){
     var list=pcAsList(r);
+    if(list){ var adv=cars.filter(function(x){ return x.ads_stock_id && x.status!=='verkocht' && list.some(function(it){ return pcItemMatches(it,x); }); })[0]; if(adv) c=adv; }
     var out='Stocklijst (isAdvertised=true): '+(list?list.length+' auto\'s':'geen lijst')+'\n'+JSON.stringify(list?list.slice(0,2):r,null,2).slice(0,2500);
     if(!c){ el.innerHTML='<pre style="font-size:11px;white-space:pre-wrap;background:var(--surface2);padding:10px;border-radius:8px">'+pcEsc(out)+'</pre>'; return; }
     return pcPubInfo(c).then(function(info){
