@@ -288,6 +288,17 @@ tbody tr:hover td{background:#FFF6F1}
 .main-tabs{display:flex;gap:8px;margin-bottom:1.5rem}
 .main-tab{font-family:inherit;font-size:13px;font-weight:600;padding:9px 18px;border-radius:10px;border:1px solid var(--border2);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:8px}
 .main-tab.active{background:#111;color:#fff;border-color:#111}
+.pc-chip{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;margin-top:4px;white-space:nowrap}
+.pc-online{background:var(--surface2);color:var(--muted)}
+.pc-due{background:var(--amber-bg);color:var(--amber-txt);border:1px solid var(--amber-mid)}
+.pc-late{background:var(--red-bg);color:var(--red-txt);border:1px solid var(--red-mid)}
+.pc-row{border:1px solid var(--border);border-radius:var(--radius);padding:.875rem 1rem;margin-bottom:10px;background:var(--surface)}
+.pc-row-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.pc-row h4{font-size:14px;font-weight:600}
+.pc-row .pc-meta{font-size:12px;color:var(--muted);margin-top:3px}
+.pc-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.pc-actions input[type=number]{width:120px;font-family:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--border2);border-radius:8px}
+.pc-hist{font-size:11px;color:var(--hint);margin-top:6px}
 .kv-badge{background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px}
 .kv-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:1.25rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-lg);padding:.875rem 1.125rem;flex-wrap:wrap}
 .kv-toolbar select{font-family:inherit;font-size:13px;padding:7px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);height:36px;outline:none}
@@ -322,6 +333,7 @@ tbody tr:hover td{background:#FFF6F1}
       <button class="hbtn" onclick="bulkRDW()">&#9889; Brandstof ophalen</button><button class="hbtn" onclick="openImport()">&#8593; Importeer CSV</button>
       <button class="hbtn" onclick="exportCSV()">&#8595; Export CSV</button>
       <button class="hbtn" onclick="openBulkLev()">&#9889; Bulk leverancier</button>
+      <button class="hbtn" onclick="openPrijscheck(true)">&#9200; Prijscheck<span id="pc-badge" class="kv-badge" style="display:none;margin-left:6px"></span></button>
       <button class="hbtn primary" onclick="openAdd()">+ Auto toevoegen</button>
     </div>
   </div>
@@ -366,6 +378,7 @@ tbody tr:hover td{background:#FFF6F1}
       <option value="status_asc">Status</option>
       <option value="inkoop_desc">Inkoop hoog-laag</option>
       <option value="inkoop_asc">Inkoop laag-hoog</option>
+      <option value="online_desc">Langst online</option>
     </select>
     <button class="btn" onclick="openChart()" style="gap:6px">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
@@ -456,6 +469,8 @@ tbody tr:hover td{background:#FFF6F1}
       <div class="fg"><label>BTW / Marge</label>
         <select id="fbtw"><option value="">Nog niet bekend</option><option value="btw">BTW auto</option><option value="marge">Marge auto</option></select>
       </div>
+      <div class="fg"><label>Online sinds (advertentie)</label><input id="fon" type="date"><span class="hint">Wordt automatisch uit Autotelex gehaald; hier corrigeren kan</span></div>
+      <div class="fg"><label>Laatste prijscheck</label><input id="fpc" type="date"><span class="hint">Volgende check = 14 dagen hierna</span></div>
       <div class="fg full"><label>Opmerkingen</label><textarea id="fo" placeholder="Bijzonderheden, schade, afspraken..."></textarea></div>
     </div>
     <div class="mftr">
@@ -619,6 +634,22 @@ tbody tr:hover td{background:#FFF6F1}
     <div class="mftr">
       <button class="btn" onclick="cm('kv-match-em')">Annuleren</button>
       <button class="btn primary" onclick="saveKvMatch()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Prijscheck modal -->
+<div class="mbg" id="pc-modal">
+  <div class="modal" style="max-width:720px">
+    <div class="mhdr">
+      <div><h2>&#9200; Prijscheck</h2><p id="pc-sub">Auto's die 21 dagen online staan, daarna elke 14 dagen</p></div>
+      <button class="xbtn" onclick="cm('pc-modal')">&#10005;</button>
+    </div>
+    <div id="pc-list" style="max-height:60vh;overflow-y:auto"></div>
+    <div class="mftr">
+      <button class="btn" onclick="testAdsKoppeling()" style="margin-right:auto">Test Autotelex-koppeling</button>
+      <button class="btn" onclick="syncOnlineDatums(true)">&#8635; Nu syncen</button>
+      <button class="btn primary" onclick="cm('pc-modal')">Later</button>
     </div>
   </div>
 </div>
@@ -1099,6 +1130,7 @@ function load() {
     render();
     updateStats();
     loadKlantvragen();
+    pcAfterLoad();
   }).catch(function() { showLoading(false); showToast('Fout bij laden'); });
 }
 
@@ -1206,6 +1238,7 @@ var brf = document.getElementById('fbrandstof').value;
     if (sortVal==='status_asc') return (a.status||'').localeCompare(b.status||'');
     if (sortVal==='inkoop_desc') return (parseFloat(b.inkoop)||0)-(parseFloat(a.inkoop)||0);
     if (sortVal==='inkoop_asc') return (parseFloat(a.inkoop)||0)-(parseFloat(b.inkoop)||0);
+    if (sortVal==='online_desc') return (pcDaysOnline(b)===null?-1:pcDaysOnline(b))-(pcDaysOnline(a)===null?-1:pcDaysOnline(a));
     return 0;
   });
   document.getElementById('count').textContent = list.length + (list.length!==1?" auto's":" auto");
@@ -1232,7 +1265,7 @@ var brf = document.getElementById('fbrandstof').value;
       '<td data-label="Inkoop" class="tr mono">'+fe(c.inkoop)+'</td>'+
       '<td data-label="Verkoop" class="tr mono">'+fe(c.verkoop)+'</td>'+
       '<td data-label="Resultaat" class="tr">'+rc(c)+'</td>'+
-      '<td data-label="Status" class="mob-always">'+sb(c.status, eid)+'</td>'+
+      '<td data-label="Status" class="mob-always">'+sb(c.status, eid)+pcChip(c)+'</td>'+
       '<td data-label="Leverancier">'+levCell+'</td>'+
       '<td data-label="Opmerkingen">'+opm+'</td>'+
       '<td><div class="acell">'+
@@ -1277,7 +1310,7 @@ function openAdd() {
   editId=null;
   document.getElementById('etitle').textContent='Auto toevoegen';
   document.getElementById('esubtitle').textContent='Vul de gegevens in en sla op';
-  ['fk','fv','ft','fmo','fb','fkm','fi','fvp','fr','fo'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  ['fk','fv','ft','fmo','fb','fkm','fi','fvp','fr','fo','fon','fpc'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('fbtw').value='';
   document.getElementById('fbr').value='';
   document.getElementById('fmk').value='';
@@ -1319,6 +1352,8 @@ function editCar(eid) {
   document.getElementById('fbtw').value=c.btw_marge||'';
   document.getElementById('fbr').value=c.brandstof||'';
   document.getElementById('fo').value=c.opmerkingen||'';
+  document.getElementById('fon').value=c.online_datum||'';
+  document.getElementById('fpc').value=c.prijscheck_laatst||'';
   fillLevDropdowns();
   document.getElementById('flev-sel').value=c.leverancier||'';
   document.getElementById('lev-custom-wrap').style.display='none';
@@ -1361,8 +1396,20 @@ function save() {
     btw_marge:document.getElementById('fbtw').value,
     leverancier:levFinal,
     opmerkingen:document.getElementById('fo').value.trim(),
-    brandstof:document.getElementById('fbr').value||null
+    brandstof:document.getElementById('fbr').value||null,
+    online_datum:document.getElementById('fon').value||null,
+    prijscheck_laatst:document.getElementById('fpc').value||null
   };
+  // Prijswijziging via bewerken telt als prijscheck (teller schuift 14 dagen door)
+  if(editId){
+    var oc=null; for(var oi=0;oi<cars.length;oi++){if(cars[oi].id===editId){oc=cars[oi];break;}}
+    if(oc && d.online_datum && String(oc.verkoop||'')!==String(d.verkoop||'') && oc.verkoop && d.verkoop){
+      d.prijscheck_laatst=pcToday();
+      var h=Array.isArray(oc.prijs_historie)?oc.prijs_historie.slice():[];
+      h.push({datum:pcToday(),oud:nv(oc.verkoop),nieuw:nv(d.verkoop),actie:'aangepast'});
+      d.prijs_historie=h;
+    }
+  }
   if(!d.kenteken&&!d.vin){alert('Vul minimaal een kenteken of VIN in.');return;}
   cm('em');
   if(editId){
@@ -1666,6 +1713,245 @@ function publishToAutotelex(eid) {
     showToast('Fout: ' + (e.message || 'Kon niet publiceren'));
   });
 }
+
+/* ===================== PRIJSCHECK-MODULE =====================
+   Teller start op de advertentiedatum (online_datum) uit Autotelex.
+   Eerste check na 21 dagen, daarna elke 14 dagen na de laatste check,
+   tot de status 'verkocht' is. */
+var PC_EERSTE = 21, PC_HERHAAL = 14, PC_EST = 8789;
+
+function pcEsc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];}); }
+function pcToday(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+function pcParse(iso){ if(!iso) return null; var m=String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/); if(!m) return null; return Date.UTC(+m[1],+m[2]-1,+m[3]); }
+function pcAdd(iso,days){ var t=pcParse(iso); if(t===null) return null; return new Date(t+days*86400000).toISOString().slice(0,10); }
+function pcDiff(a,b){ var ta=pcParse(a), tb=pcParse(b); if(ta===null||tb===null) return null; return Math.round((ta-tb)/86400000); }
+function pcFmt(iso){ var m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/); return m? m[3]+'-'+m[2]+'-'+m[1] : '-'; }
+
+function pcDaysOnline(c){ if(!c||!c.online_datum) return null; return pcDiff(pcToday(), c.online_datum); }
+function pcNextDue(c){
+  if(!c || c.status==='verkocht' || !c.online_datum) return null;
+  if(c.prijscheck_laatst && pcDiff(c.prijscheck_laatst, c.online_datum) >= 0) return pcAdd(c.prijscheck_laatst, PC_HERHAAL);
+  return pcAdd(c.online_datum, PC_EERSTE);
+}
+function pcIsDue(c){ var n=pcNextDue(c); return !!n && pcDiff(pcToday(), n) >= 0; }
+function pcDueList(){ return cars.filter(pcIsDue).sort(function(a,b){ return pcDiff(pcNextDue(a),pcNextDue(b)); }); }
+
+function pcChip(c){
+  if(!c || c.status==='verkocht') return '';
+  if(!c.online_datum) return c.ads_stock_id ? '<br><span class="pc-chip pc-online" title="Aangemaakt in Autotelex, nog niet online gezien">ADS &middot; nog niet online</span>' : '';
+  var dOn = pcDaysOnline(c), nd = pcNextDue(c), over = pcDiff(pcToday(), nd);
+  if(over >= 0){
+    var cls = over >= 7 ? 'pc-late' : 'pc-due';
+    return '<br><span class="pc-chip '+cls+'" style="cursor:pointer" onclick="event.stopPropagation();openPrijscheck(true)" title="Prijscheck '+(over>0?over+' dagen over tijd':'vandaag')+'">&#9200; Prijscheck &middot; '+dOn+'d online</span>';
+  }
+  return '<br><span class="pc-chip pc-online" title="Volgende prijscheck: '+pcFmt(nd)+'">Online '+dOn+'d &middot; check over '+(-over)+'d</span>';
+}
+
+function pcUpdateBadge(){
+  var b=document.getElementById('pc-badge'); if(!b) return;
+  var n=pcDueList().length;
+  b.textContent=n; b.style.display=n?'inline-block':'none';
+}
+
+/* ---- Autotelex-uitlezing (generiek, omdat het exacte veld per API-versie kan verschillen) ---- */
+var PC_DATE_KEY = /(publi|online|advert|live|start|first)/i;
+var PC_DATE_SKIP = /(expect|verwacht|end|till|until|modif|update|delet|expir|remov|stop|birth|registr|build|construct)/i;
+var PC_FLAG_KEY = /^(is)?(advertised|published|online|live|onlineadvertised)$/i;
+
+function pcWalk(obj, fn, depth, key){
+  if(depth > 5 || obj === null || obj === undefined) return;
+  if(Array.isArray(obj)){ for(var i=0;i<obj.length;i++) pcWalk(obj[i], fn, depth+1, key); return; }
+  if(typeof obj === 'object'){ for(var k in obj){ if(Object.prototype.hasOwnProperty.call(obj,k)) pcWalk(obj[k], fn, depth+1, k); } return; }
+  fn(key||'', obj);
+}
+function pcFindDate(obj){
+  var found=[];
+  pcWalk(obj, function(k,v){
+    if(!PC_DATE_KEY.test(k) || PC_DATE_SKIP.test(k)) return;
+    var iso=null;
+    if(typeof v==='string' && /^\d{4}-\d{2}-\d{2}/.test(v)) iso=v.slice(0,10);
+    else if(typeof v==='number' && v>1e12 && v<4e12) iso=new Date(v).toISOString().slice(0,10);
+    if(iso && iso > '2015-01-01' && pcDiff(pcToday(), iso) >= 0) found.push(iso);
+  }, 0);
+  found.sort();
+  return found.length ? found[0] : null;
+}
+function pcFlag(obj){
+  var res=null;
+  pcWalk(obj, function(k,v){ if(typeof v==='boolean' && PC_FLAG_KEY.test(k)){ if(v===true) res=true; else if(res===null) res=false; } }, 0);
+  return res;
+}
+function pcItemMatches(item, c){
+  var sid=String(c.ads_stock_id||''), kt=String(c.kenteken||'').replace(/[-\s]/g,'').toUpperCase(), hit=false;
+  pcWalk(item, function(k,v){
+    var s=String(v);
+    if(sid && s===sid) hit=true;
+    if(kt && kt.length>=6 && s.replace(/[-\s]/g,'').toUpperCase()===kt) hit=true;
+  }, 0);
+  return hit;
+}
+function pcAsList(r){
+  if(Array.isArray(r)) return r;
+  if(r && typeof r==='object'){ var ks=['items','data','results','vehicles','stock','value']; for(var i=0;i<ks.length;i++){ if(Array.isArray(r[ks[i]])) return r[ks[i]]; } }
+  return null;
+}
+function pcPubInfo(c){
+  return adsApiFetch('GET','/api/v2/advertisement/'+encodeURIComponent(c.ads_stock_id)+'/advertisement-publication-information', null)
+    .catch(function(){ return null; });
+}
+function pcSaveOnline(c, iso){
+  c.online_datum = iso;
+  return apiFetch('PATCH','autos?id=eq.'+c.id,{online_datum: iso, online_bron: 'autotelex'});
+}
+
+function syncOnlineDatums(force){
+  var last=0; try{ last=parseInt(localStorage.getItem('bourg_pc_sync')||'0',10)||0; }catch(e){}
+  if(!force && Date.now()-last < 3*3600*1000) return Promise.resolve(0);
+  var cand = cars.filter(function(c){ return c.ads_stock_id && c.status!=='verkocht' && !c.online_datum; });
+  if(!cand.length){ try{ localStorage.setItem('bourg_pc_sync', String(Date.now())); }catch(e){} if(force) showToast('Geen auto\'s die wachten op online-datum'); return Promise.resolve(0); }
+  if(force) showToast('Autotelex checken voor '+cand.length+' auto\'s...');
+  var nieuw=0;
+  return adsApiFetch('GET','/api/v2/stock/by-establishment/'+PC_EST+'?isAdvertised=true', null)
+    .catch(function(){ return null; })
+    .then(function(r){
+      var list = pcAsList(r);
+      var chain = Promise.resolve();
+      cand.forEach(function(c){
+        chain = chain.then(function(){
+          var item = list ? list.filter(function(it){ return pcItemMatches(it,c); })[0] : null;
+          if(list && !item) return; // niet in de lijst met geadverteerde auto's
+          if(item && pcFlag(item)===false) return;
+          var d = item ? pcFindDate(item) : null;
+          if(d){ nieuw++; return pcSaveOnline(c,d); }
+          return pcPubInfo(c).then(function(info){
+            var f = pcFlag(info), di = pcFindDate(info);
+            var online = item ? true : (f===true || (f===null && !!di));
+            if(!online) return;
+            nieuw++;
+            return pcSaveOnline(c, di || pcToday());
+          });
+        });
+      });
+      return chain;
+    })
+    .then(function(){
+      try{ localStorage.setItem('bourg_pc_sync', String(Date.now())); }catch(e){}
+      if(nieuw || force){ render(); pcUpdateBadge(); }
+      if(force) showToast(nieuw ? nieuw+' auto(\'s) online gezet' : 'Geen nieuwe online auto\'s gevonden');
+      if(document.getElementById('pc-modal').classList.contains('open')) pcRenderModal(true);
+      return nieuw;
+    });
+}
+
+function pcAfterLoad(){
+  pcUpdateBadge();
+  syncOnlineDatums(false).then(function(){
+    var shown=''; try{ shown=localStorage.getItem('bourg_pc_shown')||''; }catch(e){}
+    if(pcDueList().length && shown!==pcToday()) openPrijscheck(false);
+  });
+}
+
+/* ---- Pop-up ---- */
+function openPrijscheck(manual){
+  try{ localStorage.setItem('bourg_pc_shown', pcToday()); }catch(e){}
+  pcRenderModal(manual);
+  document.getElementById('pc-modal').classList.add('open');
+}
+function pcRenderModal(manual){
+  var due = pcDueList();
+  var el = document.getElementById('pc-list');
+  document.getElementById('pc-sub').textContent = due.length
+    ? due.length+(due.length===1?' auto is':' auto\'s zijn')+' toe aan een prijscheck'
+    : 'Alles is up-to-date';
+  var html = due.map(pcRowHtml).join('');
+  if(!due.length) html = '<p style="color:var(--muted);font-size:13px;padding:1rem 0">Geen auto\'s die nu een prijscheck nodig hebben. &#128077;</p>';
+  if(manual){
+    var soon = cars.filter(function(c){ var n=pcNextDue(c); if(!n) return false; var dd=pcDiff(n,pcToday()); return dd>0 && dd<=7; })
+      .sort(function(a,b){ return pcDiff(pcNextDue(a),pcNextDue(b)); });
+    if(soon.length){
+      html += '<div class="sdiv" style="margin:1rem 0 .5rem"><span>Binnen 7 dagen aan de beurt</span></div>' +
+        soon.map(function(c){ return '<div style="font-size:13px;padding:4px 0;color:var(--muted)"><b style="color:var(--text)">'+pcEsc(c.kenteken||c.vin)+'</b> '+pcEsc((c.merk||'')+' '+(c.type||''))+' &middot; check op '+pcFmt(pcNextDue(c))+'</div>'; }).join('');
+    }
+    var wacht = cars.filter(function(c){ return c.ads_stock_id && c.status!=='verkocht' && !c.online_datum; }).length;
+    if(wacht) html += '<p style="font-size:12px;color:var(--hint);margin-top:1rem">'+wacht+' auto(\'s) staan in Autotelex maar zijn nog niet online gezien. Sync draait automatisch; &quot;Nu syncen&quot; forceert het.</p>';
+  }
+  el.innerHTML = html;
+}
+function pcRowHtml(c){
+  var id = pcEsc(c.id), dOn = pcDaysOnline(c), over = pcDiff(pcToday(), pcNextDue(c));
+  var vk = nv(c.verkoop), ik = nv(c.inkoop);
+  var spread = (vk!==null && ik!==null) ? ' &middot; spread '+(vk-ik>=0?'+':'')+'EUR '+(vk-ik).toLocaleString('nl-NL') : '';
+  var hist = Array.isArray(c.prijs_historie) ? c.prijs_historie.slice(-3).reverse().map(function(h){
+    return pcFmt(h.datum)+': '+(h.actie==='aangepast' ? 'EUR '+Number(h.oud||0).toLocaleString('nl-NL')+' &rarr; EUR '+Number(h.nieuw||0).toLocaleString('nl-NL') : 'prijs gehandhaafd');
+  }).join(' &middot; ') : '';
+  var nr = Array.isArray(c.prijs_historie) ? c.prijs_historie.length+1 : 1;
+  return '<div class="pc-row" id="pc-row-'+id+'">'+
+    '<div class="pc-row-top"><div>'+
+      '<h4>'+pcEsc(c.kenteken||c.vin)+' &middot; '+pcEsc((c.merk||'')+' '+(c.type||''))+'</h4>'+
+      '<div class="pc-meta">'+pcEsc(c.motor||'')+(c.bj?' &middot; '+pcEsc(c.bj):'')+(c.km?' &middot; '+Number(c.km).toLocaleString('nl-NL')+' km':'')+'</div>'+
+      '<div class="pc-meta">Online sinds '+pcFmt(c.online_datum)+' (<b>'+dOn+' dagen</b>) &middot; check #'+nr+(over>0?' &middot; <span style="color:var(--red-txt)">'+over+'d over tijd</span>':'')+'</div>'+
+      '<div class="pc-meta">Vraagprijs <b>'+(vk!==null?'EUR '+vk.toLocaleString('nl-NL'):'-')+'</b>'+(ik!==null?' &middot; inkoop EUR '+ik.toLocaleString('nl-NL'):'')+spread+'</div>'+
+      (hist?'<div class="pc-hist">'+hist+'</div>':'')+
+    '</div>'+
+    '<button class="btn small" data-kenteken="'+pcEsc(c.kenteken||'')+'" onclick="openJP(this.dataset.kenteken)" style="color:#E8620A;font-weight:600">JPcars &#8599;</button></div>'+
+    '<div class="pc-actions">'+
+      '<input type="number" id="pc-np-'+id+'" placeholder="Nieuwe prijs">'+
+      (c.ads_stock_id?'<label style="font-size:12px;color:var(--muted);display:flex;gap:4px;align-items:center"><input type="checkbox" id="pc-ads-'+id+'" checked> ook in Autotelex</label>':'')+
+      '<button class="btn small primary" data-id="'+id+'" onclick="pcSetPrice(this.dataset.id)">Prijs aanpassen</button>'+
+      '<button class="btn small" data-id="'+id+'" onclick="pcKeep(this.dataset.id)">Prijs blijft staan</button>'+
+    '</div></div>';
+}
+function pcFindCar(id){ for(var i=0;i<cars.length;i++){ if(String(cars[i].id)===String(id)) return cars[i]; } return null; }
+function pcLog(c, entry){ var h=Array.isArray(c.prijs_historie)?c.prijs_historie.slice():[]; h.push(entry); return h; }
+function pcAfterAction(){ render(); pcUpdateBadge(); pcRenderModal(true); }
+
+function pcSetPrice(id){
+  var c=pcFindCar(id); if(!c) return;
+  var inp=document.getElementById('pc-np-'+id), np=nv(inp && inp.value);
+  if(np===null || np<=0){ showToast('Vul een geldige nieuwe prijs in'); return; }
+  var oud=nv(c.verkoop);
+  if(oud!==null && np===oud){ pcKeep(id); return; }
+  var today=pcToday(), hist=pcLog(c,{datum:today,oud:oud,nieuw:np,actie:'aangepast'});
+  var ads=document.getElementById('pc-ads-'+id), pushAds = c.ads_stock_id && ads && ads.checked;
+  apiFetch('PATCH','autos?id=eq.'+c.id,{verkoop:np, prijscheck_laatst:today, prijs_historie:hist}).then(function(){
+    c.verkoop=np; c.prijscheck_laatst=today; c.prijs_historie=hist;
+    if(!pushAds){ showToast('Prijs aangepast naar EUR '+np.toLocaleString('nl-NL')); pcAfterAction(); return; }
+    return adsApiFetch('PUT','/api/v2/advertisement/'+encodeURIComponent(c.ads_stock_id)+'/price',{ amount: np, amountExVat: 0, priceType: 'AskingPrice', countryCode: 'NL' })
+      .then(function(r){
+        var ok = !r || !r.status || (r.status>=200 && r.status<300);
+        showToast(ok ? 'Prijs aangepast in dashboard + Autotelex' : 'Dashboard bijgewerkt, Autotelex gaf fout ('+r.status+') — check handmatig');
+        pcAfterAction();
+      })
+      .catch(function(){ showToast('Dashboard bijgewerkt, Autotelex niet bereikt — check handmatig'); pcAfterAction(); });
+  }).catch(function(){ showToast('Fout bij opslaan — is het SQL-script al uitgevoerd?'); });
+}
+function pcKeep(id){
+  var c=pcFindCar(id); if(!c) return;
+  var today=pcToday(), hist=pcLog(c,{datum:today,oud:nv(c.verkoop),nieuw:nv(c.verkoop),actie:'gecontroleerd'});
+  apiFetch('PATCH','autos?id=eq.'+c.id,{prijscheck_laatst:today, prijs_historie:hist}).then(function(){
+    c.prijscheck_laatst=today; c.prijs_historie=hist;
+    showToast('Gecontroleerd — volgende check op '+pcFmt(pcAdd(today,PC_HERHAAL)));
+    pcAfterAction();
+  }).catch(function(){ showToast('Fout bij opslaan — is het SQL-script al uitgevoerd?'); });
+}
+
+/* ---- Diagnose: laat zien wat Autotelex teruggeeft ---- */
+function testAdsKoppeling(){
+  var el=document.getElementById('pc-list');
+  var c=cars.filter(function(x){ return x.ads_stock_id && x.status!=='verkocht'; })[0];
+  el.innerHTML='<p style="font-size:13px;color:var(--muted)">Bezig met ophalen...</p>';
+  adsApiFetch('GET','/api/v2/stock/by-establishment/'+PC_EST+'?isAdvertised=true', null).catch(function(e){ return {fout:String(e)}; }).then(function(r){
+    var list=pcAsList(r);
+    var out='Stocklijst (isAdvertised=true): '+(list?list.length+' auto\'s':'geen lijst')+'\n'+JSON.stringify(list?list.slice(0,2):r,null,2).slice(0,2500);
+    if(!c){ el.innerHTML='<pre style="font-size:11px;white-space:pre-wrap;background:var(--surface2);padding:10px;border-radius:8px">'+pcEsc(out)+'</pre>'; return; }
+    return pcPubInfo(c).then(function(info){
+      out+='\n\nPublicatie-info '+(c.kenteken||'')+' (stockId '+c.ads_stock_id+'):\n'+JSON.stringify(info,null,2).slice(0,2500)+
+        '\n\nHerkend: online-vlag='+pcFlag(info)+', datum='+(pcFindDate(info)||'-')+', in lijst='+(list?list.some(function(it){return pcItemMatches(it,c);}):'?');
+      el.innerHTML='<pre style="font-size:11px;white-space:pre-wrap;background:var(--surface2);padding:10px;border-radius:8px">'+pcEsc(out)+'</pre>';
+    });
+  });
+}
+/* =================== EINDE PRIJSCHECK-MODULE =================== */
 
 function stuurNaarInname(eid) {
   var id = decodeURIComponent(eid);
