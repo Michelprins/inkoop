@@ -1799,6 +1799,52 @@ function pcPubInfo(c){
   return adsApiFetch('GET','/api/v2/advertisement/'+encodeURIComponent(c.ads_stock_id)+'/advertisement-publication-information', null)
     .catch(function(){ return null; });
 }
+/* Auto's zonder stockId (bijv. direct in Autotelex aangemaakt) koppelen via kenteken */
+function pcPickStockId(r){
+  var arr = Array.isArray(r) ? r : (pcAsList(r) || (r && typeof r==='object' ? [r] : []));
+  var best=null;
+  arr.forEach(function(it){
+    if(!it || typeof it!=='object') return;
+    var id = it.id || it.adsStockId || it.stockNumber || it.stockId;
+    if(!id) return;
+    if(!best || (it.isAdvertised===true && best.adv!==true)) best={id:String(id), adv:it.isAdvertised};
+  });
+  return best ? best.id : null;
+}
+function pcLinkStock(c){
+  var kt=String(c.kenteken||'').replace(/[-\s]/g,'').toUpperCase();
+  if(!kt) return Promise.resolve(null);
+  return adsApiFetch('GET','/api/v2/stock/by-license-plate/'+encodeURIComponent(kt), null)
+    .catch(function(){ return null; })
+    .then(function(r){
+      var id=pcPickStockId(r);
+      if(!id) return null;
+      c.ads_stock_id=id;
+      return apiFetch('PATCH','autos?id=eq.'+c.id,{ads_stock_id:id}).then(function(){ return id; });
+    });
+}
+function pcLinkButton(id){
+  var c=pcFindCar(id); if(!c) return;
+  showToast('Zoeken in Autotelex op '+(c.kenteken||'')+'...');
+  pcLinkStock(c).then(function(sid){
+    showToast(sid ? 'Gekoppeld aan Autotelex (stockId '+sid+')' : 'Niet gevonden in Autotelex op dit kenteken');
+    pcAfterAction();
+  });
+}
+function pcAutoLink(){
+  // Niet-gevonden kentekens maximaal 1x per dag opnieuw proberen
+  var miss={}; try{ miss=JSON.parse(localStorage.getItem('bourg_pc_nolink')||'{}')||{}; }catch(e){}
+  var today=pcToday();
+  var todo = cars.filter(function(c){ return !c.ads_stock_id && c.kenteken && c.status!=='verkocht' && miss[c.id]!==today; });
+  var chain=Promise.resolve(), n=0;
+  todo.forEach(function(c){ chain=chain.then(function(){ return pcLinkStock(c).then(function(id){ if(id) n++; else miss[c.id]=today; }); }); });
+  return chain.then(function(){
+    for(var k in miss){ if(miss[k]!==today) delete miss[k]; }
+    try{ localStorage.setItem('bourg_pc_nolink', JSON.stringify(miss)); }catch(e){}
+    return n;
+  });
+}
+
 function pcSaveOnline(c, iso){
   c.online_datum = iso;
   return apiFetch('PATCH','autos?id=eq.'+c.id,{online_datum: iso, online_bron: 'autotelex'});
@@ -1807,8 +1853,11 @@ function pcSaveOnline(c, iso){
 function syncOnlineDatums(force){
   var last=0; try{ last=parseInt(localStorage.getItem('bourg_pc_sync')||'0',10)||0; }catch(e){}
   if(!force && Date.now()-last < 3*3600*1000) return Promise.resolve(0);
+  return pcAutoLink().then(function(linked){ return pcSyncCore(force, linked); });
+}
+function pcSyncCore(force, linked){
   var cand = cars.filter(function(c){ return c.ads_stock_id && c.status!=='verkocht' && !c.online_datum; });
-  if(!cand.length){ try{ localStorage.setItem('bourg_pc_sync', String(Date.now())); }catch(e){} if(force) showToast('Geen auto\'s die wachten op online-datum'); return Promise.resolve(0); }
+  if(!cand.length){ try{ localStorage.setItem('bourg_pc_sync', String(Date.now())); }catch(e){} if(linked){ render(); pcUpdateBadge(); } if(force) showToast((linked?linked+' gekoppeld aan Autotelex · ':'')+'geen auto\'s die wachten op online-datum'); return Promise.resolve(0); }
   if(force) showToast('Autotelex checken voor '+cand.length+' auto\'s...');
   var nieuw=0;
   return adsApiFetch('GET','/api/v2/stock/by-establishment/'+PC_EST+'?isAdvertised=true', null)
@@ -1836,8 +1885,8 @@ function syncOnlineDatums(force){
     })
     .then(function(){
       try{ localStorage.setItem('bourg_pc_sync', String(Date.now())); }catch(e){}
-      if(nieuw || force){ render(); pcUpdateBadge(); }
-      if(force) showToast(nieuw ? nieuw+' auto(\'s) online gezet' : 'Geen nieuwe online auto\'s gevonden');
+      if(nieuw || linked || force){ render(); pcUpdateBadge(); }
+      if(force) showToast((linked ? linked+' gekoppeld aan Autotelex · ' : '') + (nieuw ? nieuw+' auto(\'s) online gezet' : 'geen nieuwe online auto\'s'));
       if(document.getElementById('pc-modal').classList.contains('open')) pcRenderModal(true);
       return nieuw;
     });
@@ -1896,7 +1945,7 @@ function pcRowHtml(c){
     '<button class="btn small" data-kenteken="'+pcEsc(c.kenteken||'')+'" onclick="openJP(this.dataset.kenteken)" style="color:#E8620A;font-weight:600">JPcars &#8599;</button></div>'+
     '<div class="pc-actions">'+
       '<input type="number" id="pc-np-'+id+'" placeholder="Nieuwe prijs">'+
-      (c.ads_stock_id?'<label style="font-size:12px;color:var(--muted);display:flex;gap:4px;align-items:center"><input type="checkbox" id="pc-ads-'+id+'" checked> ook in Autotelex</label>':'')+
+      (c.ads_stock_id?'<label style="font-size:12px;color:var(--muted);display:flex;gap:4px;align-items:center"><input type="checkbox" id="pc-ads-'+id+'" checked> ook in Autotelex</label>':'<button class="btn small" data-id="'+id+'" onclick="pcLinkButton(this.dataset.id)" title="Niet via de ADS-knop aangemaakt: zoek deze auto op kenteken in Autotelex">&#128279; Koppel Autotelex</button>')+
       '<button class="btn small primary" data-id="'+id+'" onclick="pcSetPrice(this.dataset.id)">Prijs aanpassen</button>'+
       '<button class="btn small" data-id="'+id+'" onclick="pcKeep(this.dataset.id)">Prijs blijft staan</button>'+
     '</div></div>';
