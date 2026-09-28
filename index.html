@@ -339,6 +339,18 @@ tbody tr:hover td{background:#FFF6F1}
 .kv-match-row a[href^="tel"],.kv-match-row a[href^="mailto"]{font-weight:500}
 @media(max-width:768px){.b2b-quick{grid-template-columns:1fr 1fr}.b2b-grid{grid-template-columns:1fr}.b2b-alert{flex-direction:column;align-items:flex-start}}
 
+/* ===== AANBIEDINGSBLAD PDF ===== */
+.pdf-thumbs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:10px}
+.pdf-thumb{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/3;background:var(--surface2)}
+.pdf-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.pdf-thumb.main{outline:2px solid var(--accent);outline-offset:1px}
+.pdf-main-lbl{position:absolute;left:4px;bottom:4px;background:var(--accent);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px}
+.pdf-tbtn{position:absolute;left:4px;bottom:4px;border:none;background:rgba(0,0,0,.6);color:#fff;border-radius:6px;font-size:11px;padding:1px 6px;cursor:pointer}
+.pdf-tbtn.pdf-del{left:auto;right:4px;top:4px;bottom:auto}
+#pdf-file{display:none}
+.pdf-dz{padding:1.25rem;margin-bottom:0}
+@media(max-width:600px){.pdf-thumbs{grid-template-columns:repeat(3,1fr)}}
+
 /* Desktop: bredere layout + kenteken links en knoppen rechts altijd zichtbaar */
 @media(min-width:769px){
   .app,.header-inner{max-width:1880px}
@@ -444,6 +456,7 @@ tbody tr:hover td{background:#FFF6F1}
         <button class="analytics-tab" id="b2b-sub-historie" onclick="setB2bSub('historie')">Historie</button>
       </div>
       <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="openPdfKenteken()">&#128196; Aanbiedingsblad op kenteken</button>
         <button class="btn" onclick="openDeal()">+ Deal vastleggen</button>
         <button class="btn primary" onclick="openB2bBedrijf()">+ Autobedrijf</button>
       </div>
@@ -730,6 +743,56 @@ tbody tr:hover td{background:#FFF6F1}
     <div class="mftr">
       <button class="btn" onclick="cm('b2b-bed-em')">Annuleren</button>
       <button class="btn primary" onclick="saveB2bBedrijf()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Aanbiedingsblad PDF -->
+<div class="mbg" id="pdf-em">
+  <div class="modal" style="max-width:720px">
+    <div class="mhdr">
+      <div><h2>&#128196; Aanbiedingsblad (PDF)</h2><p id="pdf-sub"></p></div>
+      <button class="xbtn" onclick="cm('pdf-em')">&#10005;</button>
+    </div>
+    <div class="isum" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:1rem">
+      <button class="btn small" onclick="pdfFromAutotelex()">&#8635; Uit Autotelex ophalen</button>
+      <span id="pdf-ads-status" style="font-size:12px;flex:1;min-width:200px"></span>
+    </div>
+    <div class="fgrid">
+      <div class="fg"><label>B2B-prijs (EUR)</label><input id="pdf-prijs" type="number" placeholder="bijv. 18500"><span class="hint">Leeg = "Op aanvraag"</span></div>
+      <div class="fg"><label>BTW / Marge</label><select id="pdf-f-btw_marge"><option value="">Geen vermelding</option><option value="btw">BTW-auto (excl. btw)</option><option value="marge">Marge-auto</option></select></div>
+      <div class="fg full"><label>Aangeboden aan (optioneel)</label><select id="pdf-bedrijf"></select><span class="hint">Legt 'aangeboden' vast in de B2B-historie</span></div>
+      <div class="sdiv"><span>Voertuig (aanpasbaar)</span></div>
+      <div class="fg"><label>Merk</label><input id="pdf-f-merk"></div>
+      <div class="fg"><label>Model / type</label><input id="pdf-f-type"></div>
+      <div class="fg full"><label>Uitvoering / motor</label><input id="pdf-f-motor" placeholder="bijv. 1.3 MHEV 158 pk Xtronic Tekna"></div>
+      <div class="fg full"><label>Highlights</label><input id="pdf-f-highlights" placeholder="bijv. Panoramadak · 360 camera · Trekhaak"></div>
+      <div class="fg"><label>Kenteken</label><input id="pdf-f-kenteken"></div>
+      <div class="fg"><label>Bouwjaar</label><input id="pdf-f-bj" type="number"></div>
+      <div class="fg"><label>KM-stand</label><input id="pdf-f-km" type="number"></div>
+      <div class="fg"><label>Brandstof</label><select id="pdf-f-brandstof"><option value="">Onbekend</option><option value="Benzine">Benzine</option><option value="Diesel">Diesel</option><option value="Elektrisch">Elektrisch</option><option value="Plug-in hybride">Plug-in hybride</option><option value="Hybride">Hybride</option><option value="LPG">LPG</option></select></div>
+      <div class="fg"><label>Transmissie</label><input id="pdf-f-transmissie" placeholder="Automaat / Handgeschakeld"></div>
+      <div class="fg"><label>Vermogen</label><input id="pdf-f-vermogen" placeholder="bijv. 116 kW (158 pk)"></div>
+      <div class="fg"><label>Kleur</label><input id="pdf-f-kleur"></div>
+      <div class="fg" style="justify-content:flex-end"><div style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="pdf-kenteken" style="width:auto"><label for="pdf-kenteken" style="text-transform:none;letter-spacing:0;font-size:13px;color:var(--text)">Kenteken tonen</label></div></div>
+      <div class="sdiv"><span>Foto's (max. 6 &mdash; eerste = hoofdfoto)</span></div>
+      <div class="fg full">
+        <div class="dropz pdf-dz" id="pdf-dz" onclick="document.getElementById('pdf-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="pdfDrop(event)">
+          <strong style="font-size:14px">Sleep foto's hierheen of klik om te kiezen</strong>
+          <p style="color:var(--muted);font-size:12px;margin-top:4px" id="pdf-count">0 / 6 foto's</p>
+        </div>
+        <input type="file" id="pdf-file" accept="image/*" multiple onchange="pdfAddFiles(this.files);this.value=''">
+        <div class="pdf-thumbs" id="pdf-thumbs"></div>
+      </div>
+      <div class="sdiv"><span>Jouw contactgegevens (worden onthouden)</span></div>
+      <div class="fg"><label>Naam</label><input id="pdf-naam"></div>
+      <div class="fg"><label>Telefoon</label><input id="pdf-tel" placeholder="06 ..."></div>
+      <div class="fg full"><label>E-mail</label><input id="pdf-email"></div>
+    </div>
+    <div class="mftr">
+      <button class="btn" onclick="cm('pdf-em')" style="margin-right:auto">Annuleren</button>
+      <button class="btn" onclick="pdfGo('share')">&#128241; Delen</button>
+      <button class="btn primary" onclick="pdfGo('download')">&#8595; PDF downloaden</button>
     </div>
   </div>
 </div>
@@ -1352,6 +1415,7 @@ var brf = document.getElementById('fbrandstof').value;
       '<td><div class="acell">'+
         '<button class="ib" title="Publiceer naar Autotelex" data-id="'+eid+'" onclick="publishToAutotelex(this.dataset.id)" style="font-size:10px;font-weight:700;color:#1a6b1a;padding:4px 6px;background:#edfaf1;border-radius:6px">ADS</button>'+
         '<button class="ib" title="Stuur naar Inname dashboard (verwacht)" data-id="'+eid+'" onclick="stuurNaarInname(this.dataset.id)" style="font-size:10px;font-weight:700;color:#7c3aed;padding:4px 6px;background:#f5f0ff;border-radius:6px">INN</button>'+
+        '<button class="ib" title="Aanbiedingsblad (PDF) maken" data-id="'+eid+'" onclick="openPdf(this.dataset.id)" style="font-size:10px;font-weight:700;color:#C4510A;padding:4px 6px;background:#FFF3EC;border-radius:6px">PDF</button>'+
         '<button class="ib" title="B2B-deal vastleggen (doorzetten naar autobedrijf)" data-id="'+eid+'" onclick="openDealFromCar(this.dataset.id,\'\',\'verkocht\')" style="font-size:10px;font-weight:700;color:#1A3A8F;padding:4px 6px;background:#EEF4FF;border-radius:6px">B2B</button>'+
         '<button class="ib" title="Bekijk op JPcars" data-kenteken="'+(c.kenteken||'')+'" onclick="openJP(this.dataset.kenteken)" style="font-size:11px;font-weight:600;color:#E8620A;padding:4px 7px">JP</button>'+
         '<button class="ib" title="Bewerken" data-id="'+eid+'" onclick="editCar(this.dataset.id)">&#9998;</button>'+
@@ -1513,12 +1577,12 @@ function delCar(eid) {
 
 function cm(id){document.getElementById(id).classList.remove('open');}
 document.addEventListener('click',function(e){
-  ['em','im','bulk-lev-modal','manage-lev-modal','chart-modal','b2b-deal-em','b2b-bed-em','pc-modal'].forEach(function(id){
+  ['em','im','bulk-lev-modal','manage-lev-modal','chart-modal','b2b-deal-em','b2b-bed-em','pc-modal','pdf-em'].forEach(function(id){
     if(e.target===document.getElementById(id))cm(id);
   });
 });
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){['em','im','bulk-lev-modal','manage-lev-modal','chart-modal','b2b-deal-em','b2b-bed-em','pc-modal'].forEach(cm);}
+  if(e.key==='Escape'){['em','im','bulk-lev-modal','manage-lev-modal','chart-modal','b2b-deal-em','b2b-bed-em','pc-modal','pdf-em'].forEach(cm);}
 });
 
 var CMAP={'kenteken':'kenteken','merk':'merk','type':'type','motor':'motor','bouwjaar':'bj','km stand':'km','kmstand':'km','km-stand':'km','inkoop datum':'datum','inkoopdatum':'datum','inkoopprijs':'inkoop','verkoopprijs':'verkoop','status':'status','opmerking':'opmerkingen','opmerkingen':'opmerkingen','resultaat':'resultaat','vin':'vin','chassisnummer':'vin','leverancier':'leverancier'};
@@ -2348,7 +2412,8 @@ function renderB2bKansen(){
     var c=k.car;
     return '<div class="kv-card">'+
       '<div class="kv-card-top"><div><div class="kv-card-title">'+pcEsc(c.kenteken||c.vin||'?')+' &nbsp;'+pcEsc((c.merk||'')+' '+(c.type||''))+' <span class="dm" style="font-weight:400">'+pcEsc(c.motor||'')+'</span></div>'+
-      '<div class="kv-card-sub">'+(c.bj||'-')+' &middot; '+fk(c.km)+' &middot; inkoop '+fe(c.inkoop)+' &middot; <span class="badge b-'+(c.status||'bestelling')+'">'+(c.status||'')+'</span></div></div></div>'+
+      '<div class="kv-card-sub">'+(c.bj||'-')+' &middot; '+fk(c.km)+' &middot; inkoop '+fe(c.inkoop)+' &middot; <span class="badge b-'+(c.status||'bestelling')+'">'+(c.status||'')+'</span></div></div>'+
+      '<button class="btn small" onclick="openPdf(\''+encodeURIComponent(c.id)+'\')">&#128196; Aanbiedingsblad</button></div>'+
       '<div class="kv-section" style="margin-top:0;padding-top:.5rem"><div class="kv-section-lbl">Past bij ('+k.matches.length+')</div>'+b2bMatchRows(k.matches, c.id)+'</div></div>';
   }).join('');
 }
@@ -2544,6 +2609,377 @@ function b2bDealVerkocht(id){ var d=b2bFindDeal(id); if(!d) return; var copy={};
 function delDeal(id){
   if (!confirm('Deze B2B-deal verwijderen?')) return;
   apiFetch('DELETE','b2b_deals?id=eq.'+id,null).then(function(){ showToast('Deal verwijderd'); loadB2B(); });
+}
+
+// ===== B2B AANBIEDINGSBLAD (PDF) =====
+var pdfCar = null, pdfFotos = [], pdfAdsRaw = null, JSPDF_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+var PDF_FIELDS = ['kenteken','merk','type','motor','bj','km','brandstof','transmissie','vermogen','kleur','highlights','btw_marge'];
+
+function pdfContact(){
+  var def = { naam:'Michel Prins', telefoon:'', email:'michel.prins@bourguignon.nl' };
+  try { var s = JSON.parse(localStorage.getItem('bourg_pdf_contact')||'null'); if (s) return s; } catch(e){}
+  return def;
+}
+function pdfSaveContact(){
+  try { localStorage.setItem('bourg_pdf_contact', JSON.stringify({ naam:document.getElementById('pdf-naam').value.trim(), telefoon:document.getElementById('pdf-tel').value.trim(), email:document.getElementById('pdf-email').value.trim() })); } catch(e){}
+}
+
+// Openen vanuit voorraad (eid) of los op kenteken (obj)
+function openPdf(eid){
+  var c = b2bCarById(decodeURIComponent(eid)); if (!c) return;
+  pdfOpenWith({ auto_id:c.id, kenteken:c.kenteken||'', vin:c.vin||'', merk:c.merk||'', type:c.type||'', motor:c.motor||'', bj:c.bj||'', km:c.km||'',
+    brandstof:c.brandstof||'', btw_marge:c.btw_marge||'', status:c.status||'', inkoop:c.inkoop, ads_stock_id:c.ads_stock_id||'' });
+}
+function openPdfKenteken(){
+  var kt = (prompt('Kenteken van de auto (bijv. X-177-ZR):')||'').trim();
+  if (!kt) return;
+  var n = kt.replace(/[-\s]/g,'').toUpperCase();
+  var c = cars.filter(function(x){ return String(x.kenteken||'').replace(/[-\s]/g,'').toUpperCase()===n; })[0];
+  if (c) { openPdf(encodeURIComponent(c.id)); return; }
+  pdfOpenWith({ kenteken:kt.toUpperCase(), status:'binnen' });
+}
+function pdfOpenWith(v){
+  pdfCar = v; pdfFotos = []; pdfAdsRaw = null;
+  document.getElementById('pdf-sub').textContent = (v.kenteken||v.vin||'')+(v.merk?' — '+v.merk+' '+(v.type||''):'');
+  PDF_FIELDS.forEach(function(f){ document.getElementById('pdf-f-'+f).value = v[f]==null?'':v[f]; });
+  var last = v.auto_id ? b2bDeals.filter(function(d){ return d.auto_id===v.auto_id && nv(d.verkoopprijs)!==null; })[0] : null;
+  document.getElementById('pdf-prijs').value = last ? last.verkoopprijs : '';
+  document.getElementById('pdf-kenteken').checked = true;
+  var k = pdfContact();
+  document.getElementById('pdf-naam').value = k.naam||''; document.getElementById('pdf-tel').value = k.telefoon||''; document.getElementById('pdf-email').value = k.email||'';
+  document.getElementById('pdf-bedrijf').innerHTML = '<option value="">Niet vastleggen</option>' + b2bBedrijven.filter(function(b){ return b.actief!==false; }).map(function(b){ return '<option value="'+b.id+'">'+pcEsc(b.naam)+'</option>'; }).join('');
+  document.getElementById('pdf-file').value = '';
+  pdfSetAdsStatus('');
+  pdfRenderThumbs();
+  document.getElementById('pdf-em').classList.add('open');
+  pdfLoadLib();
+  if (v.kenteken || v.ads_stock_id) pdfFromAutotelex();
+}
+
+function pdfLoadLib(){
+  if (window.jspdf) return Promise.resolve();
+  if (window._pdfLibP) return window._pdfLibP;
+  window._pdfLibP = new Promise(function(res, rej){
+    var s = document.createElement('script'); s.src = JSPDF_URL; s.onload = res; s.onerror = function(){ window._pdfLibP = null; rej(); };
+    document.head.appendChild(s);
+  });
+  return window._pdfLibP;
+}
+
+// ---------- Autotelex: gegevens + foto's ophalen ----------
+function pdfSetAdsStatus(html){ document.getElementById('pdf-ads-status').innerHTML = html; }
+
+// Loopt door de hele API-respons en geeft [pad, waarde] terug
+function pdfWalk(obj, fn, path, depth){
+  path = path||[]; depth = depth||0;
+  if (depth > 8 || obj === null || obj === undefined) return;
+  if (Array.isArray(obj)) { for (var i=0;i<obj.length;i++) pdfWalk(obj[i], fn, path.concat([i]), depth+1); return; }
+  if (typeof obj === 'object') { for (var k in obj) if (Object.prototype.hasOwnProperty.call(obj,k)) pdfWalk(obj[k], fn, path.concat([k]), depth+1); return; }
+  fn(path, obj);
+}
+function pdfKeyOf(path){
+  var keys = path.filter(function(p){ return typeof p==='string'; });
+  var last = keys[keys.length-1]||'', parent = keys[keys.length-2]||'';
+  if (/^(name|value|description|label|text|nl|nl-nl|nl_nl|displayname|code)$/i.test(last)) return (parent+'.'+last).toLowerCase();
+  return last.toLowerCase();
+}
+var PDF_MAP = [
+  ['merk',        /^(make|brand|makename|brandname|merk)(\.(name|description|label|value|displayname))?$/],
+  ['model',       /^(model|modelname|modeldescription)(\.(name|description|label|value|displayname))?$/],
+  ['type',        /^(version|variant|typename|trim|versionname|uitvoering|modelversion|typedescription)(\.(name|description|label|value|displayname))?$/],
+  ['titel',       /^(title|advertisementtitle|headline|commercialtitle|advertisementheadline|omschrijving)(\.(nl|nl-nl|nl_nl|value|text))?$/],
+  ['km',          /^(mileage|odometer|odometerreading|mileageinkm|kilometerstand|currentmileage)(\.(value))?$/],
+  ['bj',          /^(buildyear|constructionyear|modelyear|year|bouwjaar|yearofmanufacture)$/],
+  ['datum_eerste',/^(firstregistrationdate|firstadmission|dateoffirstregistration|firstregistration|registrationdate|dateoffirstadmission)$/],
+  ['brandstof',   /^(fuel|fueltype|fuelkind|brandstof|energysource)(\.(name|description|label|value|displayname|code))?$/],
+  ['transmissie', /^(transmission|gearbox|transmissiontype|transmissie|geartype)(\.(name|description|label|value|displayname|code))?$/],
+  ['kleur',       /^(color|colour|bodycolor|exteriorcolor|colorname|kleur|basecolor)(\.(name|description|label|value|displayname))?$/],
+  ['kw',          /^(powerkw|kw|enginepowerkw|power|enginepower|vermogen|maxpowerkw)(\.(value))?$/],
+  ['pk',          /^(powerhp|hp|enginepowerhp|pk|horsepower)(\.(value))?$/],
+  ['btw',         /^(isvat|vat|isvatvehicle|vatmargin|vatormargin|ismargin|margin|taxtype)$/]
+];
+var PDF_FUEL = { petrol:'Benzine', gasoline:'Benzine', benzine:'Benzine', diesel:'Diesel', electric:'Elektrisch', electricity:'Elektrisch', elektrisch:'Elektrisch', ev:'Elektrisch',
+  pluginhybrid:'Plug-in hybride', phev:'Plug-in hybride', 'plug-in hybride':'Plug-in hybride', hybrid:'Hybride', hybride:'Hybride', lpg:'LPG', cng:'CNG' };
+var PDF_TRANS = { automatic:'Automaat', automaat:'Automaat', auto:'Automaat', a:'Automaat', manual:'Handgeschakeld', handgeschakeld:'Handgeschakeld', handmatig:'Handgeschakeld', m:'Handgeschakeld', semiautomatic:'Semi-automaat' };
+
+function pdfExtract(data){
+  var f = {}, imgs = [];
+  pdfWalk(data, function(path, v){
+    var key = pdfKeyOf(path), s = String(v);
+    if (typeof v==='string' && /^https?:\/\/\S+\.(jpe?g|png|webp)(\?\S*)?$/i.test(s)) { imgs.push(s); return; }
+    if (typeof v==='string' && /^https?:\/\//i.test(s) && /(image|photo|picture|media|foto|afbeelding)/i.test(path.join('.'))) { imgs.push(s); return; }
+    for (var i=0;i<PDF_MAP.length;i++){
+      var m = PDF_MAP[i];
+      if (f[m[0]]!==undefined || !m[1].test(key)) continue;
+      if (m[0]==='btw'){ if (typeof v==='boolean'){ f.btw = /margin/.test(key) ? (v?'marge':'btw') : (v?'btw':'marge'); } else if (/marg/i.test(s)) f.btw='marge'; else if (/vat|btw/i.test(s)) f.btw='btw'; continue; }
+      if (v===null || v==='' ) continue;
+      if (/^(km|bj|kw|pk)$/.test(m[0]) && !(Number(v) > 0)) continue;
+      if (m[0]==='bj' && !(Number(v) > 1980 && Number(v) < 2040)) continue;
+      if (m[0]==='titel' && s.length < 15) continue;
+      f[m[0]] = v;
+    }
+  });
+  // foto's: dubbelen (zelfde foto in andere maat) eruit, grootste variant bewaren
+  var seen = {}, out = [];
+  imgs.forEach(function(u){
+    var k = u.replace(/\?.*$/,'').replace(/[\/_-](thumb|thumbnail|small|medium|large|big|original|xl|xxl|s|m|l|\d{2,4}x\d{2,4})(?=[\/_.-])/ig,'');
+    var score = /(original|large|big|xxl|xl|1600|1920|2048)/i.test(u) ? 2 : /(thumb|small|\b160\b|\b320\b)/i.test(u) ? 0 : 1;
+    if (seen[k]===undefined){ seen[k]=out.length; out.push({u:u,s:score}); }
+    else if (score > out[seen[k]].s) out[seen[k]] = {u:u,s:score};
+  });
+  f.fotos = out.map(function(x){ return x.u; });
+  return f;
+}
+
+function pdfAdsCalls(sid){
+  return [
+    '/api/v2/vehicle/'+sid, '/api/v2/advertisement/'+sid, '/api/v2/stock/'+sid,
+    '/api/v2/advertisement/'+sid+'/images', '/api/v2/vehicle/'+sid+'/images', '/api/v2/advertisement/'+sid+'/media'
+  ];
+}
+function pdfFromAutotelex(){
+  var v = pdfCar; if (!v) return;
+  var kt = String(document.getElementById('pdf-f-kenteken').value||v.kenteken||'').replace(/[-\s]/g,'').toUpperCase();
+  if (!kt && !v.ads_stock_id){ pdfSetAdsStatus('<span style="color:var(--red-txt)">Vul eerst een kenteken in.</span>'); return; }
+  pdfSetAdsStatus('&#8635; Ophalen uit Autotelex...');
+  var raw = {};
+  var start = kt ? adsApiFetch('GET','/api/v2/stock/by-license-plate/'+encodeURIComponent(kt), null).catch(function(){ return null; }) : Promise.resolve(null);
+  start.then(function(r){
+    raw['stock/by-license-plate'] = r;
+    var sid = v.ads_stock_id || pcPickStockId(r);
+    if (!sid) return null;
+    return Promise.all(pdfAdsCalls(sid).map(function(p){
+      return adsApiFetch('GET', p, null).then(function(x){ return [p,x]; }).catch(function(){ return [p,null]; });
+    })).then(function(res){
+      res.forEach(function(pr){
+        var x = pr[1];
+        if (!x || (x.status && Object.keys(x).length<=2) || x.raw) return; // 404/fout/lege respons negeren
+        raw[pr[0]] = x;
+      });
+      return sid;
+    });
+  }).then(function(sid){
+    pdfAdsRaw = raw;
+    if (!sid){ pdfSetAdsStatus('<span style="color:var(--red-txt)">Niet gevonden in Autotelex op kenteken '+pcEsc(kt)+'.</span> Controleer of de auto via ADS is aangemaakt.'); return; }
+    var f = pdfExtract(raw);
+    var set = function(field, val){ var el=document.getElementById('pdf-f-'+field); if (el && !String(el.value).trim() && val!==undefined && val!==null && val!=='') el.value = val; };
+    set('merk', f.merk);
+    set('type', f.model || '');
+    if (f.type) set('motor', f.type);
+    if (f.titel){
+      var parts = String(f.titel).split('|').map(function(x){ return x.trim(); }).filter(Boolean);
+      if (parts.length > 1) set('highlights', parts.slice(1).join(' · '));
+      var kop = parts[0], pre = (pdfVal('merk')+' '+pdfVal('type')).trim();
+      if (pre && kop.toLowerCase().indexOf(pre.toLowerCase())===0) kop = kop.slice(pre.length).trim();
+      set('motor', kop);
+    }
+    set('km', f.km);
+    var bj = f.bj || (f.datum_eerste ? String(f.datum_eerste).match(/(19|20)\d{2}/) : null);
+    set('bj', Array.isArray(bj) ? bj[0] : bj);
+    if (f.brandstof) set('brandstof', PDF_FUEL[String(f.brandstof).toLowerCase().replace(/[\s_-]/g,'')] || f.brandstof);
+    if (f.transmissie) set('transmissie', PDF_TRANS[String(f.transmissie).toLowerCase().replace(/[\s_-]/g,'')] || f.transmissie);
+    set('kleur', f.kleur);
+    if (f.kw || f.pk) set('vermogen', f.kw ? f.kw+' kW ('+(f.pk||Math.round(f.kw*1.36))+' pk)' : f.pk+' pk');
+    set('btw_marge', f.btw);
+    document.getElementById('pdf-sub').textContent = (document.getElementById('pdf-f-kenteken').value||'')+' — '+document.getElementById('pdf-f-merk').value+' '+document.getElementById('pdf-f-type').value;
+    var msg = '&#10003; Gegevens uit Autotelex overgenomen (stock '+pcEsc(sid)+')';
+    if (!f.fotos.length){ pdfSetAdsStatus(msg+' &middot; <strong>geen foto\'s gevonden</strong> &mdash; sleep ze handmatig. <a href="#" onclick="pdfCopyRaw();return false">Kopieer ruwe data</a>'); return; }
+    pdfSetAdsStatus(msg+' &middot; '+f.fotos.length+' foto\'s gevonden, eerste 6 laden...');
+    pdfLoadRemote(f.fotos.slice(0, 6)).then(function(n){
+      if (n) pdfSetAdsStatus(msg+' &middot; '+n+' foto\'s geladen. Wijzig de volgorde met &#9733;.');
+      else pdfSetAdsStatus(msg+' &middot; <strong>foto\'s gevonden maar niet over te nemen</strong> (Autotelex blokkeert dat vanuit de browser) &mdash; sleep ze handmatig. <a href="#" onclick="pdfCopyRaw();return false">Kopieer ruwe data</a>');
+    });
+  });
+}
+function pdfLoadRemote(urls){
+  return Promise.all(urls.map(function(u){
+    return new Promise(function(res){
+      var img = new Image(); img.crossOrigin = 'anonymous';
+      img.onload = function(){ try { res({ img:img, thumb:pdfCrop(img, 240, 180) }); } catch(e){ res(null); } };
+      img.onerror = function(){ res(null); };
+      img.src = u;
+    });
+  })).then(function(res){
+    var ok = res.filter(Boolean);
+    if (ok.length){ pdfFotos = ok.concat(pdfFotos).slice(0,6); pdfRenderThumbs(); }
+    return ok.length;
+  });
+}
+function pdfCopyRaw(){
+  var txt = JSON.stringify(pdfAdsRaw, null, 1);
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function(){ showToast('Ruwe Autotelex-data gekopieerd — plak het in de chat met Claude'); }, function(){ prompt('Kopieer deze tekst:', txt.slice(0,5000)); });
+  else prompt('Kopieer deze tekst:', txt.slice(0,5000));
+}
+
+// ---------- foto's ----------
+function pdfCrop(img, w, h){
+  var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  var r = Math.max(w/img.width, h/img.height), sw = w/r, sh = h/r;
+  var ctx = cv.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h);
+  ctx.drawImage(img, (img.width-sw)/2, (img.height-sh)/2, sw, sh, 0, 0, w, h);
+  return cv.toDataURL('image/jpeg', 0.82);
+}
+function pdfAddFiles(files){
+  var list = Array.prototype.slice.call(files||[]).filter(function(f){ return /^image\//.test(f.type); });
+  var ruimte = 6 - pdfFotos.length;
+  if (list.length > ruimte) showToast('Max. 6 foto\'s — de eerste '+Math.max(ruimte,0)+' zijn toegevoegd');
+  Promise.all(list.slice(0, Math.max(ruimte,0)).map(function(f){
+    return new Promise(function(res){
+      var fr = new FileReader();
+      fr.onload = function(ev){
+        var img = new Image();
+        img.onload = function(){ res({ img:img, thumb:pdfCrop(img, 240, 180) }); };
+        img.onerror = function(){ showToast('Kon '+f.name+' niet lezen (HEIC? sla op als JPG)'); res(null); };
+        img.src = ev.target.result;
+      };
+      fr.onerror = function(){ res(null); };
+      fr.readAsDataURL(f);
+    });
+  })).then(function(res){ res.forEach(function(r){ if (r && pdfFotos.length < 6) pdfFotos.push(r); }); pdfRenderThumbs(); });
+}
+function pdfDrop(e){ e.preventDefault(); document.getElementById('pdf-dz').classList.remove('drag'); pdfAddFiles(e.dataTransfer.files); }
+function pdfRenderThumbs(){
+  document.getElementById('pdf-thumbs').innerHTML = pdfFotos.map(function(f, i){
+    return '<div class="pdf-thumb'+(i===0?' main':'')+'"><img src="'+f.thumb+'">'+
+      (i===0?'<span class="pdf-main-lbl">Hoofdfoto</span>':'<button class="pdf-tbtn" title="Maak hoofdfoto" onclick="pdfMain('+i+')">&#9733;</button>')+
+      '<button class="pdf-tbtn pdf-del" title="Verwijderen" onclick="pdfDel('+i+')">&#10005;</button></div>';
+  }).join('');
+  document.getElementById('pdf-count').textContent = pdfFotos.length+' / 6 foto\'s';
+}
+function pdfMain(i){ var f = pdfFotos.splice(i,1)[0]; pdfFotos.unshift(f); pdfRenderThumbs(); }
+function pdfDel(i){ pdfFotos.splice(i,1); pdfRenderThumbs(); }
+
+function pdfLogo(){
+  try {
+    var el = document.querySelector('.logo-img'); if (!el || !el.naturalWidth) return null;
+    var sx = el.naturalWidth/225, cv = document.createElement('canvas'); cv.width = 624; cv.height = 168;
+    cv.getContext('2d').drawImage(el, 8*sx, 84*sx, 208*sx, 56*sx, 0, 0, 624, 168);
+    return cv.toDataURL('image/jpeg', 0.92);
+  } catch(e){ return null; }
+}
+function pdfFmtEur(v){ return '€ ' + Number(v).toLocaleString('nl-NL', {maximumFractionDigits:0}); }
+function pdfVal(f){ return String(document.getElementById('pdf-f-'+f).value||'').trim(); }
+
+// ---------- PDF opbouwen ----------
+function pdfBuild(){
+  var J = window.jspdf.jsPDF, doc = new J({ unit:'mm', format:'a4' });
+  var W = 210, M = 15, CW = W - 2*M, OR = [232,98,10], DK = [17,17,17], GR = [102,102,102], LG = [240,240,240];
+  var prijs = document.getElementById('pdf-prijs').value.trim(), toonKent = document.getElementById('pdf-kenteken').checked;
+  var v = {}; PDF_FIELDS.forEach(function(f){ v[f] = pdfVal(f); });
+  var status = pdfCar && pdfCar.status || '';
+  var k = { naam:document.getElementById('pdf-naam').value.trim(), tel:document.getElementById('pdf-tel').value.trim(), email:document.getElementById('pdf-email').value.trim() };
+
+  // header
+  doc.setFillColor(DK[0],DK[1],DK[2]); doc.rect(0,0,W,26,'F');
+  doc.setFillColor(243,243,243); doc.roundedRect(M,5,58,16,2,2,'F');
+  var lg = pdfLogo(); if (lg) doc.addImage(lg, 'JPEG', M+3, 6, 52, 14);
+  doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255); doc.setFontSize(13); doc.text('B2B AANBIEDING', W-M, 13.5, {align:'right'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(190,190,190);
+  var d = new Date(); doc.text(('0'+d.getDate()).slice(-2)+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+d.getFullYear(), W-M, 19, {align:'right'});
+
+  // titel + uitvoering + highlights
+  var y = 37;
+  doc.setTextColor(DK[0],DK[1],DK[2]); doc.setFont('helvetica','bold'); doc.setFontSize(19);
+  doc.text(doc.splitTextToSize((v.merk+' '+v.type).trim(), CW)[0], M, y);
+  y += 6;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10.5); doc.setTextColor(GR[0],GR[1],GR[2]);
+  if (v.motor){ doc.text(doc.splitTextToSize(v.motor, CW)[0], M, y); y += 5; }
+  if (v.highlights){
+    doc.setFontSize(8.5); doc.setTextColor(OR[0],OR[1],OR[2]);
+    var hl = doc.splitTextToSize(v.highlights, CW).slice(0,2);
+    doc.text(hl, M, y); y += hl.length*3.8;
+  }
+  y = Math.max(y+2, 50);
+
+  // foto's
+  var gap = 3, tw = (CW-4*gap)/5, th = tw*0.75, mainH = Math.min(101, 196 - y - gap - th);
+  if (pdfFotos.length){
+    doc.addImage(pdfCrop(pdfFotos[0].img, 1600, Math.round(1600*mainH/CW)), 'JPEG', M, y, CW, mainH);
+    for (var i=1;i<6;i++){
+      var x = M+(i-1)*(tw+gap);
+      if (pdfFotos[i]) doc.addImage(pdfCrop(pdfFotos[i].img, 640, 480), 'JPEG', x, y+mainH+gap, tw, th);
+      else { doc.setFillColor(LG[0],LG[1],LG[2]); doc.rect(x, y+mainH+gap, tw, th, 'F'); }
+    }
+    y += mainH + gap + th + 8;
+  } else {
+    doc.setFillColor(LG[0],LG[1],LG[2]); doc.rect(M,y,CW,40,'F');
+    doc.setFontSize(10); doc.setTextColor(GR[0],GR[1],GR[2]); doc.text('Foto\'s op aanvraag', W/2, y+21, {align:'center'});
+    y += 48;
+  }
+
+  // specificaties + prijs
+  var specs = [];
+  if (toonKent && v.kenteken) specs.push(['Kenteken', v.kenteken]);
+  specs.push(['Bouwjaar', v.bj||'-'], ['KM-stand', v.km?Number(v.km).toLocaleString('nl-NL')+' km':'-'], ['Brandstof', v.brandstof||'-']);
+  if (v.transmissie) specs.push(['Transmissie', v.transmissie]);
+  if (v.vermogen) specs.push(['Vermogen', v.vermogen]);
+  if (v.kleur) specs.push(['Kleur', v.kleur]);
+  specs = specs.slice(0,8);
+  var specW = 112, colW = specW/2, rowH = 12;
+  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(GR[0],GR[1],GR[2]); doc.text('SPECIFICATIES', M, y);
+  for (var s=0;s<specs.length;s++){
+    var sx = M + (s%2)*colW, sy = y + 3 + Math.floor(s/2)*rowH;
+    doc.setFillColor(247,247,247); doc.roundedRect(sx, sy, colW-3, rowH-2, 1.5, 1.5, 'F');
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(GR[0],GR[1],GR[2]); doc.text(specs[s][0].toUpperCase(), sx+3, sy+3.9);
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(DK[0],DK[1],DK[2]); doc.text(doc.splitTextToSize(String(specs[s][1]), colW-9)[0], sx+3, sy+8.3);
+  }
+  var px = M+specW+4, pw = CW-specW-4, ph = 36, py = y+3;
+  doc.setFillColor(OR[0],OR[1],OR[2]); doc.roundedRect(px, py, pw, ph, 2.5, 2.5, 'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.text('B2B-PRIJS', px+5, py+8);
+  if (prijs){
+    doc.setFontSize(22); doc.text(pdfFmtEur(prijs), px+5, py+20);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+    var lbl = v.btw_marge==='btw' ? 'excl. btw' : v.btw_marge==='marge' ? 'marge-auto' : '';
+    if (lbl) doc.text(lbl, px+5, py+26.5);
+  } else { doc.setFontSize(14); doc.text('Op aanvraag', px+5, py+20); }
+  var st = status==='binnen' ? 'Direct beschikbaar' : (status==='onderweg'||status==='bestelling') ? 'Binnenkort beschikbaar' : '';
+  if (st){ doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.text(st, px+5, py+ph-4); }
+
+  // footer contact
+  var fy = 272;
+  doc.setDrawColor(225,225,225); doc.line(M, fy-6, W-M, fy-6);
+  doc.setTextColor(DK[0],DK[1],DK[2]); doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text(k.naam||'Bourguignon Occasions', M, fy);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(GR[0],GR[1],GR[2]);
+  doc.text('Inkoop · Bourguignon Occasions Leeuwarden', M, fy+5);
+  var cl = [k.tel, k.email].filter(Boolean).join('   ·   ');
+  if (cl){ doc.setTextColor(OR[0],OR[1],OR[2]); doc.setFont('helvetica','bold'); doc.text(cl, W-M, fy, {align:'right'}); }
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(150,150,150);
+  doc.text('Aanbieding onder voorbehoud van tussenverkoop, typ- en prijsfouten.', W-M, fy+5, {align:'right'});
+  return doc;
+}
+
+function pdfFileName(){
+  return ('B2B_'+[pdfVal('kenteken'), pdfVal('merk'), pdfVal('type')].join('_')).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9_-]+/g,'-').replace(/-+/g,'-').replace(/_+$/,'') + '.pdf';
+}
+
+function pdfLogOffer(){
+  var bid = document.getElementById('pdf-bedrijf').value, v = pdfCar;
+  if (!bid || !v) return;
+  var prijs = document.getElementById('pdf-prijs').value.trim();
+  var kt = pdfVal('kenteken');
+  var bestaand = b2bDeals.filter(function(d){ return d.bedrijf_id===bid && d.status==='aangeboden' && ((v.auto_id && d.auto_id===v.auto_id) || (!v.auto_id && kt && d.kenteken===kt)); })[0];
+  if (bestaand){ apiFetch('PATCH','b2b_deals?id=eq.'+bestaand.id,{ verkoopprijs:prijs?Number(prijs):null, datum:pcToday() }).then(loadB2B); return; }
+  apiFetch('POST','b2b_deals',{ id:mkid(), bedrijf_id:bid, auto_id:v.auto_id||null, kenteken:kt, vin:v.vin||'', merk:pdfVal('merk'), type:pdfVal('type'), motor:pdfVal('motor'),
+    bj:parseInt(pdfVal('bj'))||null, km:parseInt(pdfVal('km'))||null, brandstof:pdfVal('brandstof'), herkomst:v.auto_id?'inkoop':'anders', datum:pcToday(),
+    inkoopprijs:nv(v.inkoop), verkoopprijs:prijs?Number(prijs):null, status:'aangeboden', opmerkingen:'Aanbiedingsblad (PDF) gestuurd' }).then(loadB2B);
+}
+
+function pdfGo(mode){
+  pdfSaveContact();
+  if (!pdfVal('merk')){ alert('Vul minimaal het merk in (of haal de gegevens uit Autotelex).'); return; }
+  pdfLoadLib().then(function(){
+    var doc = pdfBuild(); if (!doc) return;
+    var name = pdfFileName();
+    if (mode==='share'){
+      var file = new File([doc.output('blob')], name, { type:'application/pdf' });
+      if (navigator.canShare && navigator.canShare({ files:[file] })){
+        navigator.share({ files:[file], title:name }).then(function(){ pdfLogOffer(); cm('pdf-em'); }).catch(function(){});
+        return;
+      }
+      showToast('Delen wordt hier niet ondersteund — PDF wordt gedownload');
+    }
+    doc.save(name); pdfLogOffer(); showToast('PDF gedownload'); cm('pdf-em');
+  }).catch(function(){ showToast('PDF-bibliotheek kon niet laden — controleer je internet'); });
 }
 
 initAuth();
