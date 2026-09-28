@@ -317,6 +317,28 @@ tbody tr:hover td{background:#FFF6F1}
 .kv-status-sel{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--surface);cursor:pointer}
 @media(max-width:600px){.main-tabs{flex-wrap:wrap}.kv-card-top{flex-direction:column}}
 
+
+/* ===== B2B NETWERK ===== */
+.b2b-chip{background:#EEF4FF;color:var(--blue-txt);border:1px solid var(--blue-mid);cursor:pointer}
+.b2b-chip:hover{background:var(--blue-mid);color:#fff}
+.b2b-score{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.4px}
+.b2b-s3{background:var(--green-bg);color:var(--green-txt)}
+.b2b-s2{background:var(--blue-bg);color:var(--blue-txt)}
+.b2b-s1{background:var(--surface2);color:var(--muted)}
+.b2b-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem}
+.b2b-grid .kv-card{margin-bottom:0}
+.b2b-quick{display:grid;grid-template-columns:1.2fr 1.4fr .7fr .9fr .9fr 1fr;gap:8px}
+.b2b-quick input,.b2b-quick select{font-family:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);height:36px;outline:none;min-width:0}
+.b2b-quick input:focus,.b2b-quick select:focus{border-color:var(--accent);background:var(--surface)}
+.kv-toolbar input[type=text]{font-family:inherit;font-size:13px;padding:7px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);height:36px;outline:none;min-width:200px;flex:1;max-width:340px}
+.b2b-alert{position:fixed;bottom:5rem;left:50%;transform:translate(-50%,20px);background:#111;color:#fff;padding:.875rem 1.125rem;border-radius:var(--radius-lg);font-size:13px;z-index:520;display:flex;gap:14px;align-items:center;max-width:min(680px,calc(100vw - 32px));box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:all .25s;line-height:1.5}
+.b2b-alert.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.b2b-alert .btn{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)}
+.b2b-alert .btn.primary{background:var(--accent);border-color:var(--accent)}
+.kv-card-sub a{color:var(--accent2)}
+.kv-match-row a[href^="tel"],.kv-match-row a[href^="mailto"]{font-weight:500}
+@media(max-width:768px){.b2b-quick{grid-template-columns:1fr 1fr}.b2b-grid{grid-template-columns:1fr}.b2b-alert{flex-direction:column;align-items:flex-start}}
+
 /* Desktop: bredere layout + kenteken links en knoppen rechts altijd zichtbaar */
 @media(min-width:769px){
   .app,.header-inner{max-width:1880px}
@@ -355,6 +377,7 @@ tbody tr:hover td{background:#FFF6F1}
   <div class="main-tabs">
     <button class="main-tab active" id="tab-btn-voorraad" onclick="switchMainTab('voorraad')">&#128663; Voorraad</button>
     <button class="main-tab" id="tab-btn-klantvragen" onclick="switchMainTab('klantvragen')">&#128269; Klantvragen<span id="kv-open-badge" class="kv-badge" style="display:none;margin-left:4px"></span></button>
+    <button class="main-tab" id="tab-btn-b2b" onclick="switchMainTab('b2b')">&#129309; B2B netwerk<span id="b2b-badge" class="kv-badge" style="display:none;margin-left:4px"></span></button>
   </div>
   <div id="view-voorraad">
   <div class="stats" id="stats"></div>
@@ -427,6 +450,61 @@ tbody tr:hover td{background:#FFF6F1}
     </div>
     <div id="kv-inbox"></div>
     <div id="kv-list"></div>
+  </div>
+  <div id="view-b2b" style="display:none">
+    <div class="kv-toolbar">
+      <div class="analytics-tabs" style="margin:0">
+        <button class="analytics-tab active" id="b2b-sub-kansen" onclick="setB2bSub('kansen')">Kansen</button>
+        <button class="analytics-tab" id="b2b-sub-bedrijven" onclick="setB2bSub('bedrijven')">Autobedrijven</button>
+        <button class="analytics-tab" id="b2b-sub-historie" onclick="setB2bSub('historie')">Historie</button>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="openDeal()">+ Deal vastleggen</button>
+        <button class="btn primary" onclick="openB2bBedrijf()">+ Autobedrijf</button>
+      </div>
+    </div>
+
+    <div id="b2b-pane-kansen">
+      <div class="kv-card" style="border-left:3px solid var(--blue-mid)">
+        <div class="kv-section-lbl" style="margin-bottom:.75rem">Snel checken &mdash; inruil of losse auto: bij wie past deze?</div>
+        <div class="b2b-quick">
+          <input id="b2bq-merk" placeholder="Merk" oninput="renderB2bKansen()">
+          <input id="b2bq-type" placeholder="Type (bijv. Golf 8 GTI)" oninput="renderB2bKansen()">
+          <input id="b2bq-bj" type="number" placeholder="Bouwjaar" oninput="renderB2bKansen()">
+          <input id="b2bq-km" type="number" placeholder="KM-stand" oninput="renderB2bKansen()">
+          <input id="b2bq-prijs" type="number" placeholder="Prijs (EUR)" oninput="renderB2bKansen()">
+          <select id="b2bq-br" onchange="renderB2bKansen()">
+            <option value="">Brandstof</option><option value="Benzine">Benzine</option><option value="Diesel">Diesel</option><option value="Elektrisch">Elektrisch</option><option value="Plug-in hybride">Plug-in hybride</option><option value="Hybride">Hybride</option><option value="LPG">LPG</option>
+          </select>
+        </div>
+        <div id="b2bq-result" style="margin-top:.75rem"></div>
+      </div>
+      <div class="kv-section-lbl" style="margin:1.25rem 0 .75rem">Kansen in eigen voorraad<span id="b2b-count" style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--hint)"></span></div>
+      <div id="b2b-kansen-list"></div>
+    </div>
+
+    <div id="b2b-pane-bedrijven" style="display:none">
+      <div class="kv-toolbar"><input type="text" id="b2b-bed-search" placeholder="Zoek naam, plaats, merk..." oninput="renderB2bBedrijven()"></div>
+      <div id="b2b-bed-list"></div>
+    </div>
+
+    <div id="b2b-pane-historie" style="display:none">
+      <div class="kv-toolbar">
+        <input type="text" id="b2b-hist-search" placeholder="Zoek kenteken, merk, type, bedrijf..." oninput="renderB2bHistorie()">
+        <select id="b2b-hist-bedrijf" onchange="b2bHistBedrijf=this.value;renderB2bHistorie()"></select>
+        <select id="b2b-hist-status" onchange="renderB2bHistorie()">
+          <option value="">Alle statussen</option><option value="verkocht">Verkocht</option><option value="aangeboden">Aangeboden</option><option value="afgewezen">Afgewezen</option>
+        </select>
+        <span id="b2b-hist-count" style="font-size:12px;color:var(--hint);margin-left:auto"></span>
+      </div>
+      <div class="tbl-card"><div class="tbl-wrap"><table>
+        <thead><tr>
+          <th>Kenteken / VIN</th><th>Auto</th><th>BJ</th><th class="tr">KM</th><th>Autobedrijf</th><th>Datum</th><th>Herkomst</th>
+          <th class="tr">Inkoop</th><th class="tr">Verkoop</th><th class="tr">Resultaat</th><th>Status</th><th style="width:70px"></th>
+        </tr></thead>
+        <tbody id="b2b-hist-tbody"></tbody>
+      </table></div></div>
+    </div>
   </div>
 </div>
 
@@ -665,6 +743,76 @@ tbody tr:hover td{background:#FFF6F1}
     </div>
   </div>
 </div>
+
+
+<!-- B2B deal modal -->
+<div class="mbg" id="b2b-deal-em">
+  <div class="modal" style="max-width:680px">
+    <div class="mhdr">
+      <div><h2 id="dl-title">B2B-deal vastleggen</h2><p>Welke auto gaat naar welk autobedrijf?</p></div>
+      <button class="xbtn" onclick="cm('b2b-deal-em')">&#10005;</button>
+    </div>
+    <input type="hidden" id="dl-auto-id">
+    <div id="dl-linked" class="isum" style="display:none"></div>
+    <div class="fgrid">
+      <div class="fg full"><label>Autobedrijf</label><select id="dl-bedrijf" onchange="onDealBedrijfChange(this)"></select></div>
+      <div class="fg"><label>Status</label><select id="dl-status"><option value="aangeboden">Aangeboden</option><option value="verkocht">Verkocht</option><option value="afgewezen">Afgewezen</option></select></div>
+      <div class="fg"><label>Herkomst</label><select id="dl-herkomst"><option value="inkoop">Inkoop</option><option value="inruil">Inruil</option><option value="anders">Anders</option></select></div>
+      <div class="sdiv"><span>Voertuig</span></div>
+      <div class="fg"><label>Kenteken</label><input id="dl-kenteken" placeholder="AB-123-C"></div>
+      <div class="fg"><label>Chassisnummer (VIN)</label><input id="dl-vin"></div>
+      <div class="fg"><label>Merk</label><input id="dl-merk" placeholder="bijv. Volkswagen"></div>
+      <div class="fg"><label>Type / model</label><input id="dl-type" placeholder="bijv. Golf 8 GTI"></div>
+      <div class="fg"><label>Motor / uitvoering</label><input id="dl-motor"></div>
+      <div class="fg"><label>Brandstof</label><select id="dl-brandstof"><option value="">Onbekend</option><option value="Benzine">Benzine</option><option value="Diesel">Diesel</option><option value="Elektrisch">Elektrisch</option><option value="Plug-in hybride">Plug-in hybride</option><option value="Hybride">Hybride</option><option value="LPG">LPG</option></select></div>
+      <div class="fg"><label>Bouwjaar</label><input id="dl-bj" type="number"></div>
+      <div class="fg"><label>KM-stand</label><input id="dl-km" type="number"></div>
+      <div class="sdiv"><span>Deal</span></div>
+      <div class="fg"><label>Datum</label><input id="dl-datum" type="date"></div>
+      <div class="fg"></div>
+      <div class="fg"><label>Inkoop / inruilwaarde (EUR)</label><input id="dl-inkoopprijs" type="number"></div>
+      <div class="fg"><label>B2B-verkoopprijs (EUR)</label><input id="dl-verkoopprijs" type="number"></div>
+      <div class="fg full"><label>Opmerkingen</label><textarea id="dl-opmerkingen" placeholder="afspraken, transport, schade..."></textarea></div>
+    </div>
+    <div class="mftr">
+      <button class="btn" onclick="cm('b2b-deal-em')">Annuleren</button>
+      <button class="btn primary" onclick="saveDeal()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- B2B autobedrijf modal -->
+<div class="mbg" id="b2b-bed-em">
+  <div class="modal" style="max-width:680px">
+    <div class="mhdr">
+      <div><h2 id="b2b-bed-title">Autobedrijf toevoegen</h2><p>Profiel is optioneel &mdash; zonder profiel matcht het systeem op eerdere deals</p></div>
+      <button class="xbtn" onclick="cm('b2b-bed-em')">&#10005;</button>
+    </div>
+    <div class="fgrid">
+      <div class="fg"><label>Naam autobedrijf</label><input id="b2bb-naam" placeholder="bijv. Autobedrijf De Vries"></div>
+      <div class="fg"><label>Plaats</label><input id="b2bb-plaats" placeholder="bijv. Drachten"></div>
+      <div class="fg"><label>Contactpersoon</label><input id="b2bb-contactpersoon"></div>
+      <div class="fg"><label>Telefoon</label><input id="b2bb-telefoon"></div>
+      <div class="fg full"><label>E-mail</label><input id="b2bb-email"></div>
+      <div class="sdiv"><span>Zoekprofiel</span></div>
+      <div class="fg"><label>Merken</label><input id="b2bb-merken" placeholder="bijv. Volkswagen, Skoda"><span class="hint">Komma-gescheiden</span></div>
+      <div class="fg"><label>Modellen</label><input id="b2bb-modellen" placeholder="bijv. Golf, Polo, Octavia"><span class="hint">Leeg = alle modellen van die merken</span></div>
+      <div class="fg"><label>Bouwjaar van</label><input id="b2bb-bj_van" type="number" placeholder="2016"></div>
+      <div class="fg"><label>Bouwjaar tot</label><input id="b2bb-bj_tot" type="number"></div>
+      <div class="fg"><label>Max. km-stand</label><input id="b2bb-km_max" type="number" placeholder="150000"></div>
+      <div class="fg"><label>Brandstof</label><input id="b2bb-brandstof" placeholder="bijv. Benzine, Diesel"><span class="hint">Leeg = alles</span></div>
+      <div class="fg"><label>Prijs van (EUR)</label><input id="b2bb-prijs_min" type="number"></div>
+      <div class="fg"><label>Prijs tot (EUR)</label><input id="b2bb-prijs_max" type="number" placeholder="15000"></div>
+      <div class="fg full"><label>Opmerkingen</label><textarea id="b2bb-opmerkingen" placeholder="bijv. neemt ook schadeauto's, betaalt snel, haalt zelf op..."></textarea></div>
+      <div class="fg full" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="b2bb-actief" style="width:auto"><label for="b2bb-actief" style="text-transform:none;letter-spacing:0;font-size:13px;color:var(--text)">Actief (meenemen in matching)</label></div>
+    </div>
+    <div class="mftr">
+      <button class="btn" onclick="cm('b2b-bed-em')">Annuleren</button>
+      <button class="btn primary" onclick="saveB2bBedrijf()">Opslaan</button>
+    </div>
+  </div>
+</div>
+<div class="b2b-alert" id="b2b-alert"></div>
 
 <div class="pw-screen" id="pw-screen">
   <div class="pw-box">
@@ -1142,6 +1290,7 @@ function load() {
     render();
     updateStats();
     loadKlantvragen();
+    loadB2B();
     pcAfterLoad();
   }).catch(function() { showLoading(false); showToast('Fout bij laden'); });
 }
@@ -1277,12 +1426,13 @@ var brf = document.getElementById('fbrandstof').value;
       '<td data-label="Inkoop" class="tr mono">'+fe(c.inkoop)+'</td>'+
       '<td data-label="Verkoop" class="tr mono">'+fe(c.verkoop)+'</td>'+
       '<td data-label="Resultaat" class="tr">'+rc(c)+'</td>'+
-      '<td data-label="Status" class="mob-always">'+sb(c.status, eid)+pcChip(c)+'</td>'+
+      '<td data-label="Status" class="mob-always">'+sb(c.status, eid)+pcChip(c)+b2bChip(c)+'</td>'+
       '<td data-label="Leverancier">'+levCell+'</td>'+
       '<td data-label="Opmerkingen">'+opm+'</td>'+
       '<td><div class="acell">'+
         '<button class="ib" title="Publiceer naar Autotelex" data-id="'+eid+'" onclick="publishToAutotelex(this.dataset.id)" style="font-size:10px;font-weight:700;color:#1a6b1a;padding:4px 6px;background:#edfaf1;border-radius:6px">ADS</button>'+
         '<button class="ib" title="Stuur naar Inname dashboard (verwacht)" data-id="'+eid+'" onclick="stuurNaarInname(this.dataset.id)" style="font-size:10px;font-weight:700;color:#7c3aed;padding:4px 6px;background:#f5f0ff;border-radius:6px">INN</button>'+
+        '<button class="ib" title="B2B-deal vastleggen (doorzetten naar autobedrijf)" data-id="'+eid+'" onclick="openDealFromCar(this.dataset.id,\'\',\'verkocht\')" style="font-size:10px;font-weight:700;color:#1A3A8F;padding:4px 6px;background:#EEF4FF;border-radius:6px">B2B</button>'+
         '<button class="ib" title="Bekijk op JPcars" data-kenteken="'+(c.kenteken||'')+'" onclick="openJP(this.dataset.kenteken)" style="font-size:11px;font-weight:600;color:#E8620A;padding:4px 7px">JP</button>'+
         '<button class="ib" title="Bewerken" data-id="'+eid+'" onclick="editCar(this.dataset.id)">&#9998;</button>'+
         '<button class="ib del" title="Verwijderen" data-id="'+eid+'" onclick="delCar(this.dataset.id)">&#128465;</button>'+
@@ -1428,6 +1578,7 @@ function save() {
     apiFetch('PATCH','autos?id=eq.'+editId,d).then(function(){showToast('Auto bijgewerkt');load();}).catch(function(){showToast('Fout bij opslaan');});
   } else {
     d.id=mkid();
+    b2bPendingCheckId=d.id;
     apiFetch('POST','autos',d).then(function(){showToast('Auto toegevoegd');load();}).catch(function(){showToast('Fout bij opslaan');});
   }
 }
@@ -2073,7 +2224,7 @@ function stuurNaarInname(eid) {
 }
 
 function toggleRow(evt, tr) {
-  if (evt.target.closest('.ib') || evt.target.closest('.badge') || evt.target.closest('.acell')) return;
+  if (evt.target.closest('.ib') || evt.target.closest('.badge') || evt.target.closest('.acell') || evt.target.closest('.b2b-chip')) return;
   tr.classList.toggle('expanded');
 }
 
@@ -2086,7 +2237,10 @@ function switchMainTab(tab) {
   document.getElementById('tab-btn-klantvragen').classList.toggle('active', tab==='klantvragen');
   document.getElementById('view-voorraad').style.display = tab==='voorraad' ? '' : 'none';
   document.getElementById('view-klantvragen').style.display = tab==='klantvragen' ? '' : 'none';
+  document.getElementById('tab-btn-b2b').classList.toggle('active', tab==='b2b');
+  document.getElementById('view-b2b').style.display = tab==='b2b' ? '' : 'none';
   if (tab === 'klantvragen') renderKlantvragen();
+  if (tab === 'b2b') renderB2B();
 }
 
 function loadKlantvragen() {
@@ -2361,6 +2515,392 @@ function markKvMatchGezien(id) {
 function delKvMatch(id) {
   if (!confirm('Deze gevonden auto verwijderen?')) return;
   apiFetch('DELETE','klantvraag_matches?id=eq.'+id,null).then(function(){ loadKlantvragen(); });
+}
+
+// ===== B2B NETWERK =====
+var b2bBedrijven = [], b2bDeals = [], b2bSub = 'kansen', b2bLoaded = false;
+var editB2bId = null, editDealId = null, b2bPendingCheckId = null, b2bFocusCarId = null, b2bHistBedrijf = '';
+var B2B_MIN_SCORE = 35;
+
+function loadB2B() {
+  return Promise.all([
+    apiFetch('GET','b2b_bedrijven?order=naam.asc&select=*'),
+    apiFetch('GET','b2b_deals?order=created_at.desc&select=*')
+  ]).then(function(res){
+    b2bBedrijven = Array.isArray(res[0]) ? res[0] : [];
+    b2bDeals = Array.isArray(res[1]) ? res[1] : [];
+    b2bLoaded = true;
+    updateB2bBadge();
+    render();
+    if (currentMainTab === 'b2b') renderB2B();
+    b2bCheckPending();
+  }).catch(function(){ /* tabellen nog niet aangemaakt? stil negeren */ });
+}
+
+// ---- normaliseren ----
+function b2bNorm(s){ return String(s||'').toLowerCase().replace(/[šś]/g,'s').replace(/[éèë]/g,'e').replace(/[^a-z0-9]+/g,' ').trim(); }
+function b2bMerk(s){ var n=b2bNorm(s); if(n==='vw'||n==='volkswagen'||n.indexOf('volkswagen ')===0) return 'volkswagen'; if(n.indexOf('mercedes')===0) return 'mercedes'; return n; }
+function b2bList(s){ return String(s||'').split(/[,;\n]+/).map(function(x){return x.trim();}).filter(Boolean); }
+function b2bModelKey(type){ return b2bNorm(type).split(' ')[0]||''; }
+function b2bModelHit(profielModel, type){
+  var need=b2bNorm(profielModel).split(' ').filter(Boolean), have=' '+b2bNorm(type)+' ';
+  if(!need.length) return false;
+  return need.every(function(t){ return have.indexOf(' '+t+' ')>-1; });
+}
+function b2bFromCar(c){ return { merk:c.merk, type:c.type, bj:parseInt(c.bj)||null, km:parseInt(c.km)||null, prijs:nv(c.inkoop)||nv(c.verkoop), brandstof:c.brandstof||'' }; }
+function b2bFindBedrijf(id){ for(var i=0;i<b2bBedrijven.length;i++){ if(b2bBedrijven[i].id===id) return b2bBedrijven[i]; } return null; }
+function b2bFindDeal(id){ for(var i=0;i<b2bDeals.length;i++){ if(b2bDeals[i].id===id) return b2bDeals[i]; } return null; }
+function b2bCarById(id){ for(var i=0;i<cars.length;i++){ if(String(cars[i].id)===String(id)) return cars[i]; } return null; }
+
+// ---- matching: profiel + historie ----
+function b2bScore(v, b, autoId){
+  if (b.actief === false) return null;
+  var score=0, base=0, why=[];
+  var vm=b2bMerk(v.merk), vmod=b2bModelKey(v.type);
+  var merken=b2bList(b.merken), modellen=b2bList(b.modellen);
+  var merkHit = merken.some(function(m){ return b2bMerk(m)===vm; });
+  var modelHit = modellen.filter(function(m){ return b2bModelHit(m, v.type); })[0];
+  if (merkHit) {
+    if (modellen.length && !modelHit) { base+=15; }
+    else { base+=35; why.push('profiel: '+v.merk); }
+  }
+  if (modelHit) { base+=30; why.push('profiel: '+modelHit); if(!merken.length) base+=10; }
+
+  // historie van dit bedrijf
+  var deals=b2bDeals.filter(function(d){ return d.bedrijf_id===b.id && b2bMerk(d.merk)===vm; });
+  var sold=deals.filter(function(d){ return d.status==='verkocht'; });
+  var soldModel=sold.filter(function(d){ return vmod && b2bModelKey(d.type)===vmod; }).length;
+  var soldMerk=sold.length-soldModel;
+  var nee=deals.filter(function(d){ return d.status==='afgewezen' && vmod && b2bModelKey(d.type)===vmod; }).length;
+  if (soldModel){ base+=Math.min(soldModel*20,40); why.push('kocht eerder '+soldModel+'× '+(v.type||'').split(' ')[0]); }
+  if (soldMerk){ base+=Math.min(soldMerk*8,16); why.push('kocht eerder '+soldMerk+'× '+v.merk); }
+  if (!base) return null;
+  score=base;
+  if (nee){ score-=nee*10; why.push('wees '+nee+'× '+(v.type||'').split(' ')[0]+' af'); }
+
+  // harde criteria
+  var mis=[];
+  if (v.bj){ if(b.bj_van && v.bj<b.bj_van) mis.push('bj'); else if(b.bj_tot && v.bj>b.bj_tot) mis.push('bj'); else if(b.bj_van||b.bj_tot) score+=5; }
+  if (v.km && b.km_max){ if(v.km>b.km_max) mis.push('km'); else score+=5; }
+  if (v.prijs){ if(b.prijs_min && v.prijs<b.prijs_min) mis.push('prijs'); else if(b.prijs_max && v.prijs>b.prijs_max) mis.push('prijs'); else if(b.prijs_min||b.prijs_max) score+=5; }
+  var brs=b2bList(b.brandstof).map(function(x){return x.toLowerCase();});
+  if (v.brandstof && brs.length){ if(brs.indexOf(v.brandstof.toLowerCase())===-1) mis.push('brandstof'); else score+=5; }
+  if (mis.length){ score-=mis.length*20; why.push('buiten profiel: '+mis.join(', ')); }
+
+  // status voor deze specifieke auto
+  var own=null;
+  if (autoId) own=b2bDeals.filter(function(d){ return d.auto_id===autoId && d.bedrijf_id===b.id; })[0]||null;
+  if (own && own.status==='afgewezen') return null;
+  return { bedrijf:b, score:score, why:why, deal:own };
+}
+
+function b2bMatchesFor(v, autoId){
+  if (!v.merk) return [];
+  return b2bBedrijven.map(function(b){ return b2bScore(v,b,autoId); })
+    .filter(function(r){ return r && r.score>=B2B_MIN_SCORE; })
+    .sort(function(a,b){ return b.score-a.score; });
+}
+
+function b2bCarSold(c){ return c.status==='verkocht' || b2bDeals.some(function(d){ return d.auto_id===c.id && d.status==='verkocht'; }); }
+
+function b2bKansen(){
+  if (!b2bLoaded) return [];
+  return cars.filter(function(c){ return !b2bCarSold(c); })
+    .map(function(c){ return { car:c, matches:b2bMatchesFor(b2bFromCar(c), c.id) }; })
+    .filter(function(k){ return k.matches.length; })
+    .sort(function(a,b){ return b.matches[0].score-a.matches[0].score; });
+}
+
+function b2bLabel(score){
+  if (score>=70) return '<span class="b2b-score b2b-s3">sterk</span>';
+  if (score>=50) return '<span class="b2b-score b2b-s2">goed</span>';
+  return '<span class="b2b-score b2b-s1">mogelijk</span>';
+}
+
+// chip in voorraadtabel
+function b2bChip(c){
+  if (!b2bLoaded || b2bCarSold(c)) return '';
+  var m=b2bMatchesFor(b2bFromCar(c), c.id);
+  if (!m.length) return '';
+  return '<br><span class="pc-chip b2b-chip" title="'+pcEsc(m.map(function(x){return x.bedrijf.naam;}).join(', '))+'" onclick="b2bFocus(\''+encodeURIComponent(c.id)+'\')">B2B · '+m.length+'</span>';
+}
+
+function updateB2bBadge(){
+  var n=b2bKansen().length, el=document.getElementById('b2b-badge');
+  if (!el) return;
+  if (n){ el.textContent=n; el.style.display='inline-block'; } else el.style.display='none';
+}
+
+// melding na toevoegen auto
+function b2bCheckPending(){
+  if (!b2bPendingCheckId) return;
+  var c=b2bCarById(b2bPendingCheckId); b2bPendingCheckId=null;
+  if (!c) return;
+  var m=b2bMatchesFor(b2bFromCar(c), c.id);
+  if (!m.length) return;
+  var el=document.getElementById('b2b-alert');
+  el.innerHTML='<div><strong>&#129309; B2B-match voor '+pcEsc(c.kenteken||c.vin||'')+' '+pcEsc((c.merk||'')+' '+(c.type||''))+'</strong><br>'+
+    m.slice(0,3).map(function(x){ return pcEsc(x.bedrijf.naam)+' ('+x.why[0]+')'; }).join(' &middot; ')+(m.length>3?' &middot; +'+(m.length-3):'')+'</div>'+
+    '<div style="display:flex;gap:6px;flex-shrink:0"><button class="btn small primary" onclick="b2bFocus(\''+encodeURIComponent(c.id)+'\');b2bCloseAlert()">Bekijk</button><button class="btn small" onclick="b2bCloseAlert()">Sluit</button></div>';
+  el.classList.add('show');
+  clearTimeout(window._b2bAlertT); window._b2bAlertT=setTimeout(b2bCloseAlert, 15000);
+}
+function b2bCloseAlert(){ document.getElementById('b2b-alert').classList.remove('show'); }
+
+function b2bFocus(eid){ b2bFocusCarId=decodeURIComponent(eid); b2bSub='kansen'; switchMainTab('b2b'); }
+
+// ---- tabs ----
+function setB2bSub(s){ b2bSub=s; if(s!=='kansen') b2bFocusCarId=null; renderB2B(); }
+
+function renderB2B(){
+  ['kansen','bedrijven','historie'].forEach(function(s){ document.getElementById('b2b-sub-'+s).classList.toggle('active', b2bSub===s); document.getElementById('b2b-pane-'+s).style.display=b2bSub===s?'':'none'; });
+  if (b2bSub==='kansen') renderB2bKansen();
+  else if (b2bSub==='bedrijven') renderB2bBedrijven();
+  else renderB2bHistorie();
+}
+
+function b2bContact(b){
+  var p=[];
+  if (b.contactpersoon) p.push(pcEsc(b.contactpersoon));
+  if (b.telefoon) p.push('<a href="tel:'+pcEsc(b.telefoon.replace(/\s/g,''))+'">'+pcEsc(b.telefoon)+'</a>');
+  if (b.email) p.push('<a href="mailto:'+pcEsc(b.email)+'">'+pcEsc(b.email)+'</a>');
+  return p.join(' &middot; ');
+}
+
+function b2bMatchRows(matches, carId){
+  return matches.map(function(x){
+    var b=x.bedrijf, d=x.deal, st='';
+    if (d && d.status==='aangeboden') st='<span class="kv-tag" style="background:var(--blue-bg);color:var(--blue-txt)">aangeboden '+pcFmt(d.datum)+'</span>';
+    var btns = carId
+      ? (d && d.status==='aangeboden'
+          ? '<button class="btn small green" onclick="b2bDealVerkocht(\''+d.id+'\')">Verkocht</button> <button class="btn small" onclick="b2bDealStatus(\''+d.id+'\',\'afgewezen\')">Afgewezen</button>'
+          : '<button class="btn small" onclick="b2bAanbieden(\''+encodeURIComponent(carId)+'\',\''+b.id+'\')">Aangeboden</button> <button class="btn small green" onclick="openDealFromCar(\''+encodeURIComponent(carId)+'\',\''+b.id+'\',\'verkocht\')">Verkocht</button>')
+      : '<button class="btn small green" onclick="b2bQuickDeal(\''+b.id+'\')">Vastleggen</button>';
+    return '<div class="kv-match-row" style="justify-content:space-between">'+
+      '<div style="min-width:0"><strong>'+pcEsc(b.naam)+'</strong>'+(b.plaats?' <span class="dm">'+pcEsc(b.plaats)+'</span>':'')+' '+b2bLabel(x.score)+' '+st+
+      '<div style="color:var(--muted);margin-top:3px">'+x.why.map(pcEsc).join(' &middot; ')+(b2bContact(b)?' &nbsp;|&nbsp; '+b2bContact(b):'')+'</div></div>'+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">'+btns+'</div></div>';
+  }).join('');
+}
+
+function renderB2bKansen(){
+  // snelle check (inruil / losse auto)
+  var q={ merk:document.getElementById('b2bq-merk').value.trim(), type:document.getElementById('b2bq-type').value.trim(),
+    bj:parseInt(document.getElementById('b2bq-bj').value)||null, km:parseInt(document.getElementById('b2bq-km').value)||null,
+    prijs:parseFloat(document.getElementById('b2bq-prijs').value)||null, brandstof:document.getElementById('b2bq-br').value };
+  var qEl=document.getElementById('b2bq-result');
+  if (!q.merk) qEl.innerHTML='';
+  else { var qm=b2bMatchesFor(q,null); qEl.innerHTML = qm.length ? b2bMatchRows(qm,null) : '<div class="kv-empty">Geen passend autobedrijf gevonden. Tip: vul profielen aan bij Autobedrijven.</div>'; }
+
+  var el=document.getElementById('b2b-kansen-list');
+  if (!b2bBedrijven.length){ el.innerHTML='<div class="kv-card"><div class="kv-empty">Nog geen autobedrijven. Voeg ze toe onder "Autobedrijven" &mdash; met een zoekprofiel of gewoon een naam (dan leert het systeem van je deals).</div></div>'; return; }
+  var list=b2bKansen(), focus='';
+  if (b2bFocusCarId){
+    list=list.filter(function(k){ return String(k.car.id)===String(b2bFocusCarId); });
+    focus='<div class="kv-empty" style="margin-bottom:.5rem">Gefilterd op 1 auto &mdash; <a href="#" onclick="b2bFocusCarId=null;renderB2B();return false" style="color:var(--accent2)">toon alle kansen</a></div>';
+  }
+  document.getElementById('b2b-count').textContent=list.length+(list.length!==1?" auto's met match":' auto met match');
+  if (!list.length){ el.innerHTML=focus+'<div class="kv-card"><div class="kv-empty">Geen B2B-kansen in de huidige voorraad.</div></div>'; return; }
+  el.innerHTML=focus+list.map(function(k){
+    var c=k.car;
+    return '<div class="kv-card">'+
+      '<div class="kv-card-top"><div><div class="kv-card-title">'+pcEsc(c.kenteken||c.vin||'?')+' &nbsp;'+pcEsc((c.merk||'')+' '+(c.type||''))+' <span class="dm" style="font-weight:400">'+pcEsc(c.motor||'')+'</span></div>'+
+      '<div class="kv-card-sub">'+(c.bj||'-')+' &middot; '+fk(c.km)+' &middot; inkoop '+fe(c.inkoop)+' &middot; <span class="badge b-'+(c.status||'bestelling')+'">'+(c.status||'')+'</span></div></div></div>'+
+      '<div class="kv-section" style="margin-top:0;padding-top:.5rem"><div class="kv-section-lbl">Past bij ('+k.matches.length+')</div>'+b2bMatchRows(k.matches, c.id)+'</div></div>';
+  }).join('');
+}
+
+function b2bBedrijfStats(b){
+  var sold=b2bDeals.filter(function(d){ return d.bedrijf_id===b.id && d.status==='verkocht'; });
+  var cnt={}; sold.forEach(function(d){ var k=((d.merk||'')+' '+(d.type||'').split(' ')[0]).trim(); cnt[k]=(cnt[k]||0)+1; });
+  var top=Object.keys(cnt).sort(function(a,c){ return cnt[c]-cnt[a]; }).slice(0,4).map(function(k){ return pcEsc(k)+' '+cnt[k]+'×'; });
+  var last=sold.map(function(d){return d.datum||'';}).sort().pop();
+  return { n:sold.length, top:top, last:last };
+}
+
+function renderB2bBedrijven(){
+  var q=b2bNorm(document.getElementById('b2b-bed-search').value);
+  var list=b2bBedrijven.filter(function(b){ return !q || b2bNorm([b.naam,b.plaats,b.contactpersoon,b.merken,b.modellen].join(' ')).indexOf(q)>-1; });
+  var el=document.getElementById('b2b-bed-list');
+  if (!list.length){ el.innerHTML='<div class="kv-card"><div class="kv-empty">'+(b2bBedrijven.length?'Geen resultaten.':'Nog geen autobedrijven toegevoegd.')+'</div></div>'; return; }
+  el.innerHTML='<div class="b2b-grid">'+list.map(function(b){
+    var s=b2bBedrijfStats(b), tags=[];
+    if (b.merken) tags.push(b.merken);
+    if (b.modellen) tags.push(b.modellen);
+    if (b.bj_van||b.bj_tot) tags.push('bj '+(b.bj_van||'...')+'-'+(b.bj_tot||'...'));
+    if (b.km_max) tags.push('max '+Number(b.km_max).toLocaleString('nl-NL')+' km');
+    if (b.prijs_min||b.prijs_max) tags.push('EUR '+(b.prijs_min?Number(b.prijs_min).toLocaleString('nl-NL'):'0')+' - '+(b.prijs_max?Number(b.prijs_max).toLocaleString('nl-NL'):'...'));
+    if (b.brandstof) tags.push(b.brandstof);
+    return '<div class="kv-card"'+(b.actief===false?' style="opacity:.55"':'')+'>'+
+      '<div class="kv-card-top" style="margin-bottom:.25rem"><div><div class="kv-card-title">'+pcEsc(b.naam)+(b.actief===false?' <span class="kv-tag">inactief</span>':'')+'</div>'+
+      '<div class="kv-card-sub">'+pcEsc(b.plaats||'')+(b.plaats&&b2bContact(b)?' &middot; ':'')+b2bContact(b)+'</div></div>'+
+      '<div style="display:flex;gap:4px"><button class="ib" title="Bewerken" onclick="editB2bBedrijf(\''+b.id+'\')">&#9998;</button><button class="ib del" title="Verwijderen" onclick="delB2bBedrijf(\''+b.id+'\')">&#128465;</button></div></div>'+
+      '<div class="kv-crit">'+(tags.length?tags.map(function(t){return '<span class="kv-tag">'+pcEsc(t)+'</span>';}).join(''):'<span class="kv-empty" style="padding:0">Geen profiel &mdash; matcht op historie</span>')+'</div>'+
+      '<div class="kv-section" style="font-size:12px;color:var(--muted)"><strong style="color:var(--text)">'+s.n+'</strong> verkocht'+(s.last?' &middot; laatste '+pcFmt(s.last):'')+(s.top.length?'<br>'+s.top.join(' &middot; '):'')+
+      (s.n?' <a href="#" onclick="b2bHistBedrijf=\''+b.id+'\';setB2bSub(\'historie\');return false" style="color:var(--accent2);font-weight:600;margin-left:6px">historie &rarr;</a>':'')+'</div>'+
+      (b.opmerkingen?'<div class="kv-card-sub" style="margin-top:.5rem">'+pcEsc(b.opmerkingen)+'</div>':'')+
+    '</div>';
+  }).join('')+'</div>';
+}
+
+function renderB2bHistorie(){
+  var sel=document.getElementById('b2b-hist-bedrijf');
+  sel.innerHTML='<option value="">Alle autobedrijven</option>'+b2bBedrijven.map(function(b){ return '<option value="'+b.id+'"'+(b.id===b2bHistBedrijf?' selected':'')+'>'+pcEsc(b.naam)+'</option>'; }).join('');
+  var q=b2bNorm(document.getElementById('b2b-hist-search').value), sf=document.getElementById('b2b-hist-status').value;
+  var list=b2bDeals.filter(function(d){
+    var b=b2bFindBedrijf(d.bedrijf_id);
+    var h=b2bNorm([d.kenteken,d.vin,d.merk,d.type,d.motor,b?b.naam:'',d.opmerkingen].join(' '));
+    return (!q||h.indexOf(q)>-1) && (!sf||d.status===sf) && (!b2bHistBedrijf||d.bedrijf_id===b2bHistBedrijf);
+  }).sort(function(a,b){ return String(b.datum||'').localeCompare(String(a.datum||'')); });
+  var sold=list.filter(function(d){return d.status==='verkocht';});
+  document.getElementById('b2b-hist-count').textContent=list.length+(list.length!==1?' deals':' deal')+' · '+sold.length+' verkocht';
+  var tb=document.getElementById('b2b-hist-tbody');
+  if (!list.length){ tb.innerHTML='<tr class="erow"><td colspan="12">Nog geen B2B-deals vastgelegd.</td></tr>'; return; }
+  var stCls={aangeboden:'b-bestelling',verkocht:'b-verkocht',afgewezen:'b-onderweg'};
+  tb.innerHTML=list.map(function(d){
+    var b=b2bFindBedrijf(d.bedrijf_id), res=(nv(d.verkoopprijs)!==null&&nv(d.inkoopprijs)!==null)?nv(d.verkoopprijs)-nv(d.inkoopprijs):null;
+    return '<tr onclick="toggleRow(event,this)">'+
+      '<td data-label="Kenteken" class="mob-always"><span class="mono" style="font-weight:600">'+pcEsc(d.kenteken||'')+'</span>'+(d.vin?'<br><span style="font-size:11px;color:var(--hint)">'+pcEsc(d.vin)+'</span>':'')+(!d.kenteken&&!d.vin?'<span class="dm">-</span>':'')+'</td>'+
+      '<td data-label="Auto" class="mob-always"><strong>'+pcEsc(d.merk||'')+'</strong> '+pcEsc(d.type||'')+'<br><span class="dm">'+pcEsc(d.motor||'')+'</span></td>'+
+      '<td data-label="BJ">'+(d.bj||'<span class="dm">-</span>')+'</td>'+
+      '<td data-label="KM" class="tr mono">'+fk(d.km)+'</td>'+
+      '<td data-label="Autobedrijf" class="mob-always"><strong>'+pcEsc(b?b.naam:'(verwijderd)')+'</strong></td>'+
+      '<td data-label="Datum">'+pcFmt(d.datum)+'</td>'+
+      '<td data-label="Herkomst"><span class="lev-badge">'+pcEsc(d.herkomst||'')+'</span></td>'+
+      '<td data-label="Inkoop" class="tr mono">'+fe(d.inkoopprijs)+'</td>'+
+      '<td data-label="Verkoop" class="tr mono">'+fe(d.verkoopprijs)+'</td>'+
+      '<td data-label="Resultaat" class="tr">'+(res===null?'<span class="dm">-</span>':'<span class="'+(res>=0?'rp':'rn')+'">'+(res>=0?'+':'')+'EUR '+res.toLocaleString('nl-NL')+'</span>')+'</td>'+
+      '<td data-label="Status"><span class="badge '+(stCls[d.status]||'')+'">'+pcEsc(d.status||'')+'</span></td>'+
+      '<td><div class="acell"><button class="ib" title="Bewerken" onclick="editDeal(\''+d.id+'\')">&#9998;</button><button class="ib del" title="Verwijderen" onclick="delDeal(\''+d.id+'\')">&#128465;</button></div></td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ---- autobedrijf CRUD ----
+var B2B_BED_FIELDS = ['naam','plaats','contactpersoon','telefoon','email','merken','modellen','bj_van','bj_tot','km_max','prijs_min','prijs_max','brandstof','opmerkingen'];
+function openB2bBedrijf(){
+  editB2bId=null;
+  document.getElementById('b2b-bed-title').textContent='Autobedrijf toevoegen';
+  B2B_BED_FIELDS.forEach(function(f){ document.getElementById('b2bb-'+f).value=''; });
+  document.getElementById('b2bb-actief').checked=true;
+  document.getElementById('b2b-bed-em').classList.add('open');
+  setTimeout(function(){ document.getElementById('b2bb-naam').focus(); },50);
+}
+function editB2bBedrijf(id){
+  var b=b2bFindBedrijf(id); if(!b) return;
+  editB2bId=id;
+  document.getElementById('b2b-bed-title').textContent='Autobedrijf bewerken';
+  B2B_BED_FIELDS.forEach(function(f){ document.getElementById('b2bb-'+f).value=(b[f]===null||b[f]===undefined)?'':b[f]; });
+  document.getElementById('b2bb-actief').checked=b.actief!==false;
+  document.getElementById('b2b-bed-em').classList.add('open');
+}
+function saveB2bBedrijf(){
+  var d={}, nums=['bj_van','bj_tot','km_max','prijs_min','prijs_max'];
+  B2B_BED_FIELDS.forEach(function(f){ var v=document.getElementById('b2bb-'+f).value.trim(); d[f]= nums.indexOf(f)>-1 ? (v===''?null:Number(v)) : v; });
+  d.actief=document.getElementById('b2bb-actief').checked;
+  if (!d.naam){ alert('Vul minimaal de naam in.'); return; }
+  cm('b2b-bed-em');
+  var p = editB2bId ? apiFetch('PATCH','b2b_bedrijven?id=eq.'+editB2bId,d) : (d.id=mkid(), apiFetch('POST','b2b_bedrijven',d));
+  p.then(function(r){
+    if (r && r.message) { showToast('Fout: '+r.message); return; }
+    showToast(editB2bId?'Autobedrijf bijgewerkt':'Autobedrijf toegevoegd');
+    if (window._b2bAfterBedrijf){ var cb=window._b2bAfterBedrijf; window._b2bAfterBedrijf=null; loadB2B().then(function(){ cb(d.id||editB2bId); }); }
+    else loadB2B();
+  }).catch(function(){ showToast('Fout bij opslaan — is het SQL-script al uitgevoerd?'); });
+}
+function delB2bBedrijf(id){
+  var b=b2bFindBedrijf(id); if(!b) return;
+  var n=b2bDeals.filter(function(d){return d.bedrijf_id===id;}).length;
+  if (n){ if(!confirm(b.naam+' heeft '+n+' deal(s) in de historie. Liever op inactief zetten via bewerken?\n\nOK = toch verwijderen (historie blijft, zonder bedrijfsnaam)')) return; }
+  else if (!confirm(b.naam+' verwijderen?')) return;
+  apiFetch('DELETE','b2b_bedrijven?id=eq.'+id,null).then(function(){ showToast('Verwijderd'); loadB2B(); });
+}
+
+// ---- deals ----
+var B2B_DEAL_FIELDS=['kenteken','vin','merk','type','motor','bj','km','brandstof','herkomst','datum','inkoopprijs','verkoopprijs','status','opmerkingen'];
+function fillDealBedrijven(sel){
+  document.getElementById('dl-bedrijf').innerHTML='<option value="">Kies autobedrijf...</option>'+
+    b2bBedrijven.filter(function(b){ return b.actief!==false || b.id===sel; }).map(function(b){ return '<option value="'+b.id+'"'+(b.id===sel?' selected':'')+'>'+pcEsc(b.naam)+(b.plaats?' ('+pcEsc(b.plaats)+')':'')+'</option>'; }).join('')+
+    '<option value="__nieuw__">+ Nieuw autobedrijf...</option>';
+}
+function openDeal(pre){
+  pre=pre||{};
+  editDealId=pre.id||null;
+  document.getElementById('dl-title').textContent=editDealId?'B2B-deal bewerken':'B2B-deal vastleggen';
+  B2B_DEAL_FIELDS.forEach(function(f){ var v=pre[f]; document.getElementById('dl-'+f).value=(v===null||v===undefined)?'':v; });
+  if (!pre.datum) document.getElementById('dl-datum').value=pcToday();
+  if (!pre.status) document.getElementById('dl-status').value='verkocht';
+  if (!pre.herkomst) document.getElementById('dl-herkomst').value='inruil';
+  document.getElementById('dl-auto-id').value=pre.auto_id||'';
+  var c=pre.auto_id?b2bCarById(pre.auto_id):null;
+  document.getElementById('dl-linked').innerHTML=c?'&#128279; Gekoppeld aan voorraad: <strong>'+pcEsc(c.kenteken||c.vin||'')+'</strong> '+pcEsc((c.merk||'')+' '+(c.type||'')):'';
+  document.getElementById('dl-linked').style.display=c?'':'none';
+  fillDealBedrijven(pre.bedrijf_id||'');
+  document.getElementById('b2b-deal-em').classList.add('open');
+}
+function onDealBedrijfChange(sel){
+  if (sel.value!=='__nieuw__') return;
+  sel.value='';
+  window._b2bAfterBedrijf=function(newId){ fillDealBedrijven(newId); };
+  openB2bBedrijf();
+}
+function openDealFromCar(eid, bedrijfId, status){
+  var c=b2bCarById(decodeURIComponent(eid)); if(!c) return;
+  var dt=null; if(c.datum){ var p=String(c.datum).split('-'); if(p.length===3&&p[2].length===4) dt=p[2]+'-'+('0'+p[1]).slice(-2)+'-'+('0'+p[0]).slice(-2); }
+  openDeal({ auto_id:c.id, bedrijf_id:bedrijfId||'', kenteken:c.kenteken, vin:c.vin, merk:c.merk, type:c.type, motor:c.motor, bj:c.bj, km:c.km, brandstof:c.brandstof||'',
+    herkomst:'inkoop', inkoopprijs:c.inkoop, verkoopprijs:'', status:status||'verkocht' });
+}
+function b2bQuickDeal(bedrijfId){
+  openDeal({ bedrijf_id:bedrijfId, merk:document.getElementById('b2bq-merk').value.trim(), type:document.getElementById('b2bq-type').value.trim(),
+    bj:document.getElementById('b2bq-bj').value, km:document.getElementById('b2bq-km').value, inkoopprijs:document.getElementById('b2bq-prijs').value,
+    brandstof:document.getElementById('b2bq-br').value, herkomst:'inruil', status:'aangeboden' });
+}
+function editDeal(id){ var d=b2bFindDeal(id); if(d) openDeal(d); }
+
+function saveDeal(){
+  var d={}, nums=['bj','km','inkoopprijs','verkoopprijs'];
+  B2B_DEAL_FIELDS.forEach(function(f){ var v=document.getElementById('dl-'+f).value.trim(); d[f]= nums.indexOf(f)>-1 ? (v===''?null:Number(v)) : (v===''&&f==='datum'?null:v); });
+  d.bedrijf_id=document.getElementById('dl-bedrijf').value;
+  d.auto_id=document.getElementById('dl-auto-id').value||null;
+  if (!d.bedrijf_id || d.bedrijf_id==='__nieuw__'){ alert('Kies een autobedrijf.'); return; }
+  if (!d.merk){ alert('Vul minimaal het merk in.'); return; }
+  cm('b2b-deal-em');
+  var wasId=editDealId;
+  var p = wasId ? apiFetch('PATCH','b2b_deals?id=eq.'+wasId,d) : (d.id=mkid(), apiFetch('POST','b2b_deals',d));
+  p.then(function(r){
+    if (r && r.message){ showToast('Fout: '+r.message); return; }
+    showToast(wasId?'Deal bijgewerkt':'Deal vastgelegd');
+    b2bSyncCarSold(d);
+    loadB2B();
+  }).catch(function(){ showToast('Fout bij opslaan — is het SQL-script al uitgevoerd?'); });
+}
+
+// als een voorraadauto B2B verkocht is: aanbieden om voorraadstatus mee te zetten
+function b2bSyncCarSold(d){
+  if (d.status!=='verkocht' || !d.auto_id) return;
+  var c=b2bCarById(d.auto_id); if(!c || c.status==='verkocht') return;
+  var b=b2bFindBedrijf(d.bedrijf_id);
+  if (!confirm('Auto '+(c.kenteken||c.vin||'')+' in je voorraad ook op "verkocht" zetten'+(d.verkoopprijs?' met verkoopprijs EUR '+Number(d.verkoopprijs).toLocaleString('nl-NL'):'')+'?')) return;
+  var patch={status:'verkocht'};
+  if (d.verkoopprijs) patch.verkoop=d.verkoopprijs;
+  var opm=(c.opmerkingen?c.opmerkingen+' | ':'')+'B2B verkocht aan '+(b?b.naam:'');
+  patch.opmerkingen=opm;
+  apiFetch('PATCH','autos?id=eq.'+c.id,patch).then(function(){ load(); });
+}
+
+function b2bAanbieden(eid, bedrijfId){
+  var c=b2bCarById(decodeURIComponent(eid)); if(!c) return;
+  var d={ id:mkid(), bedrijf_id:bedrijfId, auto_id:c.id, kenteken:c.kenteken||'', vin:c.vin||'', merk:c.merk||'', type:c.type||'', motor:c.motor||'',
+    bj:parseInt(c.bj)||null, km:parseInt(c.km)||null, brandstof:c.brandstof||'', herkomst:'inkoop', datum:pcToday(), inkoopprijs:nv(c.inkoop), verkoopprijs:null, status:'aangeboden', opmerkingen:'' };
+  apiFetch('POST','b2b_deals',d).then(function(r){ if(r&&r.message){showToast('Fout: '+r.message);return;} showToast('Gemarkeerd als aangeboden'); loadB2B(); });
+}
+function b2bDealStatus(id, status){
+  apiFetch('PATCH','b2b_deals?id=eq.'+id,{status:status}).then(function(){ showToast('Status: '+status); loadB2B(); });
+}
+function b2bDealVerkocht(id){ var d=b2bFindDeal(id); if(!d) return; var copy={}; for(var k in d) copy[k]=d[k]; copy.status='verkocht'; copy.datum=pcToday(); openDeal(copy); }
+function delDeal(id){
+  if (!confirm('Deze B2B-deal verwijderen?')) return;
+  apiFetch('DELETE','b2b_deals?id=eq.'+id,null).then(function(){ showToast('Deal verwijderd'); loadB2B(); });
 }
 
 initAuth();
