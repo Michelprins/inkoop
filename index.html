@@ -769,11 +769,14 @@ tbody tr:hover td{background:#FFF6F1}
       <div class="fg full"><label>Highlights</label><input id="pdf-f-highlights" placeholder="bijv. Panoramadak · 360 camera · Trekhaak"></div>
       <div class="fg"><label>Kenteken</label><input id="pdf-f-kenteken"></div>
       <div class="fg"><label>Bouwjaar</label><input id="pdf-f-bj" type="number"></div>
+      <div class="fg"><label>Eerste toelating</label><input id="pdf-f-eerste_toelating" placeholder="MM-JJJJ"></div>
       <div class="fg"><label>KM-stand</label><input id="pdf-f-km" type="number"></div>
       <div class="fg"><label>Brandstof</label><select id="pdf-f-brandstof"><option value="">Onbekend</option><option value="Benzine">Benzine</option><option value="Diesel">Diesel</option><option value="Elektrisch">Elektrisch</option><option value="Plug-in hybride">Plug-in hybride</option><option value="Hybride">Hybride</option><option value="LPG">LPG</option></select></div>
       <div class="fg"><label>Transmissie</label><input id="pdf-f-transmissie" placeholder="Automaat / Handgeschakeld"></div>
       <div class="fg"><label>Vermogen</label><input id="pdf-f-vermogen" placeholder="bijv. 116 kW (158 pk)"></div>
       <div class="fg"><label>Kleur</label><input id="pdf-f-kleur"></div>
+      <div class="fg"><label>Carrosserie</label><input id="pdf-f-carrosserie" placeholder="bijv. MPV, 5-deurs"></div>
+      <div class="fg"><label>APK tot</label><input id="pdf-f-apk" placeholder="DD-MM-JJJJ"></div>
       <div class="fg" style="justify-content:flex-end"><div style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="pdf-kenteken" style="width:auto"><label for="pdf-kenteken" style="text-transform:none;letter-spacing:0;font-size:13px;color:var(--text)">Kenteken tonen</label></div></div>
       <div class="sdiv"><span>Foto's (max. 6 &mdash; eerste = hoofdfoto)</span></div>
       <div class="fg full">
@@ -2613,7 +2616,7 @@ function delDeal(id){
 
 // ===== B2B AANBIEDINGSBLAD (PDF) =====
 var pdfCar = null, pdfFotos = [], pdfAdsRaw = null, JSPDF_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-var PDF_FIELDS = ['kenteken','merk','type','motor','bj','km','brandstof','transmissie','vermogen','kleur','highlights','btw_marge'];
+var PDF_FIELDS = ['kenteken','merk','type','motor','bj','eerste_toelating','km','brandstof','transmissie','vermogen','kleur','carrosserie','apk','highlights','btw_marge'];
 
 function pdfContact(){
   var def = { naam:'Michel Prins', telefoon:'', email:'michel.prins@bourguignon.nl' };
@@ -2703,11 +2706,13 @@ var PDF_FUEL = { petrol:'Benzine', gasoline:'Benzine', benzine:'Benzine', diesel
 var PDF_TRANS = { automatic:'Automaat', automaat:'Automaat', auto:'Automaat', a:'Automaat', manual:'Handgeschakeld', handgeschakeld:'Handgeschakeld', handmatig:'Handgeschakeld', m:'Handgeschakeld', semiautomatic:'Semi-automaat' };
 
 function pdfExtract(data){
-  var f = {}, imgs = [];
+  var f = {}, imgs = [], opts = [];
   pdfWalk(data, function(path, v){
     var key = pdfKeyOf(path), s = String(v);
     if (typeof v==='string' && /^https?:\/\/\S+\.(jpe?g|png|webp)(\?\S*)?$/i.test(s)) { imgs.push(s); return; }
     if (typeof v==='string' && /^https?:\/\//i.test(s) && /(image|photo|picture|media|foto|afbeelding)/i.test(path.join('.'))) { imgs.push(s); return; }
+    var pj = path.join('.');
+    if (typeof v==='string' && v.length>2 && v.length<60 && /(option|equipment|accessor|feature|uitrusting)/i.test(pj) && /(name|description|label|text|omschrijving|nl)$/i.test(String(path[path.length-1]))) { opts.push(v.trim()); return; }
     for (var i=0;i<PDF_MAP.length;i++){
       var m = PDF_MAP[i];
       if (f[m[0]]!==undefined || !m[1].test(key)) continue;
@@ -2728,21 +2733,19 @@ function pdfExtract(data){
     else if (score > out[seen[k]].s) out[seen[k]] = {u:u,s:score};
   });
   f.fotos = out.map(function(x){ return x.u; });
+  f.opties = opts.filter(function(o,i){ return opts.indexOf(o)===i; });
   return f;
 }
 
 function pdfAdsCalls(sid){
-  return [
-    '/api/v2/vehicle/'+sid, '/api/v2/advertisement/'+sid, '/api/v2/stock/'+sid,
-    '/api/v2/advertisement/'+sid+'/images', '/api/v2/vehicle/'+sid+'/images', '/api/v2/advertisement/'+sid+'/media'
-  ];
+  return [ '/api/v2/stock/'+sid+'/full' ];
 }
 function pdfFromAutotelex(){
   var v = pdfCar; if (!v) return;
   var kt = String(document.getElementById('pdf-f-kenteken').value||v.kenteken||'').replace(/[-\s]/g,'').toUpperCase();
   if (!kt && !v.ads_stock_id){ pdfSetAdsStatus('<span style="color:var(--red-txt)">Vul eerst een kenteken in.</span>'); return; }
-  pdfSetAdsStatus('&#8635; Ophalen uit Autotelex...');
-  var raw = {};
+  pdfSetAdsStatus('&#8635; Ophalen uit Autotelex en RDW...');
+  var raw = {}, rdwP = pdfRdw(kt);
   var start = kt ? adsApiFetch('GET','/api/v2/stock/by-license-plate/'+encodeURIComponent(kt), null).catch(function(){ return null; }) : Promise.resolve(null);
   start.then(function(r){
     raw['stock/by-license-plate'] = r;
@@ -2760,7 +2763,16 @@ function pdfFromAutotelex(){
     });
   }).then(function(sid){
     pdfAdsRaw = raw;
-    if (!sid){ pdfSetAdsStatus('<span style="color:var(--red-txt)">Niet gevonden in Autotelex op kenteken '+pcEsc(kt)+'.</span> Controleer of de auto via ADS is aangemaakt.'); return; }
+    return rdwP.then(function(rdw){ pdfApply(sid, raw, rdw, kt); });
+  });
+}
+function pdfApply(sid, raw, rdw, kt){
+    var rdwMsg = rdw ? ' &middot; RDW &#10003;' : '';
+    if (!sid){
+      pdfApplyRdw(rdw);
+      pdfSetAdsStatus('<span style="color:var(--red-txt)">Niet gevonden in Autotelex op kenteken '+pcEsc(kt)+'.</span>'+(rdw?' Wel RDW-gegevens ingevuld &mdash; foto\'s handmatig toevoegen.':' Ook niet in RDW.'));
+      return;
+    }
     var f = pdfExtract(raw);
     var set = function(field, val){ var el=document.getElementById('pdf-f-'+field); if (el && !String(el.value).trim() && val!==undefined && val!==null && val!=='') el.value = val; };
     set('merk', f.merk);
@@ -2781,15 +2793,51 @@ function pdfFromAutotelex(){
     set('kleur', f.kleur);
     if (f.kw || f.pk) set('vermogen', f.kw ? f.kw+' kW ('+(f.pk||Math.round(f.kw*1.36))+' pk)' : f.pk+' pk');
     set('btw_marge', f.btw);
+    if (f.datum_eerste){ var dm = String(f.datum_eerste).match(/((?:19|20)\d{2})-(\d{2})/); if (dm) set('eerste_toelating', dm[2]+'-'+dm[1]); }
+    if (f.opties && f.opties.length) set('highlights', f.opties.slice(0,8).join(' · '));
+    pdfApplyRdw(rdw);
     document.getElementById('pdf-sub').textContent = (document.getElementById('pdf-f-kenteken').value||'')+' — '+document.getElementById('pdf-f-merk').value+' '+document.getElementById('pdf-f-type').value;
-    var msg = '&#10003; Gegevens uit Autotelex overgenomen (stock '+pcEsc(sid)+')';
-    if (!f.fotos.length){ pdfSetAdsStatus(msg+' &middot; <strong>geen foto\'s gevonden</strong> &mdash; sleep ze handmatig. <a href="#" onclick="pdfCopyRaw();return false">Kopieer ruwe data</a>'); return; }
+    var leeg = PDF_FIELDS.filter(function(x){ return x!=='highlights' && x!=='btw_marge' && !pdfVal(x); });
+    var msg = '&#10003; Autotelex (stock '+pcEsc(sid)+')'+rdwMsg+(leeg.length?' &middot; nog leeg: '+leeg.join(', '):'')+' &middot; <a href="#" onclick="pdfCopyRaw();return false">ruwe data</a>';
+    if (!f.fotos.length){ pdfSetAdsStatus(msg+' &middot; <strong>geen foto\'s gevonden</strong> &mdash; sleep ze handmatig.'); return; }
     pdfSetAdsStatus(msg+' &middot; '+f.fotos.length+' foto\'s gevonden, eerste 6 laden...');
     pdfLoadRemote(f.fotos.slice(0, 6)).then(function(n){
       if (n) pdfSetAdsStatus(msg+' &middot; '+n+' foto\'s geladen. Wijzig de volgorde met &#9733;.');
-      else pdfSetAdsStatus(msg+' &middot; <strong>foto\'s gevonden maar niet over te nemen</strong> (Autotelex blokkeert dat vanuit de browser) &mdash; sleep ze handmatig. <a href="#" onclick="pdfCopyRaw();return false">Kopieer ruwe data</a>');
+      else pdfSetAdsStatus(msg+' &middot; <strong>foto\'s gevonden maar niet over te nemen</strong> (Autotelex blokkeert dat vanuit de browser) &mdash; sleep ze handmatig.');
     });
-  });
+}
+
+// ---------- RDW (open data) ----------
+function pdfRdw(kt){
+  if (!kt || kt.length < 4) return Promise.resolve(null);
+  var j = function(u){ return fetch(u).then(function(r){ return r.json(); }).catch(function(){ return []; }); };
+  return Promise.all([ j('https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken='+kt), j('https://opendata.rdw.nl/resource/8ys7-d773.json?kenteken='+kt) ])
+    .then(function(r){ var v = r[0]&&r[0][0]; if (!v) return null; v._brandstof = Array.isArray(r[1]) ? r[1] : []; return v; })
+    .catch(function(){ return null; });
+}
+function pdfCap(s){ return String(s||'').toLowerCase().replace(/(^|[\s-])([a-zà-ÿ])/g, function(m,a,b){ return a+b.toUpperCase(); }); }
+function pdfApplyRdw(v){
+  if (!v) return;
+  var set = function(field, val){ var el=document.getElementById('pdf-f-'+field); if (el && !String(el.value).trim() && val) el.value = val; };
+  set('merk', pdfCap(v.merk));
+  if (v.handelsbenaming){ var hb = pdfCap(v.handelsbenaming), mk = pdfCap(v.merk); if (hb.indexOf(mk+' ')===0) hb = hb.slice(mk.length+1); set('type', hb); }
+  var dt = String(v.datum_eerste_toelating||'');
+  if (dt.length===8){ set('bj', dt.slice(0,4)); set('eerste_toelating', dt.slice(4,6)+'-'+dt.slice(0,4)); }
+  var ak = String(v.vervaldatum_apk||''); if (ak.length===8) set('apk', ak.slice(6,8)+'-'+ak.slice(4,6)+'-'+ak.slice(0,4));
+  if (v.eerste_kleur && !/niet/i.test(v.eerste_kleur)) set('kleur', pdfCap(v.eerste_kleur));
+  var carr = String(v.inrichting||'').length<=4 ? String(v.inrichting||'').toUpperCase() : pdfCap(v.inrichting||''); if (carr && !/niet/i.test(carr)) set('carrosserie', carr + (v.aantal_deuren ? ', '+v.aantal_deuren+'-deurs' : '') + (v.aantal_zitplaatsen ? ', '+v.aantal_zitplaatsen+' zitpl.' : ''));
+  var bs = v._brandstof.map(function(b){ return String(b.brandstof_omschrijving||''); });
+  var hyb = v._brandstof.map(function(b){ return String(b.klasse_hybride_elektrisch_voertuig||''); }).join(' ');
+  var br = '';
+  if (/(^|[^N])OVC-HEV/i.test(hyb)) br = 'Plug-in hybride';
+  else if (/NOVC-HEV/i.test(hyb) || (bs.indexOf('Elektriciteit')>-1 && bs.length>1)) br = 'Hybride';
+  else if (bs.indexOf('Elektriciteit')>-1) br = 'Elektrisch';
+  else if (bs.indexOf('Diesel')>-1) br = 'Diesel';
+  else if (bs.indexOf('Benzine')>-1) br = 'Benzine';
+  else if (/LPG/i.test(bs.join(' '))) br = 'LPG';
+  set('brandstof', br);
+  var kw = 0; v._brandstof.forEach(function(b){ var x = parseFloat(b.nettomaximumvermogen||b.netto_max_vermogen_elektrisch||0); if (x > kw) kw = x; });
+  if (kw) set('vermogen', Math.round(kw)+' kW ('+Math.round(kw*1.36)+' pk)');
 }
 function pdfLoadRemote(urls){
   return Promise.all(urls.map(function(u){
@@ -2910,11 +2958,14 @@ function pdfBuild(){
   // specificaties + prijs
   var specs = [];
   if (toonKent && v.kenteken) specs.push(['Kenteken', v.kenteken]);
-  specs.push(['Bouwjaar', v.bj||'-'], ['KM-stand', v.km?Number(v.km).toLocaleString('nl-NL')+' km':'-'], ['Brandstof', v.brandstof||'-']);
+  specs.push(v.eerste_toelating ? ['Eerste toelating', v.eerste_toelating] : ['Bouwjaar', v.bj||'-']);
+  specs.push(['KM-stand', v.km?Number(v.km).toLocaleString('nl-NL')+' km':'-'], ['Brandstof', v.brandstof||'-']);
   if (v.transmissie) specs.push(['Transmissie', v.transmissie]);
   if (v.vermogen) specs.push(['Vermogen', v.vermogen]);
   if (v.kleur) specs.push(['Kleur', v.kleur]);
-  specs = specs.slice(0,8);
+  if (v.carrosserie) specs.push(['Carrosserie', v.carrosserie]);
+  if (v.apk) specs.push(['APK tot', v.apk]);
+  specs = specs.slice(0,10);
   var specW = 112, colW = specW/2, rowH = 12;
   doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(GR[0],GR[1],GR[2]); doc.text('SPECIFICATIES', M, y);
   for (var s=0;s<specs.length;s++){
