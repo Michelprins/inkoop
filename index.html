@@ -344,6 +344,7 @@ tbody tr:hover td{background:#FFF6F1}
 .pdf-thumb{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/3;background:var(--surface2)}
 .pdf-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .pdf-thumb.main{outline:2px solid var(--accent);outline-offset:1px}
+.pdf-pool{cursor:pointer;opacity:.7}.pdf-pool:hover{opacity:1;outline:2px solid var(--blue-mid)}
 .pdf-main-lbl{position:absolute;left:4px;bottom:4px;background:var(--accent);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px}
 .pdf-tbtn{position:absolute;left:4px;bottom:4px;border:none;background:rgba(0,0,0,.6);color:#fff;border-radius:6px;font-size:11px;padding:1px 6px;cursor:pointer}
 .pdf-tbtn.pdf-del{left:auto;right:4px;top:4px;bottom:auto}
@@ -786,6 +787,7 @@ tbody tr:hover td{background:#FFF6F1}
         </div>
         <input type="file" id="pdf-file" accept="image/*" multiple onchange="pdfAddFiles(this.files);this.value=''">
         <div class="pdf-thumbs" id="pdf-thumbs"></div>
+        <div id="pdf-pool"></div>
       </div>
       <div class="sdiv"><span>Jouw contactgegevens (worden onthouden)</span></div>
       <div class="fg"><label>Naam</label><input id="pdf-naam"></div>
@@ -2615,7 +2617,7 @@ function delDeal(id){
 }
 
 // ===== B2B AANBIEDINGSBLAD (PDF) =====
-var pdfCar = null, pdfFotos = [], pdfAdsRaw = null, JSPDF_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+var pdfCar = null, pdfFotos = [], pdfPool = [], pdfSkipped = 0, pdfAdsRaw = null, JSPDF_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
 var PDF_FIELDS = ['kenteken','merk','type','motor','bj','eerste_toelating','km','brandstof','transmissie','vermogen','kleur','carrosserie','apk','highlights','btw_marge'];
 
 function pdfContact(){
@@ -2642,7 +2644,7 @@ function openPdfKenteken(){
   pdfOpenWith({ kenteken:kt.toUpperCase(), status:'binnen' });
 }
 function pdfOpenWith(v){
-  pdfCar = v; pdfFotos = []; pdfAdsRaw = null;
+  pdfCar = v; pdfFotos = []; pdfPool = []; pdfAdsRaw = null;
   document.getElementById('pdf-sub').textContent = (v.kenteken||v.vin||'')+(v.merk?' — '+v.merk+' '+(v.type||''):'');
   PDF_FIELDS.forEach(function(f){ document.getElementById('pdf-f-'+f).value = v[f]==null?'':v[f]; });
   var last = v.auto_id ? b2bDeals.filter(function(d){ return d.auto_id===v.auto_id && nv(d.verkoopprijs)!==null; })[0] : null;
@@ -2705,6 +2707,26 @@ var PDF_FUEL = { petrol:'Benzine', gasoline:'Benzine', benzine:'Benzine', diesel
   pluginhybrid:'Plug-in hybride', phev:'Plug-in hybride', 'plug-in hybride':'Plug-in hybride', hybrid:'Hybride', hybride:'Hybride', lpg:'LPG', cng:'CNG' };
 var PDF_TRANS = { automatic:'Automaat', automaat:'Automaat', auto:'Automaat', a:'Automaat', manual:'Handgeschakeld', handgeschakeld:'Handgeschakeld', handmatig:'Handgeschakeld', m:'Handgeschakeld', semiautomatic:'Semi-automaat' };
 
+// Zoekt per foto het volgnummer (order/sequence/position/...) in het object waar de foto-URL in staat
+function pdfImgOrder(data){
+  var map = {}, ORD = /^(order|sortorder|sort|sequence|seq|position|pos|index|rank|number|volgorde|displayorder|ordernumber|imageorder|photoorder|sequencenumber)$/i;
+  function urlsIn(o, acc, d){
+    if (d > 4 || o===null || typeof o!=='object') { if (typeof o==='string' && /^https?:\/\//i.test(o)) acc.push(o); return acc; }
+    for (var k in o) if (Object.prototype.hasOwnProperty.call(o,k)) urlsIn(o[k], acc, d+1);
+    return acc;
+  }
+  function visit(o, d){
+    if (d > 10 || o===null || typeof o!=='object') return;
+    if (Array.isArray(o)){ o.forEach(function(x){ visit(x, d+1); }); return; }
+    for (var k in o) if (Object.prototype.hasOwnProperty.call(o,k)) visit(o[k], d+1);   // binnenste eerst
+    var n = null;
+    for (var k2 in o){ if (ORD.test(k2) && o[k2]!==null && o[k2]!=='' && !isNaN(Number(o[k2]))) { n = Number(o[k2]); break; } }
+    if (n===null) return;
+    urlsIn(o, [], 0).forEach(function(u){ if (map[u]===undefined) map[u] = n; });
+  }
+  visit(data, 0);
+  return map;
+}
 function pdfExtract(data){
   var f = {}, imgs = [], opts = [];
   pdfWalk(data, function(path, v){
@@ -2732,6 +2754,9 @@ function pdfExtract(data){
     if (seen[k]===undefined){ seen[k]=out.length; out.push({u:u,s:score}); }
     else if (score > out[seen[k]].s) out[seen[k]] = {u:u,s:score};
   });
+  var ord = pdfImgOrder(data);
+  out.forEach(function(x, i){ x.i = i; x.o = ord[x.u]; });
+  out.sort(function(a, b){ var ao = a.o===undefined ? 1e9 : a.o, bo = b.o===undefined ? 1e9 : b.o; return ao!==bo ? ao-bo : a.i-b.i; });
   f.fotos = out.map(function(x){ return x.u; });
   f.opties = opts.filter(function(o,i){ return opts.indexOf(o)===i; });
   return f;
@@ -2800,9 +2825,9 @@ function pdfApply(sid, raw, rdw, kt){
     var leeg = PDF_FIELDS.filter(function(x){ return x!=='highlights' && x!=='btw_marge' && !pdfVal(x); });
     var msg = '&#10003; Autotelex (stock '+pcEsc(sid)+')'+rdwMsg+(leeg.length?' &middot; nog leeg: '+leeg.join(', '):'')+' &middot; <a href="#" onclick="pdfCopyRaw();return false">ruwe data</a>';
     if (!f.fotos.length){ pdfSetAdsStatus(msg+' &middot; <strong>geen foto\'s gevonden</strong> &mdash; sleep ze handmatig.'); return; }
-    pdfSetAdsStatus(msg+' &middot; '+f.fotos.length+' foto\'s gevonden, eerste 6 laden...');
-    pdfLoadRemote(f.fotos.slice(0, 6)).then(function(n){
-      if (n) pdfSetAdsStatus(msg+' &middot; '+n+' foto\'s geladen. Wijzig de volgorde met &#9733;.');
+    pdfSetAdsStatus(msg+' &middot; '+f.fotos.length+' foto\'s gevonden, laden...');
+    pdfLoadRemote(f.fotos.slice(0, 16)).then(function(n){
+      if (n) pdfSetAdsStatus(msg+' &middot; '+n+' foto\'s geladen'+(pdfSkipped?' ('+pdfSkipped+' afleverpakket-plaatje overgeslagen)':'')+'. Klik onder de foto\'s op een andere om te wisselen.');
       else pdfSetAdsStatus(msg+' &middot; <strong>foto\'s gevonden maar niet over te nemen</strong> (Autotelex blokkeert dat vanuit de browser) &mdash; sleep ze handmatig.');
     });
 }
@@ -2849,9 +2874,28 @@ function pdfLoadRemote(urls){
     });
   })).then(function(res){
     var ok = res.filter(Boolean);
-    if (ok.length){ pdfFotos = ok.concat(pdfFotos).slice(0,6); pdfRenderThumbs(); }
+    pdfSkipped = 0;
+    ok = ok.filter(function(x){ if (pdfIsPromo(x.img)) { pdfSkipped++; return false; } return true; });
+    pdfPool = ok;
+    if (ok.length){ pdfFotos = ok.slice(0,6).concat(pdfFotos).slice(0,6); pdfRenderThumbs(); }
     return ok.length;
   });
+}
+// Afleverpakket/promoplaatje herkennen: brede oranje balk boven én onder
+function pdfIsPromo(img){
+  try {
+    var w = 64, h = 48, cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    var ctx = cv.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+    var d = ctx.getImageData(0, 0, w, h).data;
+    var band = function(y0, y1){ var n = 0, t = 0; for (var y=y0;y<y1;y++) for (var x=0;x<w;x++){ var i=(y*w+x)*4, r=d[i], g=d[i+1], b=d[i+2]; t++; if (r>190 && g>60 && g<150 && b<80 && r-g>70) n++; } return n/t; };
+    return band(0, 4) > 0.5 && band(h-4, h) > 0.5;
+  } catch(e){ return false; }
+}
+function pdfPoolAdd(i){
+  var f = pdfPool[i]; if (!f) return;
+  if (pdfFotos.indexOf(f) > -1) return;
+  if (pdfFotos.length >= 6) pdfFotos[5] = f; else pdfFotos.push(f);
+  pdfRenderThumbs();
 }
 function pdfCopyRaw(){
   var txt = JSON.stringify(pdfAdsRaw, null, 1);
@@ -2893,6 +2937,8 @@ function pdfRenderThumbs(){
       '<button class="pdf-tbtn pdf-del" title="Verwijderen" onclick="pdfDel('+i+')">&#10005;</button></div>';
   }).join('');
   document.getElementById('pdf-count').textContent = pdfFotos.length+' / 6 foto\'s';
+  var rest = pdfPool.map(function(f, i){ return pdfFotos.indexOf(f) > -1 ? '' : '<div class="pdf-thumb pdf-pool" title="Toevoegen (vervangt de laatste als er al 6 zijn)" onclick="pdfPoolAdd('+i+')"><img src="'+f.thumb+'"><span class="pdf-tbtn">+</span></div>'; }).join('');
+  document.getElementById('pdf-pool').innerHTML = rest ? '<div class="kv-section-lbl" style="margin:12px 0 0">Meer foto\'s uit Autotelex &mdash; klik om toe te voegen</div><div class="pdf-thumbs">'+rest+'</div>' : '';
 }
 function pdfMain(i){ var f = pdfFotos.splice(i,1)[0]; pdfFotos.unshift(f); pdfRenderThumbs(); }
 function pdfDel(i){ pdfFotos.splice(i,1); pdfRenderThumbs(); }
