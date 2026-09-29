@@ -760,8 +760,9 @@ tbody tr:hover td{background:#FFF6F1}
       <span id="pdf-ads-status" style="font-size:12px;flex:1;min-width:200px"></span>
     </div>
     <div class="fgrid">
-      <div class="fg"><label>B2B-prijs (EUR)</label><input id="pdf-prijs" type="number" placeholder="bijv. 18500"><span class="hint">Leeg = "Op aanvraag"</span></div>
-      <div class="fg"><label>BTW / Marge</label><select id="pdf-f-btw_marge"><option value="">Geen vermelding</option><option value="btw">BTW-auto (excl. btw)</option><option value="marge">Marge-auto</option></select></div>
+      <div class="fg"><label>B2B-prijs (EUR)</label><input id="pdf-prijs" type="number" placeholder="bijv. 18500" oninput="pdfBtwUi()"><span class="hint" id="pdf-prijs-hint">Leeg = "Op aanvraag"</span></div>
+      <div class="fg"><label>BTW / Marge</label><select id="pdf-f-btw_marge" onchange="pdfBtwUi()"><option value="">Geen vermelding</option><option value="btw">BTW-auto</option><option value="marge">Marge-auto</option></select></div>
+      <div class="fg" id="pdf-btwmode-wrap"><label>Prijs aanbieden</label><select id="pdf-btwmode" onchange="pdfBtwModeSave();pdfBtwUi()"><option value="excl">Excl. btw</option><option value="incl">Incl. btw</option></select><span class="hint">Alleen bij BTW-auto &middot; de ingevulde prijs is de getoonde prijs</span></div>
       <div class="fg full"><label>Aangeboden aan (optioneel)</label><select id="pdf-bedrijf"></select><span class="hint">Legt 'aangeboden' vast in de B2B-historie</span></div>
       <div class="sdiv"><span>Voertuig (aanpasbaar)</span></div>
       <div class="fg"><label>Merk</label><input id="pdf-f-merk"></div>
@@ -2649,6 +2650,7 @@ function pdfOpenWith(v){
   PDF_FIELDS.forEach(function(f){ document.getElementById('pdf-f-'+f).value = v[f]==null?'':v[f]; });
   var last = v.auto_id ? b2bDeals.filter(function(d){ return d.auto_id===v.auto_id && nv(d.verkoopprijs)!==null; })[0] : null;
   document.getElementById('pdf-prijs').value = last ? last.verkoopprijs : '';
+  pdfBtwModeLoad(); pdfBtwUi();
   document.getElementById('pdf-kenteken').checked = true;
   var k = pdfContact();
   document.getElementById('pdf-naam').value = k.naam||''; document.getElementById('pdf-tel').value = k.telefoon||''; document.getElementById('pdf-email').value = k.email||'';
@@ -2817,7 +2819,7 @@ function pdfApply(sid, raw, rdw, kt){
     if (f.transmissie) set('transmissie', PDF_TRANS[String(f.transmissie).toLowerCase().replace(/[\s_-]/g,'')] || f.transmissie);
     set('kleur', f.kleur);
     if (f.kw || f.pk) set('vermogen', f.kw ? f.kw+' kW ('+(f.pk||Math.round(f.kw*1.36))+' pk)' : f.pk+' pk');
-    set('btw_marge', f.btw);
+    set('btw_marge', f.btw); pdfBtwUi();
     if (f.datum_eerste){ var dm = String(f.datum_eerste).match(/((?:19|20)\d{2})-(\d{2})/); if (dm) set('eerste_toelating', dm[2]+'-'+dm[1]); }
     if (f.opties && f.opties.length) set('highlights', f.opties.slice(0,8).join(' · '));
     pdfApplyRdw(rdw);
@@ -2954,6 +2956,29 @@ function pdfLogo(){
 function pdfFmtEur(v){ return '€ ' + Number(v).toLocaleString('nl-NL', {maximumFractionDigits:0}); }
 function pdfVal(f){ return String(document.getElementById('pdf-f-'+f).value||'').trim(); }
 
+// ---------- BTW-weergave (excl./incl.) — onthouden per auto ----------
+function pdfBtwKey(){ var v = pdfCar||{}; return v.auto_id || String(v.kenteken||v.vin||'').replace(/[-\s]/g,'').toUpperCase() || ''; }
+function pdfBtwModes(){ try { return JSON.parse(localStorage.getItem('bourg_pdf_btwmode')||'{}')||{}; } catch(e){ return {}; } }
+function pdfBtwModeLoad(){
+  var m = pdfBtwModes(), k = pdfBtwKey();
+  document.getElementById('pdf-btwmode').value = (k && m[k]) || m._last || 'excl';
+}
+function pdfBtwModeSave(){
+  var m = pdfBtwModes(), k = pdfBtwKey(), val = document.getElementById('pdf-btwmode').value;
+  if (k) m[k] = val; m._last = val;
+  try { localStorage.setItem('bourg_pdf_btwmode', JSON.stringify(m)); } catch(e){}
+}
+function pdfBtwUi(){
+  var isBtw = pdfVal('btw_marge')==='btw', mode = document.getElementById('pdf-btwmode').value;
+  var sel = document.getElementById('pdf-btwmode'); sel.disabled = !isBtw;
+  document.getElementById('pdf-btwmode-wrap').style.opacity = isBtw ? '1' : '.45';
+  var p = Number(document.getElementById('pdf-prijs').value), h = document.getElementById('pdf-prijs-hint');
+  if (isBtw && p > 0){
+    h.textContent = mode==='incl' ? 'Getoond incl. btw · = '+pdfFmtEur(Math.round(p/1.21))+' excl. btw'
+                                  : 'Getoond excl. btw · = '+pdfFmtEur(Math.round(p*1.21))+' incl. btw';
+  } else h.textContent = 'Leeg = "Op aanvraag"';
+}
+
 // ---------- PDF opbouwen ----------
 function pdfBuild(){
   var J = window.jspdf.jsPDF, doc = new J({ unit:'mm', format:'a4' });
@@ -3026,7 +3051,7 @@ function pdfBuild(){
   if (prijs){
     doc.setFontSize(22); doc.text(pdfFmtEur(prijs), px+5, py+20);
     doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
-    var lbl = v.btw_marge==='btw' ? 'excl. btw' : v.btw_marge==='marge' ? 'marge-auto' : '';
+    var lbl = v.btw_marge==='btw' ? (document.getElementById('pdf-btwmode').value==='incl' ? 'incl. btw' : 'excl. btw') : v.btw_marge==='marge' ? 'marge-auto' : '';
     if (lbl) doc.text(lbl, px+5, py+26.5);
   } else { doc.setFontSize(14); doc.text('Op aanvraag', px+5, py+20); }
   var st = status==='binnen' ? 'Direct beschikbaar' : (status==='onderweg'||status==='bestelling') ? 'Binnenkort beschikbaar' : '';
