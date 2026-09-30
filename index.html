@@ -337,6 +337,19 @@ tbody tr:hover td{background:#FFF6F1}
 .b2b-alert .btn.primary{background:var(--accent);border-color:var(--accent)}
 .kv-card-sub a{color:var(--accent2)}
 .kv-match-row a[href^="tel"],.kv-match-row a[href^="mailto"]{font-weight:500}
+.af-steps{display:flex;flex-direction:column;gap:2px;margin-top:10px}
+.af-step{font-family:inherit;font-size:13px;font-weight:500;padding:4px 6px;border:none;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;border-radius:6px;width:fit-content}
+.af-step:hover{background:var(--surface2)}
+.af-step::before{content:'';width:9px;height:9px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.af-step small{font-weight:500;font-size:11px;color:var(--hint)}
+.af-step.done{color:var(--text)}
+.af-step.done::before{background:#1FC15A}
+.af-step.next{color:var(--text);font-weight:700}
+.af-step.next::before{background:var(--accent)}
+.af-step.locked{opacity:.5;cursor:not-allowed}
+.af-prog{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--surface2);color:var(--muted);cursor:pointer;white-space:nowrap;display:inline-block;margin-top:4px}
+.af-prog.klaar{background:var(--green-bg);color:var(--green-txt)}
+.af-warn{color:var(--amber-txt);font-weight:600}
 @media(max-width:768px){.b2b-quick{grid-template-columns:1fr 1fr}.b2b-grid{grid-template-columns:1fr}.b2b-alert{flex-direction:column;align-items:flex-start}}
 
 /* ===== AANBIEDINGSBLAD PDF ===== */
@@ -455,6 +468,7 @@ tbody tr:hover td{background:#FFF6F1}
         <button class="analytics-tab active" id="b2b-sub-kansen" onclick="setB2bSub('kansen')">Kansen</button>
         <button class="analytics-tab" id="b2b-sub-bedrijven" onclick="setB2bSub('bedrijven')">Autobedrijven</button>
         <button class="analytics-tab" id="b2b-sub-historie" onclick="setB2bSub('historie')">Historie</button>
+        <button class="analytics-tab" id="b2b-sub-afhandeling" onclick="setB2bSub('afhandeling')">Afhandeling<span id="af-badge" class="kv-badge" style="display:none;margin-left:6px"></span></button>
       </div>
       <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" onclick="openPdfKenteken()">&#128196; Aanbiedingsblad op kenteken</button>
@@ -485,6 +499,15 @@ tbody tr:hover td{background:#FFF6F1}
     <div id="b2b-pane-bedrijven" style="display:none">
       <div class="kv-toolbar"><input type="text" id="b2b-bed-search" placeholder="Zoek naam, plaats, merk..." oninput="renderB2bBedrijven()"></div>
       <div id="b2b-bed-list"></div>
+    </div>
+
+    <div id="b2b-pane-afhandeling" style="display:none">
+      <div class="kv-toolbar">
+        <input type="text" id="af-search" placeholder="Zoek kenteken, merk, type, bedrijf..." oninput="renderB2bAfhandeling()">
+        <select id="af-filter" onchange="renderB2bAfhandeling()"><option value="open">Openstaand</option><option value="klaar">Afgerond</option><option value="">Alles</option></select>
+        <span id="af-count" style="font-size:12px;color:var(--hint);margin-left:auto"></span>
+      </div>
+      <div id="af-list"></div>
     </div>
 
     <div id="b2b-pane-historie" style="display:none">
@@ -2342,6 +2365,8 @@ function updateB2bBadge(){
   var n=b2bKansen().length, el=document.getElementById('b2b-badge');
   if (!el) return;
   if (n){ el.textContent=n; el.style.display='inline-block'; } else el.style.display='none';
+  var open=b2bDeals.filter(function(d){ return d.status==='verkocht' && !afKlaar(d); }).length, ab=document.getElementById('af-badge');
+  if (ab){ if(open){ ab.textContent=open; ab.style.display='inline-block'; } else ab.style.display='none'; }
 }
 
 // melding na toevoegen auto
@@ -2366,9 +2391,10 @@ function b2bFocus(eid){ b2bFocusCarId=decodeURIComponent(eid); b2bSub='kansen'; 
 function setB2bSub(s){ b2bSub=s; if(s!=='kansen') b2bFocusCarId=null; renderB2B(); }
 
 function renderB2B(){
-  ['kansen','bedrijven','historie'].forEach(function(s){ document.getElementById('b2b-sub-'+s).classList.toggle('active', b2bSub===s); document.getElementById('b2b-pane-'+s).style.display=b2bSub===s?'':'none'; });
+  ['kansen','bedrijven','historie','afhandeling'].forEach(function(s){ document.getElementById('b2b-sub-'+s).classList.toggle('active', b2bSub===s); document.getElementById('b2b-pane-'+s).style.display=b2bSub===s?'':'none'; });
   if (b2bSub==='kansen') renderB2bKansen();
   else if (b2bSub==='bedrijven') renderB2bBedrijven();
+  else if (b2bSub==='afhandeling') renderB2bAfhandeling();
   else renderB2bHistorie();
 }
 
@@ -2484,7 +2510,7 @@ function renderB2bHistorie(){
       '<td data-label="Inkoop" class="tr mono">'+fe(d.inkoopprijs)+'</td>'+
       '<td data-label="Verkoop" class="tr mono">'+fe(d.verkoopprijs)+'</td>'+
       '<td data-label="Resultaat" class="tr">'+(res===null?'<span class="dm">-</span>':'<span class="'+(res>=0?'rp':'rn')+'">'+(res>=0?'+':'')+'EUR '+res.toLocaleString('nl-NL')+'</span>')+'</td>'+
-      '<td data-label="Status"><span class="badge '+(stCls[d.status]||'')+'">'+pcEsc(d.status||'')+'</span></td>'+
+      '<td data-label="Status"><span class="badge '+(stCls[d.status]||'')+'">'+pcEsc(d.status||'')+'</span>'+afChip(d)+'</td>'+
       '<td><div class="acell"><button class="ib" title="Bewerken" onclick="editDeal(\''+d.id+'\')">&#9998;</button><button class="ib del" title="Verwijderen" onclick="delDeal(\''+d.id+'\')">&#128465;</button></div></td>'+
     '</tr>';
   }).join('');
@@ -2615,6 +2641,80 @@ function b2bDealVerkocht(id){ var d=b2bFindDeal(id); if(!d) return; var copy={};
 function delDeal(id){
   if (!confirm('Deze B2B-deal verwijderen?')) return;
   apiFetch('DELETE','b2b_deals?id=eq.'+id,null).then(function(){ showToast('Deal verwijderd'); loadB2B(); });
+}
+
+// ===== B2B AFHANDELING (checklist na verkoop) =====
+var AF_STEPS = [
+  { k:'order',      l:'Order gemaakt' },
+  { k:'factuur',    l:'Factuur verstuurd' },
+  { k:'betaald',    l:'Betaling binnen' },
+  { k:'docnr',      l:'Documentnr. verstuurd', need:'betaald' },
+  { k:'vrijwaring', l:'Vrijwaring binnen',     need:'docnr' },
+  { k:'ophaal',     l:'Ophaalmelding verstuurd', need:'vrijwaring' }
+];
+function afData(d){ var a=d&&d.afhandeling; if(typeof a==='string'){ try{a=JSON.parse(a);}catch(e){a=null;} } return (a&&typeof a==='object')?a:{}; }
+function afDone(d){ var a=afData(d); return AF_STEPS.filter(function(s){ return !!a[s.k]; }).length; }
+function afKlaar(d){ return afDone(d)===AF_STEPS.length; }
+function afNext(d){ var a=afData(d); for(var i=0;i<AF_STEPS.length;i++){ if(!a[AF_STEPS[i].k]) return AF_STEPS[i]; } return null; }
+function afLabel(k){ for(var i=0;i<AF_STEPS.length;i++){ if(AF_STEPS[i].k===k) return AF_STEPS[i].l; } return k; }
+function afDays(from){ if(!from) return null; var a=new Date(from+'T00:00:00'), b=new Date(pcToday()+'T00:00:00'); return Math.round((b-a)/86400000); }
+
+function afChip(d){
+  if (d.status!=='verkocht') return '';
+  var n=afDone(d), k=n===AF_STEPS.length;
+  return '<br><span class="af-prog'+(k?' klaar':'')+'" title="Afhandeling bekijken" onclick="event.stopPropagation();afFocus(\''+d.id+'\')">'+(k?'&#10003; afgehandeld':'afhandeling '+n+'/'+AF_STEPS.length)+'</span>';
+}
+function afFocus(id){ b2bSub='afhandeling'; var f=document.getElementById('af-filter'); var d=b2bFindDeal(id); if(f&&d) f.value=afKlaar(d)?'klaar':'open'; var s=document.getElementById('af-search'); if(s&&d) s.value=d.kenteken||d.vin||''; renderB2B(); }
+
+function renderB2bAfhandeling(){
+  var q=b2bNorm(document.getElementById('af-search').value), f=document.getElementById('af-filter').value;
+  var all=b2bDeals.filter(function(d){ return d.status==='verkocht'; });
+  var list=all.filter(function(d){
+    var b=b2bFindBedrijf(d.bedrijf_id), k=afKlaar(d);
+    var h=b2bNorm([d.kenteken,d.vin,d.merk,d.type,b?b.naam:''].join(' '));
+    return (!q||h.indexOf(q)>-1) && (f===''||(f==='klaar'?k:!k));
+  }).sort(function(a,b){ return String(a.datum||'').localeCompare(String(b.datum||'')); });
+  var open=all.filter(function(d){ return !afKlaar(d); }).length;
+  document.getElementById('af-count').textContent=open+' openstaand · '+(all.length-open)+' afgerond';
+  var el=document.getElementById('af-list');
+  if (!list.length){ el.innerHTML='<div class="kv-empty">'+(all.length?'Niets gevonden met dit filter.':'Nog geen B2B-verkopen. Zet een deal op "verkocht" en hij verschijnt hier.')+'</div>'; return; }
+  el.innerHTML=list.map(function(d){
+    var b=b2bFindBedrijf(d.bedrijf_id), a=afData(d), nx=afNext(d), dagen=afDays(d.datum);
+    var warn='';
+    if (a.factuur && !a.betaald){ var w=afDays(a.factuur); if(w!==null && w>=3) warn=' &middot; <span class="af-warn">wacht '+w+' dagen op betaling</span>'; }
+    else if (a.docnr && !a.vrijwaring){ var v=afDays(a.docnr); if(v!==null && v>=2) warn=' &middot; <span class="af-warn">vrijwaring '+v+' dagen onderweg</span>'; }
+    var steps=AF_STEPS.map(function(s){
+      var done=!!a[s.k], locked=!done && s.need && !a[s.need], isNext=nx && nx.k===s.k && !locked;
+      var cls='af-step'+(done?' done':locked?' locked':isNext?' next':'');
+      var tip=done?'Klik om ongedaan te maken':locked?'Eerst: '+afLabel(s.need):'Klik om af te vinken (vandaag)';
+      return '<button class="'+cls+'" title="'+tip+'" onclick="afToggle(\''+d.id+'\',\''+s.k+'\')">'+s.l+(done?' <small>'+pcFmt(a[s.k])+'</small>':'')+'</button>';
+    }).join('');
+    return '<div class="pc-row"><div class="pc-row-top"><div style="min-width:0">'+
+      '<h4><span class="mono">'+pcEsc(d.kenteken||d.vin||'-')+'</span> &middot; '+pcEsc((d.merk||'')+' '+(d.type||''))+'</h4>'+
+      '<div class="pc-meta">'+pcEsc(b?b.naam:'(verwijderd)')+(b&&b.plaats?' ('+pcEsc(b.plaats)+')':'')+' &middot; verkocht '+pcFmt(d.datum)+(dagen!==null?' ('+dagen+' dg)':'')+(nv(d.verkoopprijs)!==null?' &middot; '+fe(d.verkoopprijs):'')+warn+'</div>'+
+      (b&&b2bContact(b)?'<div class="pc-meta">'+b2bContact(b)+'</div>':'')+
+      '</div><div>'+(nx?'<span class="kv-tag" style="background:var(--accent-bg);color:var(--accent2)">Volgende: '+pcEsc(nx.l)+'</span>':'<span class="kv-tag" style="background:var(--green-bg);color:var(--green-txt)">&#10003; Afgehandeld</span>')+'</div></div>'+
+      '<div class="af-steps">'+steps+'</div></div>';
+  }).join('');
+}
+
+function afToggle(id, k){
+  var d=b2bFindDeal(id); if(!d) return;
+  var a=afData(d), s=null; AF_STEPS.forEach(function(x){ if(x.k===k) s=x; });
+  var n={}; for(var key in a) n[key]=a[key];
+  if (n[k]){
+    var dep=AF_STEPS.filter(function(x){ return x.need===k && n[x.k]; })[0];
+    if (dep){ showToast('Eerst "'+dep.l+'" ongedaan maken'); return; }
+    delete n[k];
+  } else {
+    if (s.need && !n[s.need]){ showToast('Eerst: '+afLabel(s.need)); return; }
+    n[k]=pcToday();
+  }
+  var old=d.afhandeling; d.afhandeling=n; renderB2bAfhandeling(); updateB2bBadge();
+  apiFetch('PATCH','b2b_deals?id=eq.'+id,{afhandeling:n}).then(function(r){
+    if (r && r.message){ d.afhandeling=old; renderB2bAfhandeling(); updateB2bBadge(); showToast('Fout: '+r.message+' — is het SQL-script voor afhandeling al uitgevoerd?'); return; }
+    if (!a[k] && k==='ophaal') showToast('Deal volledig afgehandeld');
+  }).catch(function(){ d.afhandeling=old; renderB2bAfhandeling(); updateB2bBadge(); showToast('Opslaan mislukt'); });
 }
 
 // ===== B2B AANBIEDINGSBLAD (PDF) =====
