@@ -1868,9 +1868,10 @@ function initAuth() {
 var ADS_API = 'https://autotelex-proxy.michel-prins.workers.dev';
 
 function adsApiFetch(method, path, body) {
+  return ensureSession().then(function(token){
   var opts = {
     method: method,
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer ' + token }
   };
   if (body) opts.body = JSON.stringify(body);
   return fetch(ADS_API + path, opts).then(function(r) {
@@ -1880,6 +1881,7 @@ function adsApiFetch(method, path, body) {
       try { return JSON.parse(text); }
       catch(e) { return {status: status, raw: text}; }
     });
+  });
   });
 }
 
