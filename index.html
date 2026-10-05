@@ -1287,10 +1287,12 @@ function buildDonut(items, total) {
 // ===== CORE FUNCTIONS =====
 function apiFetch(method, path, body) {
   return ensureSession().then(function(token){
-  var opts = { method: method, headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Prefer': method === 'POST' ? 'return=representation' : '' } };
+  var opts = { method: method, headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Prefer': (method === 'POST' || method === 'PATCH') ? 'return=representation' : '' : '' } };
   if (body) opts.body = JSON.stringify(body);
   return fetch(SUPA_URL + '/rest/v1/' + path, opts).then(function(r) {
-    if (r.status === 401) { authExpired(); return {}; }
+       if (r.status === 401) { authExpired(); throw new Error('Sessie verlopen'); }
+    if (!r.ok) { return r.text().then(function(t){ throw new Error('Opslaan mislukt ('+r.status+'): '+t.slice(0,120)); }); }
+    if (method === 'PATCH') { return r.json().then(function(rows){ if (Array.isArray(rows) && rows.length === 0) throw new Error('Niets opgeslagen (0 rijen)'); return rows; }); }
     if (r.status === 204 || r.status === 200 && method !== 'GET' && method !== 'POST') return {};
     var ct = r.headers.get('content-type') || '';
     if (ct.indexOf('json') > -1) return r.json();
