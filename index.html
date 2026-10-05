@@ -1287,7 +1287,7 @@ function buildDonut(items, total) {
 // ===== CORE FUNCTIONS =====
 function apiFetch(method, path, body) {
   return ensureSession().then(function(token){
-  var opts = { method: method, headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Prefer': (method === 'POST' || method === 'PATCH') ? 'return=representation' : '' : '' } };
+  var opts = { method: method, headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Prefer': (method === 'POST' || method === 'PATCH') ? 'return=representation' : '' } };
   if (body) opts.body = JSON.stringify(body);
   return fetch(SUPA_URL + '/rest/v1/' + path, opts).then(function(r) {
        if (r.status === 401) { authExpired(); throw new Error('Sessie verlopen'); }
