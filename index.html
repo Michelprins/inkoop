@@ -1451,6 +1451,7 @@ var brf = document.getElementById('fbrandstof').value;
       '<td><div class="acell">'+
         '<button class="ib" title="Publiceer naar Autotelex" data-id="'+eid+'" onclick="publishToAutotelex(this.dataset.id)" style="font-size:10px;font-weight:700;color:#1a6b1a;padding:4px 6px;background:#edfaf1;border-radius:6px">ADS</button>'+
         '<button class="ib" title="Stuur naar Inname dashboard (verwacht)" data-id="'+eid+'" onclick="stuurNaarInname(this.dataset.id)" style="font-size:10px;font-weight:700;color:#7c3aed;padding:4px 6px;background:#f5f0ff;border-radius:6px">INN</button>'+
+                      '<button class="ib" title="'+(c.factuur_akkoord?'Factuur akkoord op '+c.factuur_akkoord:'Factuur akkoord: prijscheck + ADS + INN')+'" data-id="'+eid+'" onclick="openFactuurAkkoord(this.dataset.id)" style="font-size:10px;font-weight:700;padding:4px 6px;border-radius:6px;'+(c.factuur_akkoord?'color:#fff;background:#1a6b1a':'color:#1a6b1a;background:#fff;border:1px solid #1a6b1a')+'">'+(c.factuur_akkoord?'&#10003;F':'F')+'</button>'+
         '<button class="ib" title="Aanbiedingsblad (PDF) maken" data-id="'+eid+'" onclick="openPdf(this.dataset.id)" style="font-size:10px;font-weight:700;color:#C4510A;padding:4px 6px;background:#FFF3EC;border-radius:6px">PDF</button>'+
         '<button class="ib" title="B2B-deal vastleggen (doorzetten naar autobedrijf)" data-id="'+eid+'" onclick="openDealFromCar(this.dataset.id,\'\',\'verkocht\')" style="font-size:10px;font-weight:700;color:#1A3A8F;padding:4px 6px;background:#EEF4FF;border-radius:6px">B2B</button>'+
         '<button class="ib" title="Bekijk op JPcars" data-kenteken="'+(c.kenteken||'')+'" onclick="openJP(this.dataset.kenteken)" style="font-size:11px;font-weight:600;color:#E8620A;padding:4px 7px">JP</button>'+
@@ -2270,6 +2271,175 @@ function stuurNaarInname(eid) {
     }).catch(function() { showToast('Verbindingsfout Inname dashboard'); });
   }).catch(function() { showToast('Kon Inname dashboard niet bereiken'); });
 }
+ /* ===================== FACTUUR AKKOORD =====================
+   Eén knop per auto: prijscheck -> (kenteken) -> ADS -> INN -> vinkje factuur_akkoord.
+   Raakt de bestaande ADS- en INN-knoppen niet aan. */
+var FA_ID = null, FA_RDW = null, FA_TWIJFEL = false;
+
+function faCar(id){ for (var i=0;i<cars.length;i++){ if (cars[i].id===id) return cars[i]; } return null; }
+function faNum(v){ if (v==null) return NaN; return parseFloat(String(v).replace(/[^0-9,.-]/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.')); }
+function faEur(n){ return 'EUR ' + Math.round(n).toLocaleString('nl-NL'); }
+function faKt(k){ return String(k||'').replace(/[-\s]/g,'').toUpperCase(); }
+function faVandaag(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+
+function faModal(){
+  var m = document.getElementById('fa-modal');
+  if (m) return m;
+  m = document.createElement('div');
+  m.className = 'mbg'; m.id = 'fa-modal';
+  m.innerHTML =
+    '<div class="modal" style="max-width:460px">'+
+      '<div class="mhdr"><div><h2>Factuur akkoord</h2><p id="fa-sub"></p></div>'+
+      '<button class="xbtn" onclick="cm(\'fa-modal\')">&#10005;</button></div>'+
+      '<div style="display:flex;flex-direction:column;gap:10px;font-size:13px">'+
+        '<div>Inkoopprijs dashboard: <b id="fa-inkoop" class="mono"></b> <span id="fa-bm" style="color:var(--muted)"></span></div>'+
+        '<label>Factuurbedrag (totaal)<br><input id="fa-bedrag" inputmode="decimal" placeholder="bijv. 18350" oninput="faCheck()" style="width:100%;font-family:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text)"></label>'+
+        '<div id="fa-prijs" style="min-height:18px"></div>'+
+        '<div id="fa-kt-wrap" style="display:none">'+
+          '<label>NL-kenteken (van de factuur)<br><input id="fa-kt" placeholder="bijv. XX-123-X" onchange="faRdw()" style="width:100%;font-family:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);text-transform:uppercase"></label>'+
+          '<div id="fa-rdw" style="min-height:18px;margin-top:4px;color:var(--muted)"></div>'+
+        '</div>'+
+        '<div id="fa-log" style="font-size:12px;line-height:1.7"></div>'+
+      '</div>'+
+      '<div class="mftr"><button class="btn" onclick="cm(\'fa-modal\')">Annuleren</button>'+
+      '<button class="btn primary" id="fa-go" onclick="faGo()">Bevestigen</button></div>'+
+    '</div>';
+  document.body.appendChild(m);
+  return m;
+}
+
+function openFactuurAkkoord(eid){
+  var id = decodeURIComponent(eid), c = faCar(id);
+  if (!c) return;
+  FA_ID = id; FA_RDW = null; FA_TWIJFEL = false;
+  var m = faModal();
+  document.getElementById('fa-sub').textContent = (c.kenteken || ('VIN ' + (c.vin||'-'))) + ' · ' + (c.merk||'') + ' ' + (c.type||'') + (c.factuur_akkoord ? ' · al akkoord op ' + c.factuur_akkoord : '');
+  document.getElementById('fa-inkoop').textContent = c.inkoop ? faEur(faNum(c.inkoop)) : '-';
+  document.getElementById('fa-bm').textContent = c.btw_marge ? '(' + c.btw_marge + ')' : '(btw/marge niet ingevuld)';
+  document.getElementById('fa-bedrag').value = '';
+  document.getElementById('fa-prijs').innerHTML = '';
+  document.getElementById('fa-kt').value = '';
+  document.getElementById('fa-rdw').textContent = '';
+  document.getElementById('fa-log').innerHTML = '';
+  document.getElementById('fa-kt-wrap').style.display = c.kenteken ? 'none' : 'block';
+  var go = document.getElementById('fa-go'); go.disabled = false; go.textContent = 'Bevestigen'; go.onclick = faGo; go.dataset.kt = '';
+  m.classList.add('open');
+  setTimeout(function(){ document.getElementById('fa-bedrag').focus(); }, 50);
+}
+
+/* Vergelijkt factuurbedrag met inkoop, zowel incl. als excl. btw (marge EUR 10) */
+function faCheck(){
+  var c = faCar(FA_ID), out = document.getElementById('fa-prijs');
+  var f = faNum(document.getElementById('fa-bedrag').value), ink = faNum(c && c.inkoop);
+  FA_TWIJFEL = false;
+  document.getElementById('fa-go').textContent = 'Bevestigen';
+  if (isNaN(f) || isNaN(ink)) { out.innerHTML = ''; return; }
+  var d1 = f - ink, d2 = f / 1.21 - ink;
+  if (Math.abs(d1) <= 10) { out.innerHTML = '<span style="color:#1a6b1a">&#10003; Klopt</span>'; return; }
+  if (Math.abs(d2) <= 10) { out.innerHTML = '<span style="color:#1a6b1a">&#10003; Klopt (dashboard staat excl. btw)</span>'; return; }
+  var d = Math.abs(d2) < Math.abs(d1) ? d2 : d1;
+  FA_TWIJFEL = true;
+  out.innerHTML = '<span style="color:#b42318">&#9888; Verschil ' + (d>0?'+':'-') + faEur(Math.abs(d)) + (d===d2?' (t.o.v. excl. btw)':'') + ' &ndash; bijv. transport/leges? Klopt het, klik dan op Toch akkoord.</span>';
+  document.getElementById('fa-go').textContent = 'Toch akkoord';
+}
+
+/* RDW-check: kenteken bestaat en merk komt overeen met dashboard (RDW geeft geen VIN vrij) */
+function faRdw(){
+  var c = faCar(FA_ID), k = faKt(document.getElementById('fa-kt').value), el = document.getElementById('fa-rdw');
+  FA_RDW = null;
+  if (k.length < 6) { el.textContent = ''; return Promise.resolve(null); }
+  el.textContent = 'RDW controleren...';
+  return fetch('https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken=' + k).then(function(r){ return r.json(); }).then(function(rows){
+    var v = rows && rows[0];
+    if (!v) { FA_RDW = {ok:false}; el.innerHTML = '<span style="color:#b42318">&#9888; Kenteken niet gevonden bij RDW</span>'; return FA_RDW; }
+    var merkOk = !c.merk || String(v.merk||'').toLowerCase().indexOf(String(c.merk).toLowerCase().split(' ')[0]) > -1 || String(c.merk).toLowerCase().indexOf(String(v.merk||'').toLowerCase()) > -1;
+    FA_RDW = {ok:true, merkOk:merkOk};
+    el.innerHTML = (merkOk ? '<span style="color:#1a6b1a">&#10003; ' : '<span style="color:#b42318">&#9888; Ander merk dan in dashboard: ') +
+      'RDW: ' + (v.merk||'') + ' ' + (v.handelsbenaming||'') + ' (' + String(v.datum_eerste_toelating||'').slice(0,4) + ')</span>';
+    return FA_RDW;
+  }).catch(function(){ FA_RDW = {ok:false}; el.textContent = 'RDW niet bereikbaar'; return FA_RDW; });
+}
+
+function faLog(txt, ok){
+  var el = document.getElementById('fa-log');
+  el.innerHTML += '<div>' + (ok===true ? '<span style="color:#1a6b1a">&#10003;</span> ' : ok===false ? '<span style="color:#b42318">&#10007;</span> ' : '&middot; ') + txt + '</div>';
+}
+
+function faGo(){
+  var c = faCar(FA_ID); if (!c) return;
+  var go = document.getElementById('fa-go');
+  if (isNaN(faNum(document.getElementById('fa-bedrag').value))) { showToast('Vul eerst het factuurbedrag in'); return; }
+  var nieuwKt = !c.kenteken ? document.getElementById('fa-kt').value.trim().toUpperCase() : '';
+  if (!c.kenteken && faKt(nieuwKt).length < 6) { showToast('Vul het kenteken van de factuur in'); return; }
+  if (!c.btw_marge) { showToast('Vul eerst btw/marge in bij de auto (bewerken)'); return; }
+  go.disabled = true;
+  document.getElementById('fa-log').innerHTML = '';
+
+  var start = nieuwKt ? (FA_RDW ? Promise.resolve(FA_RDW) : faRdw()) : Promise.resolve(null);
+  start.then(function(rdw){
+    if (nieuwKt) {
+      if (!rdw || !rdw.ok || !rdw.merkOk) {
+        if (go.dataset.kt !== nieuwKt) { go.dataset.kt = nieuwKt; go.disabled = false; go.textContent = 'Kenteken toch gebruiken'; faLog('Controleer het kenteken (zie RDW-melding) en klik nogmaals.', false); throw 'stop'; }
+      }
+      return apiFetch('PATCH', 'autos?id=eq.' + FA_ID, {kenteken: nieuwKt}).then(function(){ c.kenteken = nieuwKt; faLog('Kenteken ' + nieuwKt + ' opgeslagen', true); });
+    }
+  })
+  .then(function(){ return faAds(c); })
+  .then(function(){ return faInn(c); })
+  .then(function(){
+    var d = faVandaag();
+    return apiFetch('PATCH', 'autos?id=eq.' + FA_ID, {factuur_akkoord: d}).then(function(){ c.factuur_akkoord = d; faLog('Factuur akkoord vastgelegd (' + d + ')', true); });
+  })
+  .then(function(){ go.textContent = 'Klaar'; go.disabled = false; go.onclick = function(){ cm('fa-modal'); }; go.dataset.kt = ''; render(); showToast('Factuur akkoord ✓'); })
+  .catch(function(e){ if (e === 'stop') return; go.disabled = false; go.textContent = 'Opnieuw'; faLog('Gestopt: ' + (e && e.message ? e.message : e), false); });
+}
+
+/* ADS: alleen aanmaken als de auto nog geen ads_stock_id heeft (zelfde logica als de ADS-knop) */
+function faAds(c){
+  if (c.ads_stock_id) { faLog('Autotelex: staat er al in (StockId ' + c.ads_stock_id + ')', true); return Promise.resolve(); }
+  faLog('Autotelex aanmaken...');
+  var exp = new Date(); exp.setDate(exp.getDate() + 7);
+  var body = { licensePlate: faKt(c.kenteken), establishmentId: 8789, advertisementCategory: 'Used', stockStatus: (c.status === 'binnen') ? 'inStock' : 'expected' };
+  if (c.status !== 'binnen') body.expectedDate = exp.toISOString();
+  if (c.km) body.mileage = parseInt(c.km);
+  return adsApiFetch('POST', '/api/v2/vehicle/create-by-licenseplate', body).then(function(data){
+    var sid = data.stockNumber || data.adsStockId || data.stockId || data.id;
+    if (!sid) throw new Error('Autotelex gaf geen StockId: ' + JSON.stringify(data).slice(0,80));
+    var p = [];
+    if (c.verkoop) p.push(adsApiFetch('PUT', '/api/v2/advertisement/' + sid + '/price', { amount: parseFloat(c.verkoop), amountExVat: 0, priceType: 'AskingPrice', countryCode: 'NL' }));
+    p.push(adsApiFetch('PATCH', '/api/v2/vehicle/' + sid + '/vat-margin/' + (c.btw_marge === 'btw' ? 'true' : 'false'), null));
+    if (c.status === 'binnen') p.push(adsApiFetch('PATCH', '/api/v2/stock/' + sid + '/set-in-stock', null));
+    return Promise.all(p).then(function(){
+      return apiFetch('PATCH', 'autos?id=eq.' + c.id, {ads_stock_id: String(sid)}).then(function(){ c.ads_stock_id = String(sid); faLog('Autotelex: aangemaakt (StockId ' + sid + ')', true); });
+    });
+  });
+}
+
+/* INN: zelfde logica als de INN-knop, zonder bevestigingsvraag; overslaan als hij er al staat */
+function faInn(c){
+  var k = faKt(c.kenteken);
+  var base = c.datum ? new Date(c.datum.length === 10 && c.datum[2] === '-' ? c.datum.split('-')[2]+'-'+c.datum.split('-')[1]+'-'+c.datum.split('-')[0] : c.datum) : new Date();
+  if (isNaN(base.getTime())) base = new Date();
+  base.setDate(base.getDate() + 7);
+  var vd = base.toISOString().split('T')[0];
+  return ensureSession().then(function(token){
+    return fetch(SUPA_URL + '/rest/v1/inname_cars?select=data', { headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token } })
+      .then(function(r){ return r.json(); })
+      .then(function(rows){
+        var al = (rows || []).some(function(row){ return row.data && faKt(row.data.kenteken) === k; });
+        if (al) { faLog('Inname: staat er al in', true); return; }
+        var d = { id: Date.now().toString(36) + Math.random().toString(36).slice(2), kenteken: c.kenteken, merk: c.merk || '', model: c.type || '',
+          verwacht: true, verwachtDatum: vd, datumInname: '', deadline: '',
+          info: (c.bj || '') + (c.km ? ' | ' + Number(c.km).toLocaleString('nl-NL') + ' km' : ''),
+          notes: '', repairs: [], checklist: [false,false,false,false,false], createdAt: new Date().toISOString() };
+        return fetch(SUPA_URL + '/rest/v1/inname_cars', { method: 'POST',
+          headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ id: d.id, data: d }) })
+          .then(function(r){ if (!r.ok) throw new Error('Inname dashboard gaf fout ' + r.status); faLog('Inname: toegevoegd als verwacht (' + vd + ')', true); });
+      });
+  });
+}
+/* =================== EINDE FACTUUR AKKOORD =================== */ 
 
 function toggleRow(evt, tr) {
   if (evt.target.closest('.ib') || evt.target.closest('.badge') || evt.target.closest('.acell') || evt.target.closest('.b2b-chip')) return;
