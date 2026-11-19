@@ -2583,7 +2583,7 @@ function dbOmloop(c){ if(!c.verkocht_datum || !c.eerste_online) return null; var
 function dbSoldIn(from, to){ return cars.filter(function(c){ var v=c.verkocht_datum; return v && dbOmloop(c)!==null && v>=from && v<=to; }); }
 function dbAvg(list,f){ if(!list.length) return null; return Math.round(list.reduce(function(s,c){return s+f(c);},0)/list.length); }
 function dbCarName(c){ return '<b>'+pcEsc(c.kenteken||('VIN '+String(c.vin||'').slice(-6)))+'</b> '+pcEsc((c.merk||'')+' '+(c.type||'')); }
-function dbIso(v){ var t=String(v||'').trim(), m=t.match(/^(\d{2})-(\d{2})-(\d{4})/); return m ? m[3]+'-'+m[2]+'-'+m[1] : t; }
+function dbIso(v){ var t=String(v||'').trim(), m=t.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/); return m ? m[3]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2) : t; }
 function dbSinceBuy(c){ return pcDiff(pcToday(), c.binnen_datum || dbIso(c.datum)); }
 /* Echte datums uit Autotelex: eerste publicatie + binnenkomst (stock summary) */
 var dbSyncBusy=false;
