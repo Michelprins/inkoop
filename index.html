@@ -286,34 +286,97 @@ tbody tr:hover td{background:#FFF6F1}
 
 /* ===== TABS + KAARTEN (gebruikt door B2B) ===== */
 .main-tabs{display:flex;gap:8px;margin-bottom:1.5rem}
+/* ===== THEMA: zijbalk + kaarten ===== */
+body{background:#F4F5F7}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:232px;background:#17191E;color:#C9CBD1;display:flex;flex-direction:column;padding:1.1rem .85rem;z-index:60;overflow-y:auto}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:.2rem .4rem 1.1rem}
+.sb-logo-img{width:38px;height:38px;border-radius:10px;object-fit:contain;background:#fff;padding:3px;flex-shrink:0}
+.sb-name{font-size:13.5px;font-weight:600;color:#fff;line-height:1.2}.sb-name span{color:#E8620A}
+.sb-sub{font-size:11px;color:#80838C;margin-top:2px}
+.sb-add{display:flex;align-items:center;justify-content:center;gap:8px;background:#E8620A;color:#fff;border:none;border-radius:10px;font:600 13px 'DM Sans',sans-serif;padding:10px;cursor:pointer;margin-bottom:1rem}
+.sb-add:hover{background:#C4510A}.sb-add svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round}
+.sb-nav{display:flex;flex-direction:column;gap:2px}
+.sb-sec{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6B6E77;padding:1.1rem .75rem .45rem}
+.sidebar .main-tab{display:flex;align-items:center;gap:11px;width:100%;background:none;border:none;border-radius:9px;color:#C9CBD1;font:500 13.5px 'DM Sans',sans-serif;padding:9px 12px;cursor:pointer;text-align:left}
+.sidebar .main-tab svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sidebar .main-tab:hover{background:rgba(255,255,255,.06);color:#fff}
+.sidebar .main-tab.active{background:rgba(232,98,10,.16);color:#FF8A3D;box-shadow:inset 3px 0 0 #E8620A}
+.sidebar .main-tab .kv-badge{margin-left:auto}
+.sb-tools .main-tab{font-size:12.5px;padding:7px 12px;color:#9A9DA5}
+.sb-logout{margin-top:auto!important;color:#80838C!important}
+.app{margin-left:232px;max-width:none!important;padding:1.4rem 2rem 4rem}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+.topbar h1{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.stat,.tbl-card,.toolbar,.db-card{box-shadow:0 1px 3px rgba(16,24,40,.06);border-color:rgba(0,0,0,.06)!important}
+
 /* ===== DASHBOARD ===== */
-.db-sec{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 .6rem}
-.db-kpis{display:flex;gap:1.5rem;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:0 0 .75rem}
-.db-kpis b{color:var(--text);font-size:14px}
-.db-buckets{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1rem}
-.db-b{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.8rem 1rem;cursor:pointer;border-top:4px solid var(--c);transition:box-shadow .15s}
-.db-b:hover{box-shadow:0 4px 14px rgba(0,0,0,.08)}
-.db-b.sel{outline:2px solid var(--c);outline-offset:-1px}
-.db-b .l{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.db-b .n{font-size:26px;font-weight:600;color:var(--c);line-height:1.2;margin:.15rem 0}
-.db-b .e{font-size:12px;color:var(--muted)}
-.db-bar{height:8px;border-radius:4px;overflow:hidden;display:flex;margin-bottom:1rem;background:var(--surface3)}
+.db-row2e{grid-template-columns:1fr 1fr!important}
+.db-row2{display:grid;grid-template-columns:1.45fr 1fr;gap:.8rem;margin-bottom:.8rem}.db-row2>*{min-width:0}
+.qs-wrap{position:relative;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:10px;padding:0 12px;height:38px;width:340px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.qs-wrap input{border:none;outline:none;font:inherit;font-size:13px;flex:1;background:none}
+.qs-res{display:none;position:absolute;top:42px;right:0;left:0;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:var(--shadow-lg);z-index:70;overflow:hidden}
+.qs-item{padding:8px 12px;font-size:12.5px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:baseline}
+.qs-item:hover{background:var(--surface2)}.qs-st{margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap}
+.qs-all{color:var(--accent);font-weight:600}
+@media(max-width:1300px){.db-row2{grid-template-columns:1fr}}
+@media(max-width:900px){.qs-wrap{width:100%}.topbar{flex-direction:column;align-items:stretch;gap:.6rem}}
+.db-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;margin-bottom:.8rem}
+.db-kpi{background:#fff;border-radius:16px;padding:.85rem 1rem;display:flex;gap:14px;align-items:flex-start;box-shadow:0 1px 3px rgba(16,24,40,.06);border:1px solid rgba(0,0,0,.06)}
+.db-ic{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--icbg);color:var(--icc)}
+.db-ic svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.db-kpi .l{font-size:12.5px;font-weight:600;color:#3A3D44}
+.db-kpi .v{font-size:22px;font-weight:600;line-height:1.25;margin:.15rem 0 .2rem;letter-spacing:-.01em}
+.db-kpi .t{font-size:11.5px;color:var(--muted)}
+.up{color:#1E8B47;font-weight:600}.dn{color:#C62828;font-weight:600}
+.db-row3{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:.8rem;margin-bottom:.8rem}
+.db-row3>*{min-width:0}
+.db-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:.9rem 1.05rem}
+.db-card h3{font-size:14.5px;font-weight:600;margin-bottom:.15rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.db-card .sub{font-size:12px;color:var(--muted);margin-bottom:.7rem}
+.db-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:.6rem}
+.db-stad{margin-bottom:1rem}
+.db-legend{display:flex;gap:1rem;font-size:12px;color:var(--muted);margin-bottom:.3rem}
+.db-legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.db-donut-wrap{display:flex;align-items:center;gap:1rem}
+.db-dl{list-style:none;font-size:12px;display:flex;flex-direction:column;gap:7px;flex:1}
+.db-dl li{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.db-dl li:hover b{text-decoration:underline}
+.db-dl .dot{width:9px;height:9px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.db-dl small{display:block;color:var(--muted)}
+.db-bar{height:8px;border-radius:4px;overflow:hidden;display:flex;margin:.3rem 0 .9rem;background:var(--surface3)}
 .db-bar div{height:100%}
-.db-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}
-.db-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem}
-.db-card h3{font-size:14px;font-weight:600;margin-bottom:.15rem;display:flex;justify-content:space-between;align-items:center}
-.db-card .sub{font-size:12px;color:var(--muted);margin-bottom:.6rem}
-.db-t{width:100%;border-collapse:collapse;font-size:12px}
-.db-t th{text-align:left;font-weight:600;color:var(--muted);font-size:11px;padding:5px 6px;border-bottom:1px solid var(--border2)}
-.db-t td{padding:6px;border-bottom:1px solid var(--border)}
-.db-t tr.ck{cursor:pointer}.db-t tr.ck:hover td{background:var(--surface2)}
-.db-t .r{text-align:right;font-family:'DM Mono',monospace}
-.db-d{display:inline-block;min-width:38px;text-align:center;font-weight:600;border-radius:6px;padding:1px 6px;color:#fff;background:var(--c)}
-.db-empty{font-size:12px;color:var(--hint);padding:.75rem 0}
+.db-buckets{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1rem}
+.db-b{background:#FAFAFB;border:1px solid var(--border);border-radius:12px;padding:.7rem .9rem;cursor:pointer;border-top:3px solid var(--c);transition:box-shadow .15s}
+.db-b:hover{box-shadow:0 4px 14px rgba(0,0,0,.07)}
+.db-b.sel{outline:2px solid var(--c);outline-offset:-1px;background:#fff}
+.db-b .l{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.db-b .n{font-size:24px;font-weight:600;color:var(--c);line-height:1.2;margin:.1rem 0}
+.db-b .e{font-size:12px;color:var(--muted)}
+.db-t{width:100%;border-collapse:collapse;font-size:12px;min-width:0!important}
 .db-t thead{background:none}
-.db-t{min-width:0!important}.db-grid>*{min-width:0;max-height:560px;overflow:auto}
-@media(max-width:900px){.db-buckets{grid-template-columns:repeat(2,1fr)}.db-grid{grid-template-columns:1fr}
-  .db-card{overflow-x:auto}.db-t thead{display:table-header-group}.db-t tbody tr{display:table-row;padding:0}.db-t td{display:table-cell;padding:5px;border-bottom:1px solid var(--border);font-size:12px}}
+.db-t th{text-align:left;font-weight:600;color:var(--muted);font-size:10.5px;padding:6px;border-bottom:1px solid var(--border2);position:sticky;top:0;background:#fff}
+.db-t td{padding:7px 6px;border-bottom:1px solid var(--border)}
+.db-t tr.ck{cursor:pointer}.db-t tr.ck:hover td{background:var(--surface2)}
+.db-t .r{text-align:right;font-family:'DM Mono',monospace;white-space:nowrap}
+.db-d{display:inline-block;min-width:38px;text-align:center;font-weight:600;border-radius:6px;padding:1px 6px;color:#fff;background:var(--c)}
+.db-scroll{max-height:360px;overflow:auto}
+.db-empty{font-size:12px;color:var(--hint);padding:.75rem 0}
+.db-act{display:flex;align-items:center;gap:12px;padding:.65rem 0;border-bottom:1px solid var(--border);cursor:pointer}
+.db-act:last-child{border-bottom:none}.db-act:hover .tt{text-decoration:underline}
+.db-act .db-ic{width:36px;height:36px;border-radius:10px}
+.db-act .db-ic svg{width:18px;height:18px}
+.db-act .tt{font-size:13px;font-weight:600}
+.db-act .ss{font-size:11.5px;color:var(--muted)}
+.db-pill{margin-left:auto;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--icbg);color:var(--icc);white-space:nowrap}
+@media(max-width:1300px){.db-row3{grid-template-columns:1fr 1fr}.db-kpi-row{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){
+  .sidebar{position:sticky;top:0;bottom:auto;width:auto;flex-direction:row;align-items:center;padding:.5rem;gap:.4rem;overflow-x:auto}
+  .sb-logo .sb-name,.sb-logo .sb-sub,.sb-sec,.sb-tools,.sb-logout{display:none}.sb-logo{padding:0}
+  .sb-nav{flex-direction:row}.sidebar .main-tab{padding:7px 10px;width:auto;white-space:nowrap}.sb-add{margin:0;padding:8px 10px;white-space:nowrap}
+  .app{margin-left:0;padding:1rem .75rem 4rem}
+  .db-row3,.db-kpi-row{grid-template-columns:1fr}.db-buckets{grid-template-columns:repeat(2,1fr)}
+  .db-card{overflow-x:auto}.db-t thead{display:table-header-group}.db-t tbody tr{display:table-row;padding:0}.db-t td{display:table-cell;padding:5px;border-bottom:1px solid var(--border);font-size:12px}
+}
 .main-tab{font-family:inherit;font-size:13px;font-weight:600;padding:9px 18px;border-radius:10px;border:1px solid var(--border2);background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:8px}
 .main-tab.active{background:#111;color:#fff;border-color:#111}
 .pc-chip{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;margin-top:4px;white-space:nowrap}
@@ -407,41 +470,53 @@ tbody tr:hover td{background:#FFF6F1}
 </style>
 </head>
 <body>
-<header class="header">
-  <div class="header-inner">
-    <div style="display:flex;align-items:center;gap:16px">
-      <div class="logo-pill">
-        <img class="logo-img" src="data:image/jpeg;base64,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" alt="Bourguignon">
-        <span class="logo-name">Bourguignon <span>Occasions</span></span>
-      </div>
-      <div class="hd"></div>
-      <span class="ht">Inkoopdashboard</span>
-    </div>
-    <div class="ha">
-      <button class="hbtn" onclick="bulkRDW()">&#9889; Brandstof ophalen</button><button class="hbtn" onclick="openImport()">&#8593; Importeer CSV</button>
-      <button class="hbtn" onclick="exportCSV()">&#8595; Export CSV</button>
-      <button class="hbtn" onclick="openBulkLev()">&#9889; Bulk leverancier</button>
-      <button class="hbtn" onclick="openPrijscheck(true)">&#9200; Prijscheck<span id="pc-badge" class="kv-badge" style="display:none;margin-left:6px"></span></button>
-      <button class="hbtn primary" onclick="openAdd()">+ Auto toevoegen</button>
-      <button class="hbtn" onclick="logout()" title="Uitloggen">&#x23FB; Uitloggen</button>
-    </div>
-  </div>
-</header>
+<aside class="sidebar">
+  <div class="sb-logo"><img class="sb-logo-img" src="data:image/jpeg;base64,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" alt="Bourguignon"><div><div class="sb-name">Bourguignon <span>Occasions</span></div><div class="sb-sub">Inkoopdashboard</div></div></div>
+  <button class="sb-add" onclick="openAdd()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Auto toevoegen</button>
+  <nav class="sb-nav">
+    <button class="main-tab active" id="tab-btn-dashboard" onclick="switchMainTab('dashboard')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Dashboard</span></button>
+    <button class="main-tab" id="tab-btn-voorraad" onclick="switchMainTab('voorraad')"><svg viewBox="0 0 24 24"><path d="M5 17h14M6 17v2M18 17v2M4 13l2-6h12l2 6v4H4z"/><circle cx="8" cy="14.5" r="1"/><circle cx="16" cy="14.5" r="1"/></svg><span>Voorraad</span></button>
+    <button class="main-tab" id="tab-btn-b2b" onclick="switchMainTab('b2b')"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M3 20c0-3 2.5-5 5-5s5 2 5 5M11 20c0-3 2.5-5 5-5s5 2 5 5"/></svg><span>B2B netwerk</span><span id="b2b-badge" class="kv-badge" style="display:none"></span></button>
+    <button class="main-tab" onclick="openPrijscheck(true)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Prijscheck</span><span id="pc-badge" class="kv-badge" style="display:none"></span></button>
+  </nav>
+  <div class="sb-sec">Acties</div>
+  <nav class="sb-nav sb-tools">
+    <button class="main-tab" onclick="openImport()"><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span>Importeer CSV</span></button>
+    <button class="main-tab" onclick="exportCSV()"><svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg><span>Export CSV</span></button>
+    <button class="main-tab" onclick="bulkRDW()"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Brandstof ophalen</span></button>
+    <button class="main-tab" onclick="openBulkLev()"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Bulk leverancier</span></button>
+  </nav>
+  <button class="main-tab sb-logout" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Uitloggen</span></button>
+</aside>
 
 <div class="app">
-  <div class="main-tabs">
-    <button class="main-tab active" id="tab-btn-dashboard" onclick="switchMainTab('dashboard')">&#128202; Dashboard</button>
-    <button class="main-tab" id="tab-btn-voorraad" onclick="switchMainTab('voorraad')">&#128663; Voorraad</button>
-    <button class="main-tab" id="tab-btn-b2b" onclick="switchMainTab('b2b')">&#129309; B2B netwerk<span id="b2b-badge" class="kv-badge" style="display:none;margin-left:4px"></span></button>
-  </div>
+  <div class="topbar"><h1 id="page-title">Overzicht</h1><div class="topbar-r" id="topbar-r">
+    <div class="qs-wrap"><svg width="15" height="15" fill="none" stroke="#999" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="qs" type="text" placeholder="Zoek kenteken, VIN of model..." autocomplete="off" oninput="dbQuickSearch(this.value)" onfocus="dbQuickSearch(this.value)" onblur="setTimeout(function(){document.getElementById('qs-res').style.display='none'},150)" onkeydown="if(event.key==='Enter')dbQuickAll()">
+    <div id="qs-res" class="qs-res"></div></div></div></div>
   <div id="view-dashboard">
-    <div class="db-sec">Stadagen online (vanaf eerste publicatie in Autotelex)</div>
-    <div style="float:right;margin-top:-1.6rem"><button class="btn small" onclick="dbSyncAtx(true)">&#8635; Autotelex-datums ophalen</button></div>
-    <div class="db-kpis" id="db-kpis"></div>
-    <div class="db-bar" id="db-bar"></div>
-    <div class="db-buckets" id="db-buckets"></div>
-    <div class="db-card" id="db-list"></div>
-    <div class="db-grid">
+    <div class="db-kpi-row" id="db-kpi"></div>
+    <div class="db-row3">
+      <div class="db-card" id="db-chart-week"></div>
+      <div class="db-card" id="db-chart-donut"></div>
+      <div class="db-card" id="db-chart-gauge"></div>
+    </div>
+    <div class="db-row2 db-row2e">
+      <div class="db-card" id="db-jaardoel"></div>
+      <div class="db-card" id="db-omloop"></div>
+    </div>
+    <div class="db-row2">
+      <div class="db-card" id="db-lev"></div>
+      <div class="db-card" id="db-acties"></div>
+    </div>
+    <div class="db-card db-stad">
+      <div class="db-head"><div><h3>Stadagen online</h3><div class="sub">Vanaf eerste publicatie in Autotelex &middot; klik op een blok om te filteren</div></div>
+        <button class="btn small" onclick="dbSyncAtx(true).then(function(){return dbSyncPrijzen(true);})">&#8635; Autotelex bijwerken</button></div>
+      <div class="db-bar" id="db-bar"></div>
+      <div class="db-buckets" id="db-buckets"></div>
+      <div id="db-list"></div>
+    </div>
+    <div class="db-row2 db-row2e">
       <div class="db-card" id="db-afprijzen"></div>
       <div class="db-card" id="db-nietonline"></div>
     </div>
@@ -1351,7 +1426,7 @@ function load() {
     render();
     updateStats();
     renderDash();
-    dbSyncAtx(false);
+    dbSyncAtx(false).then(function(){ return dbSyncPrijzen(false); });
     loadB2B();
     pcAfterLoad();
   }).catch(function() { showLoading(false); showToast('Fout bij laden'); });
@@ -2502,9 +2577,12 @@ function dbEur(v){ return '€ '+Math.round(v||0).toLocaleString('nl-NL'); }
 function dbBucket(d){ for(var i=0;i<DB_BUCKETS.length;i++){ if(d>=DB_BUCKETS[i].min && d<=DB_BUCKETS[i].max) return DB_BUCKETS[i]; } return DB_BUCKETS[0]; }
 function dbOnDate(c){ return c.eerste_online || c.online_datum || null; }
 function dbDays(c){ var d=dbOnDate(c); return d ? pcDiff(pcToday(), d) : null; }
-function dbOnline(){ return cars.filter(function(c){ return c.status!=='verkocht' && dbDays(c)!==null; }); }
+function dbOnline(){ return cars.filter(function(c){ return c.status!=='verkocht' && !c.verkocht_datum && dbDays(c)!==null; }); }
+function dbOmloop(c){ if(!c.verkocht_datum || !c.eerste_online) return null; var d=pcDiff(c.verkocht_datum, c.eerste_online); return d===null?null:Math.max(d,0); }
+function dbSoldIn(from, to){ return cars.filter(function(c){ var v=c.verkocht_datum; return v && dbOmloop(c)!==null && v>=from && v<=to; }); }
+function dbAvg(list,f){ if(!list.length) return null; return Math.round(list.reduce(function(s,c){return s+f(c);},0)/list.length); }
 function dbCarName(c){ return '<b>'+pcEsc(c.kenteken||('VIN '+String(c.vin||'').slice(-6)))+'</b> '+pcEsc((c.merk||'')+' '+(c.type||'')); }
-function dbIso(v){ var t=String(v||'').trim(), m=t.match(/^(\d{2})-(\d{2})-(\d{4})/); return m ? m[3]+'-'+m[2]+'-'+m[1] : t; }
+function dbIso(v){ var t=String(v||'').trim(), m=t.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/); return m ? m[3]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2) : t; }
 function dbSinceBuy(c){ return pcDiff(pcToday(), c.binnen_datum || dbIso(c.datum)); }
 /* Echte datums uit Autotelex: eerste publicatie + binnenkomst (stock summary) */
 var dbSyncBusy=false;
@@ -2512,7 +2590,12 @@ function dbSyncAtx(force){
   if(dbSyncBusy) return Promise.resolve();
   var last=0; try{ last=parseInt(localStorage.getItem('bourg_db_sync')||'0',10)||0; }catch(e){}
   if(!force && Date.now()-last < 3*3600*1000) return Promise.resolve();
-  var todo=cars.filter(function(c){ return c.ads_stock_id && c.status!=='verkocht' && (!c.eerste_online || !c.binnen_datum); });
+  var miss={}; try{ miss=JSON.parse(localStorage.getItem('bourg_db_nosold')||'{}')||{}; }catch(e){}
+  var vandaag=pcToday();
+  // niet-verkocht: altijd checken (datums + of hij in Autotelex verkocht is); verkocht: alleen zolang verkoopdatum ontbreekt (max 1x per dag)
+  var todo=cars.filter(function(c){ if(!c.ads_stock_id) return false;
+    if(c.status!=='verkocht') return !c.verkocht_datum;
+    return !c.verkocht_datum && miss[c.id]!==vandaag; });
   if(!todo.length){ if(force) showToast('Alle Autotelex-datums zijn al bekend'); return Promise.resolve(); }
   dbSyncBusy=true; var n=0, fout=null;
   if(force) showToast('Autotelex-datums ophalen voor '+todo.length+' auto\'s...');
@@ -2524,7 +2607,10 @@ function dbSyncAtx(force){
         if(!r) return;
         var pub=r.initialPublicationDateTime?String(r.initialPublicationDateTime).slice(0,10):null;
         var bin=r.inStockTimestampUtc?String(r.inStockTimestampUtc).slice(0,10):null;
+        var st=String(r.stockStatus||''), sold=r.soldTimestampUtc?String(r.soldTimestampUtc).slice(0,10):(/Sold/i.test(st)&&r.presenceEndDate?String(r.presenceEndDate).slice(0,10):null);
         var upd={};
+        if(sold && sold!==c.verkocht_datum) upd.verkocht_datum=sold;
+        if(!sold && c.status==='verkocht') miss[c.id]=vandaag;
         if(pub && pub!==c.eerste_online) upd.eerste_online=pub;
         if(bin && bin!==c.binnen_datum) upd.binnen_datum=bin;
         if(!Object.keys(upd).length) return;
@@ -2535,70 +2621,316 @@ function dbSyncAtx(force){
   });
   return chain.then(function(){
     dbSyncBusy=false;
-    if(fout){ showToast('Opslaan mislukt: zijn de kolommen eerste_online en binnen_datum aangemaakt?'); return; }
+    for(var k in miss){ if(miss[k]!==vandaag) delete miss[k]; }
+    try{ localStorage.setItem('bourg_db_nosold', JSON.stringify(miss)); }catch(e){}
+    if(fout){ showToast('Opslaan mislukt: ontbreekt er een kolom in Supabase?'); return; }
     try{ localStorage.setItem('bourg_db_sync', String(Date.now())); }catch(e){}
     renderDash();
     if(force||n) showToast(n+' auto\'s bijgewerkt met Autotelex-datums');
   });
 }
-function dbSelect(k){ dbSel = (dbSel===k) ? null : k; renderDash(); }
+function dbSelect(k){ dbSel = (dbSel===k) ? null : k; renderDash(); if(dbSel!==null){ var el=document.querySelector('.db-stad'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); } }
 
+var DB_IC = {
+  cart:'<svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg>',
+  car:'<svg viewBox="0 0 24 24"><path d="M5 17h14M6 17v2M18 17v2M4 13l2-6h12l2 6v4H4z"/></svg>',
+  clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  truck:'<svg viewBox="0 0 24 24"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>',
+  tag:'<svg viewBox="0 0 24 24"><path d="M20 12 12 20 4 12V4h8z"/><circle cx="8.5" cy="8.5" r="1.3"/></svg>',
+  eye:'<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><path d="M4 4l16 16"/></svg>',
+  down:'<svg viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M15 17h6v-6"/></svg>',
+  b2b:'<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M3 20c0-3 2.5-5 5-5s5 2 5 5M11 20c0-3 2.5-5 5-5s5 2 5 5"/></svg>',
+  check:'<svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>'
+};
+var DB_DOEL = 60; // doel gemiddelde stadagen
+function dbMonthKey(iso){ return iso ? iso.slice(0,7) : null; }
+function dbTrend(nu, toen, lagerIsBeter){
+  if(!toen) return '<span class="t">geen vergelijking</span>';
+  var pct=Math.round((nu-toen)/toen*100), goed = lagerIsBeter ? pct<=0 : pct>=0;
+  return '<span class="'+(goed?'up':'dn')+'">'+(pct>=0?'&#9650; ':'&#9660; ')+Math.abs(pct)+'%</span>';
+}
+function dbWater(c){ var i=nv(c.inkoop), v=nv(c.verkoop); return i && v && v < i; }
+
+function dbKpis(on){
+  var today=pcToday(), mk=today.slice(0,7), dag=+today.slice(8,10);
+  var pm=new Date(Date.UTC(+today.slice(0,4), +today.slice(5,7)-2, 1)).toISOString().slice(0,7);
+  var nu=0, toen=0, nuE=0;
+  cars.forEach(function(c){ var d=dbIso(c.datum); if(!/^\d{4}-\d{2}-\d{2}/.test(d)) return;
+    if(d.slice(0,7)===mk){ nu++; nuE+=nv(c.inkoop)||0; }
+    else if(d.slice(0,7)===pm && +d.slice(8,10)<=dag) toen++; });
+  var gem = on.length ? Math.round(on.reduce(function(s,c){return s+dbDays(c);},0)/on.length) : 0;
+  var som = on.reduce(function(s,c){return s+(nv(c.inkoop)||0);},0);
+  var ow = cars.filter(function(c){ return c.status==='onderweg'||c.status==='bestelling'; });
+  var owE = ow.reduce(function(s,c){return s+(nv(c.inkoop)||0);},0);
+  function k(ic,bg,col,l,v,t){ return '<div class="db-kpi"><div class="db-ic" style="--icbg:'+bg+';--icc:'+col+'">'+DB_IC[ic]+'</div><div><div class="l">'+l+'</div><div class="v">'+v+'</div><div class="t">'+t+'</div></div></div>'; }
+  document.getElementById('db-kpi').innerHTML =
+    k('cart','#FFF1E6','#E8620A','Ingekocht deze maand', nu, dbTrend(nu,toen,false)+' t.o.v. zelfde periode vorige maand') +
+    k('car','#EAF6EE','#1E8B47','Voorraad online', on.length, dbEur(som)+' inkoopwaarde') +
+    k('clock', gem>DB_DOEL?'#FDECEC':'#EAF6EE', gem>DB_DOEL?'#C62828':'#1E8B47', 'Gem. stadagen', gem, '<span class="'+(gem>DB_DOEL?'dn':'up')+'">doel &le; '+DB_DOEL+'</span> dagen online') +
+    (function(){ var t90=pcAdd(today,-90), t180=pcAdd(today,-180);
+      var nuL=dbSoldIn(t90, today), toenL=dbSoldIn(t180, pcAdd(t90,-1)), nuA=dbAvg(nuL,dbOmloop), toenA=dbAvg(toenL,dbOmloop);
+      return k('clock','#F3EEFF','#5B35C9','Omloopsnelheid', nuA===null?'-':nuA+' d', nuA===null?'nog geen verkopen bekend':(toenA?dbTrend(nuA,toenA,true)+' &middot; ':'')+nuL.length+' verkocht laatste 90 dagen'); })() +
+    k('truck','#EEF2FF','#2B55C9','Onderweg / besteld', ow.length, dbEur(owE)+' inkoopwaarde') +
+    (function(){ var t=0,n=0,m=0; on.forEach(function(c){ var a=dbAfgeprijsd(c); if(a){ m++; if(a.drop>0){ t+=a.drop; n++; } } });
+      return k('down','#FDECEC','#C62828','Afgeprijsd (online)', m?dbEur(t):'-', m?(n+' auto\'s &middot; gem. '+dbEur(n?t/n:0)):'prijshistorie nog niet opgehaald'); })();
+}
+
+function dbWeekChart(){
+  // laatste 12 weken: ingekocht (inkoopdatum) vs online gekomen (eerste publicatie)
+  var W=12, now=pcParse(pcToday()), dow=(new Date(now).getUTCDay()+6)%7, start=now-dow*86400000-(W-1)*7*86400000;
+  var a=[], b=[], lbl=[];
+  for(var i=0;i<W;i++){ a.push(0); b.push(0); var d=new Date(start+i*7*86400000); lbl.push(d.getUTCDate()+'/'+(d.getUTCMonth()+1)); }
+  function idx(iso){ var t=pcParse(iso); if(t===null||t<start) return -1; var i=Math.floor((t-start)/(7*86400000)); return i<W?i:-1; }
+  cars.forEach(function(c){ var i=idx(dbIso(c.datum)); if(i>=0) a[i]++; var j=idx(c.eerste_online); if(j>=0) b[j]++; });
+  var w=560,h=150,pl=30,pr=10,pt=8,pb=22, mx=Math.max(4,Math.max.apply(null,a.concat(b)));
+  mx=Math.ceil(mx/4)*4;
+  function X(i){ return pl+i*(w-pl-pr)/(W-1); } function Y(v){ return pt+(h-pt-pb)*(1-v/mx); }
+  function path(arr){ var d=''; for(var i=0;i<arr.length;i++){ var x=X(i),y=Y(arr[i]); if(!i){ d='M'+x+','+y; } else { var px=X(i-1),py=Y(arr[i-1]),cx=(px+x)/2; d+=' C'+cx+','+py+' '+cx+','+y+' '+x+','+y; } } return d; }
+  var g=''; for(var t=0;t<=4;t++){ var v=mx*t/4, y=Y(v); g+='<line x1="'+pl+'" x2="'+(w-pr)+'" y1="'+y+'" y2="'+y+'" stroke="#EEE"/><text x="'+(pl-6)+'" y="'+(y+3)+'" font-size="10" fill="#999" text-anchor="end">'+v+'</text>'; }
+  var xl=''; for(var i=0;i<W;i+=2) xl+='<text x="'+X(i)+'" y="'+(h-6)+'" font-size="10" fill="#999" text-anchor="middle">'+lbl[i]+'</text>';
+  var pa=path(a), pb2=path(b);
+  var svg='<svg viewBox="0 0 '+w+' '+h+'" width="100%" style="display:block">'+
+    '<defs><linearGradient id="dbga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E8620A" stop-opacity=".22"/><stop offset="1" stop-color="#E8620A" stop-opacity="0"/></linearGradient>'+
+    '<linearGradient id="dbgb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5B6472" stop-opacity=".15"/><stop offset="1" stop-color="#5B6472" stop-opacity="0"/></linearGradient></defs>'+g+xl+
+    '<path d="'+pa+' L'+X(W-1)+','+Y(0)+' L'+X(0)+','+Y(0)+'Z" fill="url(#dbga)"/><path d="'+pb2+' L'+X(W-1)+','+Y(0)+' L'+X(0)+','+Y(0)+'Z" fill="url(#dbgb)"/>'+
+    '<path d="'+pa+'" fill="none" stroke="#E8620A" stroke-width="2.4"/><path d="'+pb2+'" fill="none" stroke="#5B6472" stroke-width="2.4"/>'+
+    a.map(function(v,i){ return '<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="3" fill="#E8620A"><title>Week van '+lbl[i]+': '+v+' ingekocht, '+b[i]+' online gekomen</title></circle>'; }).join('')+'</svg>';
+  document.getElementById('db-chart-week').innerHTML='<h3>Inkoop &amp; online per week</h3><div class="db-legend"><span><i style="background:#E8620A"></i>Ingekocht</span><span><i style="background:#5B6472"></i>Online gekomen</span><span style="margin-left:auto">laatste 12 weken</span></div>'+svg;
+}
+
+function dbDonut(on, per){
+  var tot=on.length, r=62, C=2*Math.PI*r, off=0, seg='';
+  DB_BUCKETS.forEach(function(b){ var n=per[b.k].n; if(!n) return; var L=n/tot*C;
+    seg+='<circle r="'+r+'" cx="80" cy="80" fill="none" stroke="'+b.c+'" stroke-width="22" stroke-dasharray="'+(L-1.5)+' '+(C-L+1.5)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 80 80)" style="cursor:pointer" onclick="dbSelect('+b.k+')"><title>'+b.l+': '+n+'</title></circle>'; off+=L; });
+  var svg='<svg viewBox="0 0 160 160" width="128" height="128" style="flex-shrink:0">'+(tot?seg:'<circle r="'+r+'" cx="80" cy="80" fill="none" stroke="#EEE" stroke-width="22"/>')+
+    '<text x="80" y="78" text-anchor="middle" font-size="24" font-weight="600" fill="#111">'+tot+'</text><text x="80" y="96" text-anchor="middle" font-size="11" fill="#888">online</text></svg>';
+  var lg='<ul class="db-dl">'+DB_BUCKETS.map(function(b){ var n=per[b.k].n;
+    return '<li onclick="dbSelect('+b.k+')"><span class="dot" style="background:'+b.c+'"></span><div><b>'+b.l+'</b><small>'+n+' ('+(tot?Math.round(n/tot*100):0)+'%) &middot; '+dbEur(per[b.k].e)+'</small></div></li>'; }).join('')+'</ul>';
+  document.getElementById('db-chart-donut').innerHTML='<h3>Voorraad per stadagen</h3><div class="sub">Klik om de lijst te filteren</div><div class="db-donut-wrap">'+svg+lg+'</div>';
+}
+
+function dbGauge(on){
+  var tot=on.length, ok=on.filter(function(c){ return dbDays(c)<=DB_DOEL; }).length, pct=tot?ok/tot:0;
+  var col = pct>=.7 ? '#1E8B47' : pct>=.5 ? '#E8A30A' : '#C62828';
+  var r=70, cx=100, cy=95, a0=Math.PI*0.85, a1=Math.PI*2.15, span=a1-a0;
+  function pt(a){ return (cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1); }
+  function arc(from,to,c,w){ var large=(to-from)>Math.PI?1:0; return '<path d="M'+pt(from)+' A'+r+','+r+' 0 '+large+' 1 '+pt(to)+'" fill="none" stroke="'+c+'" stroke-width="'+w+'" stroke-linecap="round"/>'; }
+  var svg='<svg viewBox="0 0 200 165" width="100%" style="max-width:175px;display:block;margin:0 auto">'+arc(a0,a1,'#EEE',14)+(pct>0?arc(a0,a0+span*Math.max(pct,.01),col,14):'')+
+    '<text x="100" y="98" text-anchor="middle" font-size="34" font-weight="600" fill="#111">'+Math.round(pct*100)+'%</text>'+
+    '<text x="100" y="120" text-anchor="middle" font-size="11" fill="#888">binnen '+DB_DOEL+' dagen</text></svg>';
+  var oud=on.filter(function(c){ return dbDays(c)>90; }), oudE=oud.reduce(function(s,c){return s+(nv(c.inkoop)||0);},0);
+  document.getElementById('db-chart-gauge').innerHTML='<h3>Gezonde voorraad</h3><div class="sub">Aandeel online voorraad &le; '+DB_DOEL+' dagen</div>'+svg+
+    '<div style="text-align:center;font-size:12px;color:var(--muted);margin-top:.3rem">'+ok+' van '+tot+' auto\'s &middot; <span class="dn">'+oud.length+' &gt; 90 dagen</span> ('+dbEur(oudE)+')</div>';
+}
+
+function dbActies(on){
+  var due=pcDueList().length;
+  var nio=cars.filter(function(c){ return c.status==='binnen' && !dbOnDate(c); }).length;
+  var water=on.filter(dbWater).length;
+  var mis=cars.filter(function(c){ return c.status!=='verkocht' && c.verkocht_datum; }).length;
+  var oud=on.filter(function(c){ return dbDays(c)>120; }).length;
+  var kans=(typeof b2bKansen==='function' && b2bLoaded) ? b2bKansen().length : 0;
+  var afh=(typeof b2bDeals!=='undefined') ? b2bDeals.filter(function(d){ return d.status==='verkocht' && typeof afKlaar==='function' && !afKlaar(d); }).length : 0;
+  function a(ic,bg,col,tt,ss,n,onc){ return '<div class="db-act" onclick="'+onc+'"><div class="db-ic" style="--icbg:'+bg+';--icc:'+col+'">'+DB_IC[ic]+'</div><div><div class="tt">'+tt+'</div><div class="ss">'+ss+'</div></div><span class="db-pill" style="--icbg:'+bg+';--icc:'+col+'">'+n+'</span></div>'; }
+  var items=[];
+  if(mis) items.push(a('check','#F3EEFF','#5B35C9','Verkocht in Autotelex','Status in dashboard nog niet op verkocht',mis,"dbSelect('mis')"));
+  if(due) items.push(a('tag','#FFF1E6','#E8620A','Prijscheck / afprijzen','Prijscheck verlopen',due,'openPrijscheck(true)'));
+  if(oud) items.push(a('clock','#FDECEC','#C62828','Langer dan 120 dagen online','Afprijzen of B2B aanbieden',oud,'dbSelect(4)'));
+  if(water) items.push(a('down','#FDECEC','#C62828','Vraagprijs onder inkoop','Let op: btw/marge kan verschillen',water,"dbSelect('water')"));
+  if(nio) items.push(a('eye','#FFF7E0','#B7791F','Binnen, nog niet online','Advertentie afmaken',nio,"document.getElementById('db-nietonline').scrollIntoView({behavior:'smooth'})"));
+  if(kans) items.push(a('b2b','#EEF2FF','#2B55C9','B2B-kansen','Match met een afnemer',kans,"switchMainTab('b2b')"));
+  if(afh) items.push(a('check','#EAF6EE','#1E8B47','B2B-afhandeling open','Checklist nog niet klaar',afh,"switchMainTab('b2b');setB2bSub&&setB2bSub('afhandeling')"));
+  document.getElementById('db-acties').innerHTML='<h3>Actiepunten</h3><div class="sub">Wat vandaag aandacht nodig heeft</div>'+(items.length?items.join(''):'<div class="db-empty">Niets openstaand. Lekker bezig.</div>');
+}
+
+/* ---- C: prijshistorie uit Autotelex-logs ---- */
+var dbPrijsBusy=false;
+function dbParsePrijzen(logs){
+  var h=[];
+  (Array.isArray(logs)?logs:[]).forEach(function(l){
+    if(!l || l.activityType!=='Price') return;
+    var m=String(l.activityMessage||'').match(/^Vraagprijs NL aangepast naar €\s*([\d.]+)(?:\s+(incl|excl)\.?\s*BTW)?/i);
+    if(!m) return; var p=parseInt(m[1].replace(/\./g,''),10); if(!p) return;
+    h.push({d:String(l.activityDateTime||'').slice(0,10), p:p, b:(m[2]||'incl').toLowerCase()});
+  });
+  h.sort(function(a,b){ return a.d<b.d?-1:a.d>b.d?1:0; });
+  return h;
+}
+function dbAfgeprijsd(c){
+  var h=c.atx_prijzen&&c.atx_prijzen.h; if(!h||!h.length) return null;
+  var mx=Math.max.apply(null,h.map(function(x){return x.p;}));
+  h=h.filter(function(x){ return x.p>=mx*0.5; }); // tikfouten (bv. 3.338 i.p.v. 33.380) negeren
+  var basis=h[h.length-1].b, l=h.filter(function(x){ return x.b===basis; }), n=0;
+  for(var i=1;i<l.length;i++) if(l[i].p<l[i-1].p) n++;
+  return {drop:l[0].p-l[l.length-1].p, n:n, eerste:l[0].p, nu:l[l.length-1].p, basis:basis};
+}
+function dbSyncPrijzen(force){
+  if(dbPrijsBusy) return Promise.resolve();
+  var last=0; try{ last=parseInt(localStorage.getItem('bourg_db_prijs')||'0',10)||0; }catch(e){}
+  if(!force && Date.now()-last < 20*3600*1000) return Promise.resolve();
+  var todo=cars.filter(function(c){ return c.ads_stock_id && c.status!=='verkocht' && c.eerste_online; });
+  if(!todo.length) return Promise.resolve();
+  dbPrijsBusy=true; var n=0, fout=null, chain=Promise.resolve();
+  todo.forEach(function(c){
+    chain=chain.then(function(){
+      if(fout) return;
+      return adsApiFetch('GET','/api/v2/stock/'+encodeURIComponent(c.ads_stock_id)+'/logs',null).catch(function(){ return null; }).then(function(r){
+        if(!Array.isArray(r)) return;
+        var h=dbParsePrijzen(r), oud=c.atx_prijzen&&c.atx_prijzen.h;
+        if(JSON.stringify(oud||[])===JSON.stringify(h)) return;
+        var v={upd:pcToday(), h:h};
+        return apiFetch('PATCH','autos?id=eq.'+c.id,{atx_prijzen:v}).then(function(){ c.atx_prijzen=v; n++; })
+          .catch(function(e){ fout=e; });
+      });
+    });
+  });
+  return chain.then(function(){
+    dbPrijsBusy=false;
+    if(fout){ showToast('Prijshistorie opslaan mislukt'); return; }
+    try{ localStorage.setItem('bourg_db_prijs', String(Date.now())); }catch(e){}
+    if(currentMainTab==='dashboard') renderDash();
+    if(force) showToast('Prijshistorie bijgewerkt voor '+n+' auto\'s');
+  });
+}
+
+/* ---- A: jaardoel ---- */
+var DB_JAARDOEL = 900;
+function dbJaardoel(){
+  var today=pcToday(), jr=today.slice(0,4), mnd=[0,0,0,0,0,0,0,0,0,0,0,0], ytd=0;
+  cars.forEach(function(c){ var d=dbIso(c.datum); if(/^\d{4}-\d{2}-\d{2}/.test(d) && d.slice(0,4)===jr && d<=today){ mnd[+d.slice(5,7)-1]++; ytd++; } });
+  var doy=pcDiff(today, jr+'-01-01')+1, ndays=(+jr%4===0)?366:365;
+  var prog=Math.round(ytd/doy*ndays), pace=Math.round(DB_JAARDOEL*doy/ndays), pct=Math.min(ytd/DB_JAARDOEL,1);
+  var voor=ytd-pace, perM=DB_JAARDOEL/12, cm=+today.slice(5,7)-1;
+  var rest=Math.max(DB_JAARDOEL-ytd,0), restM=12-cm, nodig=restM>0?Math.ceil(rest/((ndays-doy)/30.4||1)):rest;
+  var w=560,h=105,pl=26,pb=18,pt=12,bw=(w-pl-10)/12, mx=Math.max(perM*1.3, Math.max.apply(null,mnd))*1.05;
+  function Y(v){ return pt+(h-pt-pb)*(1-v/mx); }
+  var MN=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'], bars='';
+  mnd.forEach(function(v,i){ var x=pl+i*bw+bw*0.18, bwi=bw*0.64, col= i>cm ? '#EEE' : (v>=perM ? '#1E8B47' : (i===cm ? '#E8620A' : '#F4A26B'));
+    bars+='<rect x="'+x+'" y="'+Y(v)+'" width="'+bwi+'" height="'+(Y(0)-Y(v))+'" rx="4" fill="'+col+'"><title>'+MN[i]+': '+v+'</title></rect>'+
+      (v&&i<=cm?'<text x="'+(x+bwi/2)+'" y="'+(Y(v)-3)+'" font-size="9.5" fill="#555" text-anchor="middle">'+v+'</text>':'')+
+      '<text x="'+(x+bwi/2)+'" y="'+(h-5)+'" font-size="10" fill="#999" text-anchor="middle">'+MN[i]+'</text>'; });
+  var ty=Y(perM);
+  var svg='<svg viewBox="0 0 '+w+' '+h+'" width="100%" style="display:block">'+bars+
+    '<line x1="'+pl+'" x2="'+(w-6)+'" y1="'+ty+'" y2="'+ty+'" stroke="#111" stroke-dasharray="4 4" stroke-width="1"/><text x="'+(pl-4)+'" y="'+(ty+3)+'" font-size="9.5" fill="#111" text-anchor="end">'+Math.round(perM)+'</text></svg>';
+  document.getElementById('db-jaardoel').innerHTML=
+    '<h3>Jaardoel inkoop '+jr+' <span style="font-size:12px;font-weight:400;color:var(--muted)">doel '+DB_JAARDOEL+' &middot; '+Math.round(perM)+' per maand</span></h3>'+
+    '<div style="display:flex;align-items:baseline;gap:.6rem;margin:.3rem 0 .4rem"><span style="font-size:28px;font-weight:600">'+ytd+'</span><span style="color:var(--muted);font-size:13px">van '+DB_JAARDOEL+' ('+Math.round(pct*100)+'%)</span>'+
+      '<span style="margin-left:auto;font-size:12.5px" class="'+(voor>=0?'up':'dn')+'">'+(voor>=0?voor+' voor op schema':(-voor)+' achter op schema')+'</span></div>'+
+    '<div style="position:relative;height:10px;background:#EEE;border-radius:6px;overflow:hidden;margin-bottom:.35rem"><div style="height:100%;width:'+(pct*100)+'%;background:'+(voor>=0?'#1E8B47':'#E8620A')+';border-radius:6px"></div></div>'+
+    '<div style="position:relative;height:0"><div title="Waar je nu zou moeten zitten: '+pace+'" style="position:absolute;top:-16px;left:calc('+(pace/DB_JAARDOEL*100)+'% - 1px);width:2px;height:12px;background:#111"></div></div>'+
+    '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:.6rem"><span>Prognose jaareinde: <b style="color:var(--text)">'+prog+'</b></span><span>Schema vandaag: '+pace+'</span><span>Nog nodig: <b style="color:var(--text)">'+rest+'</b>'+(restM>0?' (&asymp; '+nodig+'/mnd)':'')+'</span></div>'+svg;
+}
+
+/* ---- B: stadagen per leverancier ---- */
+function dbLeveranciers(on){
+  var g={};
+  on.forEach(function(c){ var l=c.leverancier||'Onbekend'; if(!g[l]) g[l]={l:l,n:0,s:0,o:0,e:0}; var d=dbDays(c); g[l].n++; g[l].s+=d; if(d>90) g[l].o++; g[l].e+=nv(c.inkoop)||0; });
+  var jr=pcAdd(pcToday(),-365);
+  cars.forEach(function(c){ var o=dbOmloop(c); if(o===null || c.verkocht_datum<jr) return; var l=c.leverancier||'Onbekend'; if(!g[l]) g[l]={l:l,n:0,s:0,o:0,e:0}; g[l].vn=(g[l].vn||0)+1; g[l].vs=(g[l].vs||0)+o; });
+  var arr=Object.keys(g).map(function(k){ var x=g[k]; x.gem=x.n?Math.round(x.s/x.n):null; x.om=x.vn?Math.round(x.vs/x.vn):null; return x; }).filter(function(x){ return x.n+(x.vn||0)>=2; });
+  arr.sort(function(a,b){ return (b.om===null?-1:b.om)-(a.om===null?-1:a.om) || (b.gem||0)-(a.gem||0); });
+  var rows=arr.map(function(x){ var b=dbBucket(x.gem);
+    return '<tr class="ck" onclick="dbLevFilter(\''+pcEsc(x.l).replace(/'/g,"\\'")+'\')"><td>'+pcEsc(x.l)+'</td><td class="r">'+(x.vn||'-')+'</td><td class="r">'+(x.om===null?'-':'<span class="db-d" style="--c:'+dbBucket(x.om).c+'">'+x.om+'d</span>')+'</td><td class="r">'+(x.n||'-')+'</td><td class="r">'+(x.gem===null?'-':x.gem+'d')+'</td><td class="r"'+(x.o?' style="color:var(--red-mid);font-weight:600"':'')+'>'+(x.o||'-')+'</td></tr>'; }).join('');
+  document.getElementById('db-lev').innerHTML='<h3>Omloop &amp; stadagen per leverancier</h3><div class="sub">Omloop = gem. dagen online tot verkocht (laatste 12 mnd) &middot; klik voor de huidige auto\'s</div>'+
+    (arr.length?'<div class="db-scroll" style="max-height:240px"><table class="db-t"><thead><tr><th>Leverancier</th><th class="r">Verkocht 12m</th><th class="r">Omloop</th><th class="r">Nu online</th><th class="r">Gem. stad.</th><th class="r">&gt;90d</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="db-empty">Nog te weinig data.</div>');
+}
+var dbLev=null;
+function dbLevFilter(l){ dbSel='lev'; dbLev=l; renderDash(); var el=document.querySelector('.db-stad'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+
+/* ---- F: snel zoeken ---- */
+function dbQuickSearch(q){
+  var box=document.getElementById('qs-res'); q=String(q||'').trim().toLowerCase();
+  if(q.length<2){ box.style.display='none'; return; }
+  var qn=q.replace(/[-\s]/g,'');
+  var hits=cars.filter(function(c){ var k=String(c.kenteken||'').toLowerCase().replace(/[-\s]/g,''), v=String(c.vin||'').toLowerCase();
+    return k.indexOf(qn)>-1 || v.indexOf(qn)>-1 || ((c.merk||'')+' '+(c.type||'')).toLowerCase().indexOf(q)>-1; }).slice(0,8);
+  box.innerHTML = hits.length ? hits.map(function(c){ var d=dbDays(c);
+    return '<div class="qs-item" onmousedown="editCar(\''+c.id+'\')"><b>'+pcEsc(c.kenteken||('VIN '+String(c.vin||'').slice(-6)))+'</b> '+pcEsc((c.merk||'')+' '+(c.type||''))+
+      '<span class="qs-st">'+pcEsc(c.status||'')+(d!==null&&c.status!=='verkocht'?' &middot; '+d+'d online':'')+'</span></div>'; }).join('') +
+    '<div class="qs-item qs-all" onmousedown="dbQuickAll()">Alle resultaten in Voorraad &rarr;</div>' : '<div class="qs-item" style="color:var(--hint)">Niets gevonden</div>';
+  box.style.display='block';
+}
+function dbQuickAll(){ var q=document.getElementById('qs').value; switchMainTab('voorraad'); var s=document.getElementById('search'); if(s){ s.value=q; render(); } document.getElementById('qs-res').style.display='none'; }
+
+/* ---- Omloopsnelheid: eerste publicatie -> verkocht (Autotelex) ---- */
+function dbOmloopCard(){
+  var today=pcToday(), MN=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  var y=+today.slice(0,4), m=+today.slice(5,7)-1, maanden=[];
+  for(var i=11;i>=0;i--){ var mm=m-i, yy=y; while(mm<0){ mm+=12; yy--; } maanden.push({k:yy+'-'+('0'+(mm+1)).slice(-2), l:MN[mm], n:0, s:0}); }
+  var idx={}; maanden.forEach(function(x,i){ idx[x.k]=i; });
+  var sold=cars.filter(function(c){ return dbOmloop(c)!==null; });
+  sold.forEach(function(c){ var i=idx[c.verkocht_datum.slice(0,7)]; if(i!==undefined){ maanden[i].n++; maanden[i].s+=dbOmloop(c); } });
+  maanden.forEach(function(x){ x.gem = x.n ? Math.round(x.s/x.n) : null; });
+  var w=560,h=128,pl=26,pb=32,pt=14,bw=(w-pl-10)/12, mx=Math.max(DB_DOEL*1.25, Math.max.apply(null,maanden.map(function(x){return x.gem||0;})))*1.05;
+  function Y(v){ return pt+(h-pt-pb)*(1-v/mx); }
+  var bars='';
+  maanden.forEach(function(x,i){ var cx=pl+i*bw+bw*0.18, bwi=bw*0.64;
+    if(x.gem!==null){ var col=dbBucket(x.gem).c;
+      bars+='<rect x="'+cx+'" y="'+Y(x.gem)+'" width="'+bwi+'" height="'+(Y(0)-Y(x.gem))+'" rx="4" fill="'+col+'"><title>'+x.l+': gem. '+x.gem+' dagen, '+x.n+' verkocht</title></rect>'+
+        '<text x="'+(cx+bwi/2)+'" y="'+(Y(x.gem)-4)+'" font-size="9.5" fill="#333" text-anchor="middle" font-weight="600">'+x.gem+'d</text>'; }
+    bars+='<text x="'+(cx+bwi/2)+'" y="'+(h-19)+'" font-size="10" fill="#999" text-anchor="middle">'+x.l+'</text>'+
+      '<text x="'+(cx+bwi/2)+'" y="'+(h-6)+'" font-size="9" fill="#BBB" text-anchor="middle">'+(x.n||'')+'</text>'; });
+  var ty=Y(DB_DOEL);
+  var svg='<svg viewBox="0 0 '+w+' '+h+'" width="100%" style="display:block">'+bars+
+    '<line x1="'+pl+'" x2="'+(w-6)+'" y1="'+ty+'" y2="'+ty+'" stroke="#111" stroke-dasharray="4 4"/><text x="'+(pl-4)+'" y="'+(ty+3)+'" font-size="9.5" fill="#111" text-anchor="end">'+DB_DOEL+'</text></svg>';
+  var recent=sold.slice().sort(function(a,b){ return a.verkocht_datum<b.verkocht_datum?1:-1; }).slice(0,8);
+  var tbl=recent.length?'<div class="db-scroll" style="max-height:175px;margin-top:.4rem"><table class="db-t"><thead><tr><th>Recent verkocht</th><th>Online</th><th>Verkocht</th><th class="r">Dagen</th></tr></thead><tbody>'+
+    recent.map(function(c){ var d=dbOmloop(c); return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td>'+dbCarName(c)+'</td><td>'+pcFmt(c.eerste_online)+'</td><td>'+pcFmt(c.verkocht_datum)+'</td><td class="r"><span class="db-d" style="--c:'+dbBucket(d).c+'">'+d+'d</span></td></tr>'; }).join('')+'</tbody></table></div>':'';
+  var dekking=cars.filter(function(c){ return c.status==='verkocht'; }).length;
+  document.getElementById('db-omloop').innerHTML='<h3>Omloopsnelheid per maand <span style="font-size:12px;font-weight:400;color:var(--muted)">online &rarr; verkocht &middot; '+sold.length+' van '+dekking+' verkochte auto\'s bekend</span></h3>'+
+    '<div class="sub">Gemiddeld aantal dagen van eerste publicatie tot verkoop in Autotelex; grijs getal = aantal verkocht</div>'+svg+tbl;
+}
 function renderDash(){
   if(!document.getElementById('view-dashboard')) return;
   var on = dbOnline();
-  var tot = on.length, som = 0, dagen = 0;
+  var tot = on.length;
   var per = DB_BUCKETS.map(function(){ return {n:0, e:0}; });
-  on.forEach(function(c){ var d=dbDays(c), b=dbBucket(d); per[b.k].n++; per[b.k].e += nv(c.inkoop)||0; som += nv(c.inkoop)||0; dagen += d; });
+  on.forEach(function(c){ var b=dbBucket(dbDays(c)); per[b.k].n++; per[b.k].e += nv(c.inkoop)||0; });
 
-  document.getElementById('db-kpis').innerHTML =
-    '<span>Online: <b>'+tot+'</b> auto\'s</span>'+
-    '<span>Gem. stadagen: <b>'+(tot?Math.round(dagen/tot):0)+'</b></span>'+
-    '<span>Inkoopwaarde online: <b>'+dbEur(som)+'</b></span>'+
-    '<span>Langer dan 90 dagen: <b style="color:var(--red-mid)">'+(per[3].n+per[4].n)+'</b> ('+dbEur(per[3].e+per[4].e)+')</span>';
+  dbKpis(on); dbWeekChart(); dbDonut(on, per); dbGauge(on); dbJaardoel(); dbOmloopCard(); dbLeveranciers(on); dbActies(on);
 
   document.getElementById('db-bar').innerHTML = DB_BUCKETS.map(function(b){
     return tot && per[b.k].n ? '<div title="'+b.l+': '+per[b.k].n+'" style="width:'+(per[b.k].n/tot*100)+'%;background:'+b.c+'"></div>' : '';
   }).join('');
-
   document.getElementById('db-buckets').innerHTML = DB_BUCKETS.map(function(b){
     return '<div class="db-b'+(dbSel===b.k?' sel':'')+'" style="--c:'+b.c+'" onclick="dbSelect('+b.k+')">'+
       '<div class="l">'+b.l+'</div><div class="n">'+per[b.k].n+'</div><div class="e">'+dbEur(per[b.k].e)+' inkoop</div></div>';
   }).join('');
 
-  // Lijst: geselecteerde bucket, of anders alles vanaf 61 dagen
   var lijst, titel;
-  if(dbSel!==null){ var sb=DB_BUCKETS[dbSel]; lijst = on.filter(function(c){ return dbBucket(dbDays(c)).k===dbSel; }); titel = sb.l; }
+  if(dbSel==='water'){ lijst=on.filter(dbWater); titel='Vraagprijs onder inkoopprijs'; }
+  else if(dbSel==='mis'){ lijst=cars.filter(function(c){ return c.status!=='verkocht' && c.verkocht_datum && dbDays(c)!==null; }); titel='Verkocht in Autotelex, status nog niet verkocht'; }
+  else if(dbSel==='lev'){ lijst=on.filter(function(c){ return (c.leverancier||'Onbekend')===dbLev; }); titel='Leverancier: '+pcEsc(dbLev); }
+  else if(dbSel!==null){ lijst = on.filter(function(c){ return dbBucket(dbDays(c)).k===dbSel; }); titel = DB_BUCKETS[dbSel].l; }
   else { lijst = on.filter(function(c){ return dbDays(c)>60; }); titel = 'Aandacht: langer dan 60 dagen online'; }
   lijst.sort(function(a,b){ return dbDays(b)-dbDays(a); });
   var rows = lijst.map(function(c){
-    var d=dbDays(c), h=Array.isArray(c.prijs_historie)?c.prijs_historie.length:0;
+    var d=dbDays(c), ap=dbAfgeprijsd(c);
     return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td><span class="db-d" style="--c:'+dbBucket(d).c+'">'+d+'d</span></td><td>'+dbCarName(c)+'</td>'+
-      '<td>'+pcEsc(c.leverancier||'-')+'</td><td>'+pcFmt(dbOnDate(c))+(c.eerste_online?'':' <span title="Nog niet uit Autotelex opgehaald" style="color:var(--hint)">*</span>')+'</td><td class="r">'+fe(c.inkoop)+'</td><td class="r">'+fe(c.verkoop)+'</td><td class="r">'+(h||'-')+'</td></tr>';
+      '<td>'+pcEsc(c.leverancier||'-')+'</td><td>'+pcFmt(dbOnDate(c))+(c.eerste_online?'':' <span title="Nog niet uit Autotelex opgehaald" style="color:var(--hint)">*</span>')+'</td><td class="r">'+fe(c.inkoop)+'</td><td class="r"'+(dbWater(c)?' style="color:var(--red-mid)"':'')+'>'+fe(c.verkoop)+'</td><td class="r" title="'+(ap?'Eerste vraagprijs '+ap.eerste+' &rarr; nu '+ap.nu+' ('+ap.basis+'. btw)':'Nog niet opgehaald')+'">'+(ap&&ap.drop>0?'<span class="dn">-'+dbEur(ap.drop).replace('€ ','€')+'</span> <span style="color:var(--muted)">('+ap.n+'&times;)</span>':(ap?(ap.drop<0?'<span class="up">+'+dbEur(-ap.drop).replace('€ ','€')+'</span>':'0'):'-'))+'</td></tr>';
   }).join('');
   document.getElementById('db-list').innerHTML =
-    '<h3>'+titel+' <span style="font-size:12px;color:var(--muted);font-weight:400">'+lijst.length+' auto\'s'+(dbSel!==null?' &middot; <a href="#" onclick="dbSelect('+dbSel+');return false" style="color:var(--accent)">toon aandachtlijst</a>':' &middot; klik op een blok om te filteren')+'</span></h3>'+
-    (lijst.length ? '<table class="db-t"><thead><tr><th>Dagen</th><th>Auto</th><th>Leverancier</th><th>Online sinds</th><th class="r">Inkoop</th><th class="r">Vraagprijs</th><th class="r">Prijswijz.</th></tr></thead><tbody>'+rows+'</tbody></table>' : '<div class="db-empty">Geen auto\'s in deze groep.</div>');
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem"><b style="font-size:13.5px">'+titel+'</b><span style="font-size:12px;color:var(--muted)">'+lijst.length+' auto\'s'+(dbSel!==null?' &middot; <a href="#" onclick="dbSel=null;renderDash();return false" style="color:var(--accent)">toon aandachtlijst</a>':'')+'</span></div>'+
+    (lijst.length ? '<div class="db-scroll"><table class="db-t"><thead><tr><th>Dagen</th><th>Auto</th><th>Leverancier</th><th>Online sinds</th><th class="r">Inkoop</th><th class="r">Vraagprijs</th><th class="r">Afgeprijsd</th></tr></thead><tbody>'+rows+'</tbody></table></div>' : '<div class="db-empty">Geen auto\'s in deze groep.</div>');
 
-  // Afprijzen: prijscheck verlopen
   var due = pcDueList();
   document.getElementById('db-afprijzen').innerHTML =
-    '<h3>Afprijzen / prijscheck <button class="btn small" onclick="openPrijscheck(true)">Prijscheck openen</button></h3>'+
-    '<div class="sub">Eerste check na '+PC_EERSTE+' dagen online, daarna elke '+PC_HERHAAL+' dagen</div>'+
-    (due.length ? '<table class="db-t"><thead><tr><th>Auto</th><th class="r">Online</th><th class="r">Over tijd</th><th class="r">Vraagprijs</th></tr></thead><tbody>'+
+    '<h3>Afprijzen <button class="btn small" onclick="openPrijscheck(true)">Prijscheck openen</button></h3>'+
+    '<div class="sub">Eerste check na '+PC_EERSTE+' dagen, daarna elke '+PC_HERHAAL+' dagen</div>'+
+    (due.length ? '<div class="db-scroll" style="max-height:260px"><table class="db-t"><thead><tr><th>Auto</th><th class="r">Online</th><th class="r">Over tijd</th><th class="r">Vraagprijs</th></tr></thead><tbody>'+
       due.map(function(c){ var over=pcDiff(pcToday(),pcNextDue(c));
-        return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td>'+dbCarName(c)+'</td><td class="r">'+dbDays(c)+'d</td><td class="r" style="color:'+(over>=7?'var(--red-mid)':'var(--amber-txt)')+'">'+(over>0?over+'d':'vandaag')+'</td><td class="r">'+fe(c.verkoop)+'</td></tr>';
-      }).join('')+'</tbody></table>' : '<div class="db-empty">Niets af te prijzen.</div>');
+        return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td>'+dbCarName(c)+'</td><td class="r">'+(dbDays(c)===null?'-':dbDays(c)+'d')+'</td><td class="r" style="color:'+(over>=7?'var(--red-mid)':'var(--amber-txt)')+'">'+(over>0?over+'d':'vandaag')+'</td><td class="r">'+fe(c.verkoop)+'</td></tr>';
+      }).join('')+'</tbody></table></div>' : '<div class="db-empty">Niets af te prijzen.</div>');
 
-  // Binnen maar niet online
   var nio = cars.filter(function(c){ return c.status==='binnen' && !dbOnDate(c); })
     .sort(function(a,b){ return (dbSinceBuy(b)||0)-(dbSinceBuy(a)||0); });
   document.getElementById('db-nietonline').innerHTML =
-    '<h3>Binnen, nog niet online <span style="font-size:12px;color:var(--muted);font-weight:400">'+nio.length+' auto\'s</span></h3>'+
-    '<div class="sub">Status binnen, maar nog niet online. Dagen vanaf binnenkomst in Autotelex (of inkoopdatum als die er niet is).</div>'+
-    (nio.length ? '<table class="db-t"><thead><tr><th>Auto</th><th class="r">Wacht</th><th>ADS</th><th class="r">Inkoop</th></tr></thead><tbody>'+
+    '<h3>Binnen, nog niet online <span style="font-size:12px;color:var(--muted);font-weight:400">'+nio.length+'</span></h3>'+
+    '<div class="sub">Dagen vanaf binnenkomst in Autotelex (anders inkoopdatum)</div>'+
+    (nio.length ? '<div class="db-scroll" style="max-height:260px"><table class="db-t"><thead><tr><th>Auto</th><th class="r">Wacht</th><th>ADS</th><th class="r">Inkoop</th></tr></thead><tbody>'+
       nio.map(function(c){ var d=dbSinceBuy(c);
         return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td>'+dbCarName(c)+'</td><td class="r"'+(d>14?' style="color:var(--red-mid);font-weight:600"':'')+'>'+(d===null?'-':d+'d')+'</td><td>'+(c.ads_stock_id?'aangemaakt':'<span style="color:var(--hint)">nee</span>')+'</td><td class="r">'+fe(c.inkoop)+'</td></tr>';
-      }).join('')+'</tbody></table>' : '<div class="db-empty">Alles wat binnen is staat online.</div>');
+      }).join('')+'</tbody></table></div>' : '<div class="db-empty">Alles wat binnen is staat online.</div>');
 }
 
 // ===== HOOFDTABS =====
@@ -2606,6 +2938,7 @@ var currentMainTab = 'dashboard';
 
 function switchMainTab(tab) {
   currentMainTab = tab;
+  var pt=document.getElementById('page-title'); if(pt) pt.textContent={dashboard:'Overzicht',voorraad:'Voorraad',b2b:'B2B netwerk'}[tab]||'';
   document.getElementById('tab-btn-dashboard').classList.toggle('active', tab==='dashboard');
   document.getElementById('view-dashboard').style.display = tab==='dashboard' ? '' : 'none';
   if (tab === 'dashboard') renderDash();
@@ -2630,6 +2963,7 @@ function loadB2B() {
     b2bDeals = Array.isArray(res[1]) ? res[1] : [];
     b2bLoaded = true;
     updateB2bBadge();
+    if (currentMainTab==='dashboard') renderDash();
     render();
     if (currentMainTab === 'b2b') renderB2B();
     b2bCheckPending();
