@@ -2737,6 +2737,8 @@ function dbParsePrijzen(logs){
 }
 function dbAfgeprijsd(c){
   var h=c.atx_prijzen&&c.atx_prijzen.h; if(!h||!h.length) return null;
+  var mx=Math.max.apply(null,h.map(function(x){return x.p;}));
+  h=h.filter(function(x){ return x.p>=mx*0.5; }); // tikfouten (bv. 3.338 i.p.v. 33.380) negeren
   var basis=h[h.length-1].b, l=h.filter(function(x){ return x.b===basis; }), n=0;
   for(var i=1;i<l.length;i++) if(l[i].p<l[i-1].p) n++;
   return {drop:l[0].p-l[l.length-1].p, n:n, eerste:l[0].p, nu:l[l.length-1].p, basis:basis};
@@ -2853,7 +2855,7 @@ function renderDash(){
   var rows = lijst.map(function(c){
     var d=dbDays(c), ap=dbAfgeprijsd(c);
     return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td><span class="db-d" style="--c:'+dbBucket(d).c+'">'+d+'d</span></td><td>'+dbCarName(c)+'</td>'+
-      '<td>'+pcEsc(c.leverancier||'-')+'</td><td>'+pcFmt(dbOnDate(c))+(c.eerste_online?'':' <span title="Nog niet uit Autotelex opgehaald" style="color:var(--hint)">*</span>')+'</td><td class="r">'+fe(c.inkoop)+'</td><td class="r"'+(dbWater(c)?' style="color:var(--red-mid)"':'')+'>'+fe(c.verkoop)+'</td><td class="r" title="'+(ap?'Eerste vraagprijs '+ap.eerste+' &rarr; nu '+ap.nu+' ('+ap.basis+'. btw)':'Nog niet opgehaald')+'">'+(ap&&ap.drop>0?'<span class="dn">-'+dbEur(ap.drop).replace('€ ','€')+'</span> <span style="color:var(--muted)">('+ap.n+'&times;)</span>':(ap?'0':'-'))+'</td></tr>';
+      '<td>'+pcEsc(c.leverancier||'-')+'</td><td>'+pcFmt(dbOnDate(c))+(c.eerste_online?'':' <span title="Nog niet uit Autotelex opgehaald" style="color:var(--hint)">*</span>')+'</td><td class="r">'+fe(c.inkoop)+'</td><td class="r"'+(dbWater(c)?' style="color:var(--red-mid)"':'')+'>'+fe(c.verkoop)+'</td><td class="r" title="'+(ap?'Eerste vraagprijs '+ap.eerste+' &rarr; nu '+ap.nu+' ('+ap.basis+'. btw)':'Nog niet opgehaald')+'">'+(ap&&ap.drop>0?'<span class="dn">-'+dbEur(ap.drop).replace('€ ','€')+'</span> <span style="color:var(--muted)">('+ap.n+'&times;)</span>':(ap?(ap.drop<0?'<span class="up">+'+dbEur(-ap.drop).replace('€ ','€')+'</span>':'0'):'-'))+'</td></tr>';
   }).join('');
   document.getElementById('db-list').innerHTML =
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem"><b style="font-size:13.5px">'+titel+'</b><span style="font-size:12px;color:var(--muted)">'+lijst.length+' auto\'s'+(dbSel!==null?' &middot; <a href="#" onclick="dbSel=null;renderDash();return false" style="color:var(--accent)">toon aandachtlijst</a>':'')+'</span></div>'+
