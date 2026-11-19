@@ -311,7 +311,7 @@ body{background:#F4F5F7}
 
 /* ===== DASHBOARD ===== */
 .db-row2e{grid-template-columns:1fr 1fr!important}
-.db-row2{display:grid;grid-template-columns:1.45fr 1fr;gap:1rem;margin-bottom:1rem}.db-row2>*{min-width:0}
+.db-row2{display:grid;grid-template-columns:1.45fr 1fr;gap:.8rem;margin-bottom:.8rem}.db-row2>*{min-width:0}
 .qs-wrap{position:relative;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:10px;padding:0 12px;height:38px;width:340px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
 .qs-wrap input{border:none;outline:none;font:inherit;font-size:13px;flex:1;background:none}
 .qs-res{display:none;position:absolute;top:42px;right:0;left:0;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:var(--shadow-lg);z-index:70;overflow:hidden}
@@ -320,17 +320,17 @@ body{background:#F4F5F7}
 .qs-all{color:var(--accent);font-weight:600}
 @media(max-width:1300px){.db-row2{grid-template-columns:1fr}}
 @media(max-width:900px){.qs-wrap{width:100%}.topbar{flex-direction:column;align-items:stretch;gap:.6rem}}
-.db-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1rem}
-.db-kpi{background:#fff;border-radius:16px;padding:1.1rem 1.2rem;display:flex;gap:14px;align-items:flex-start;box-shadow:0 1px 3px rgba(16,24,40,.06);border:1px solid rgba(0,0,0,.06)}
-.db-ic{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--icbg);color:var(--icc)}
+.db-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;margin-bottom:.8rem}
+.db-kpi{background:#fff;border-radius:16px;padding:.85rem 1rem;display:flex;gap:14px;align-items:flex-start;box-shadow:0 1px 3px rgba(16,24,40,.06);border:1px solid rgba(0,0,0,.06)}
+.db-ic{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--icbg);color:var(--icc)}
 .db-ic svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .db-kpi .l{font-size:12.5px;font-weight:600;color:#3A3D44}
-.db-kpi .v{font-size:24px;font-weight:600;line-height:1.25;margin:.15rem 0 .2rem;letter-spacing:-.01em}
+.db-kpi .v{font-size:22px;font-weight:600;line-height:1.25;margin:.15rem 0 .2rem;letter-spacing:-.01em}
 .db-kpi .t{font-size:11.5px;color:var(--muted)}
 .up{color:#1E8B47;font-weight:600}.dn{color:#C62828;font-weight:600}
-.db-row3{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
+.db-row3{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:.8rem;margin-bottom:.8rem}
 .db-row3>*{min-width:0}
-.db-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:1.1rem 1.2rem}
+.db-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:.9rem 1.05rem}
 .db-card h3{font-size:14.5px;font-weight:600;margin-bottom:.15rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem}
 .db-card .sub{font-size:12px;color:var(--muted);margin-bottom:.7rem}
 .db-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:.6rem}
@@ -359,7 +359,7 @@ body{background:#F4F5F7}
 .db-t tr.ck{cursor:pointer}.db-t tr.ck:hover td{background:var(--surface2)}
 .db-t .r{text-align:right;font-family:'DM Mono',monospace;white-space:nowrap}
 .db-d{display:inline-block;min-width:38px;text-align:center;font-weight:600;border-radius:6px;padding:1px 6px;color:#fff;background:var(--c)}
-.db-scroll{max-height:440px;overflow:auto}
+.db-scroll{max-height:360px;overflow:auto}
 .db-empty{font-size:12px;color:var(--hint);padding:.75rem 0}
 .db-act{display:flex;align-items:center;gap:12px;padding:.65rem 0;border-bottom:1px solid var(--border);cursor:pointer}
 .db-act:last-child{border-bottom:none}.db-act:hover .tt{text-decoration:underline}
@@ -2683,7 +2683,7 @@ function dbWeekChart(){
   for(var i=0;i<W;i++){ a.push(0); b.push(0); var d=new Date(start+i*7*86400000); lbl.push(d.getUTCDate()+'/'+(d.getUTCMonth()+1)); }
   function idx(iso){ var t=pcParse(iso); if(t===null||t<start) return -1; var i=Math.floor((t-start)/(7*86400000)); return i<W?i:-1; }
   cars.forEach(function(c){ var i=idx(dbIso(c.datum)); if(i>=0) a[i]++; var j=idx(c.eerste_online); if(j>=0) b[j]++; });
-  var w=560,h=200,pl=30,pr=10,pt=10,pb=24, mx=Math.max(4,Math.max.apply(null,a.concat(b)));
+  var w=560,h=150,pl=30,pr=10,pt=8,pb=22, mx=Math.max(4,Math.max.apply(null,a.concat(b)));
   mx=Math.ceil(mx/4)*4;
   function X(i){ return pl+i*(w-pl-pr)/(W-1); } function Y(v){ return pt+(h-pt-pb)*(1-v/mx); }
   function path(arr){ var d=''; for(var i=0;i<arr.length;i++){ var x=X(i),y=Y(arr[i]); if(!i){ d='M'+x+','+y; } else { var px=X(i-1),py=Y(arr[i-1]),cx=(px+x)/2; d+=' C'+cx+','+py+' '+cx+','+y+' '+x+','+y; } } return d; }
@@ -2703,7 +2703,7 @@ function dbDonut(on, per){
   var tot=on.length, r=62, C=2*Math.PI*r, off=0, seg='';
   DB_BUCKETS.forEach(function(b){ var n=per[b.k].n; if(!n) return; var L=n/tot*C;
     seg+='<circle r="'+r+'" cx="80" cy="80" fill="none" stroke="'+b.c+'" stroke-width="22" stroke-dasharray="'+(L-1.5)+' '+(C-L+1.5)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 80 80)" style="cursor:pointer" onclick="dbSelect('+b.k+')"><title>'+b.l+': '+n+'</title></circle>'; off+=L; });
-  var svg='<svg viewBox="0 0 160 160" width="160" height="160" style="flex-shrink:0">'+(tot?seg:'<circle r="'+r+'" cx="80" cy="80" fill="none" stroke="#EEE" stroke-width="22"/>')+
+  var svg='<svg viewBox="0 0 160 160" width="128" height="128" style="flex-shrink:0">'+(tot?seg:'<circle r="'+r+'" cx="80" cy="80" fill="none" stroke="#EEE" stroke-width="22"/>')+
     '<text x="80" y="78" text-anchor="middle" font-size="24" font-weight="600" fill="#111">'+tot+'</text><text x="80" y="96" text-anchor="middle" font-size="11" fill="#888">online</text></svg>';
   var lg='<ul class="db-dl">'+DB_BUCKETS.map(function(b){ var n=per[b.k].n;
     return '<li onclick="dbSelect('+b.k+')"><span class="dot" style="background:'+b.c+'"></span><div><b>'+b.l+'</b><small>'+n+' ('+(tot?Math.round(n/tot*100):0)+'%) &middot; '+dbEur(per[b.k].e)+'</small></div></li>'; }).join('')+'</ul>';
@@ -2716,7 +2716,7 @@ function dbGauge(on){
   var r=70, cx=100, cy=95, a0=Math.PI*0.85, a1=Math.PI*2.15, span=a1-a0;
   function pt(a){ return (cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1); }
   function arc(from,to,c,w){ var large=(to-from)>Math.PI?1:0; return '<path d="M'+pt(from)+' A'+r+','+r+' 0 '+large+' 1 '+pt(to)+'" fill="none" stroke="'+c+'" stroke-width="'+w+'" stroke-linecap="round"/>'; }
-  var svg='<svg viewBox="0 0 200 165" width="100%" style="max-width:240px;display:block;margin:0 auto">'+arc(a0,a1,'#EEE',14)+(pct>0?arc(a0,a0+span*Math.max(pct,.01),col,14):'')+
+  var svg='<svg viewBox="0 0 200 165" width="100%" style="max-width:175px;display:block;margin:0 auto">'+arc(a0,a1,'#EEE',14)+(pct>0?arc(a0,a0+span*Math.max(pct,.01),col,14):'')+
     '<text x="100" y="98" text-anchor="middle" font-size="34" font-weight="600" fill="#111">'+Math.round(pct*100)+'%</text>'+
     '<text x="100" y="120" text-anchor="middle" font-size="11" fill="#888">binnen '+DB_DOEL+' dagen</text></svg>';
   var oud=on.filter(function(c){ return dbDays(c)>90; }), oudE=oud.reduce(function(s,c){return s+(nv(c.inkoop)||0);},0);
@@ -2803,7 +2803,7 @@ function dbJaardoel(){
   var prog=Math.round(ytd/doy*ndays), pace=Math.round(DB_JAARDOEL*doy/ndays), pct=Math.min(ytd/DB_JAARDOEL,1);
   var voor=ytd-pace, perM=DB_JAARDOEL/12, cm=+today.slice(5,7)-1;
   var rest=Math.max(DB_JAARDOEL-ytd,0), restM=12-cm, nodig=restM>0?Math.ceil(rest/((ndays-doy)/30.4||1)):rest;
-  var w=560,h=150,pl=26,pb=20,pt=8,bw=(w-pl-10)/12, mx=Math.max(perM*1.3, Math.max.apply(null,mnd))*1.05;
+  var w=560,h=105,pl=26,pb=18,pt=12,bw=(w-pl-10)/12, mx=Math.max(perM*1.3, Math.max.apply(null,mnd))*1.05;
   function Y(v){ return pt+(h-pt-pb)*(1-v/mx); }
   var MN=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'], bars='';
   mnd.forEach(function(v,i){ var x=pl+i*bw+bw*0.18, bwi=bw*0.64, col= i>cm ? '#EEE' : (v>=perM ? '#1E8B47' : (i===cm ? '#E8620A' : '#F4A26B'));
@@ -2833,7 +2833,7 @@ function dbLeveranciers(on){
   var rows=arr.map(function(x){ var b=dbBucket(x.gem);
     return '<tr class="ck" onclick="dbLevFilter(\''+pcEsc(x.l).replace(/'/g,"\\'")+'\')"><td>'+pcEsc(x.l)+'</td><td class="r">'+(x.vn||'-')+'</td><td class="r">'+(x.om===null?'-':'<span class="db-d" style="--c:'+dbBucket(x.om).c+'">'+x.om+'d</span>')+'</td><td class="r">'+(x.n||'-')+'</td><td class="r">'+(x.gem===null?'-':x.gem+'d')+'</td><td class="r"'+(x.o?' style="color:var(--red-mid);font-weight:600"':'')+'>'+(x.o||'-')+'</td></tr>'; }).join('');
   document.getElementById('db-lev').innerHTML='<h3>Omloop &amp; stadagen per leverancier</h3><div class="sub">Omloop = gem. dagen online tot verkocht (laatste 12 mnd) &middot; klik voor de huidige auto\'s</div>'+
-    (arr.length?'<div class="db-scroll" style="max-height:300px"><table class="db-t"><thead><tr><th>Leverancier</th><th class="r">Verkocht 12m</th><th class="r">Omloop</th><th class="r">Nu online</th><th class="r">Gem. stad.</th><th class="r">&gt;90d</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="db-empty">Nog te weinig data.</div>');
+    (arr.length?'<div class="db-scroll" style="max-height:240px"><table class="db-t"><thead><tr><th>Leverancier</th><th class="r">Verkocht 12m</th><th class="r">Omloop</th><th class="r">Nu online</th><th class="r">Gem. stad.</th><th class="r">&gt;90d</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="db-empty">Nog te weinig data.</div>');
 }
 var dbLev=null;
 function dbLevFilter(l){ dbSel='lev'; dbLev=l; renderDash(); var el=document.querySelector('.db-stad'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
@@ -2862,7 +2862,7 @@ function dbOmloopCard(){
   var sold=cars.filter(function(c){ return dbOmloop(c)!==null; });
   sold.forEach(function(c){ var i=idx[c.verkocht_datum.slice(0,7)]; if(i!==undefined){ maanden[i].n++; maanden[i].s+=dbOmloop(c); } });
   maanden.forEach(function(x){ x.gem = x.n ? Math.round(x.s/x.n) : null; });
-  var w=560,h=170,pl=26,pb=34,pt=14,bw=(w-pl-10)/12, mx=Math.max(DB_DOEL*1.25, Math.max.apply(null,maanden.map(function(x){return x.gem||0;})))*1.05;
+  var w=560,h=128,pl=26,pb=32,pt=14,bw=(w-pl-10)/12, mx=Math.max(DB_DOEL*1.25, Math.max.apply(null,maanden.map(function(x){return x.gem||0;})))*1.05;
   function Y(v){ return pt+(h-pt-pb)*(1-v/mx); }
   var bars='';
   maanden.forEach(function(x,i){ var cx=pl+i*bw+bw*0.18, bwi=bw*0.64;
@@ -2875,7 +2875,7 @@ function dbOmloopCard(){
   var svg='<svg viewBox="0 0 '+w+' '+h+'" width="100%" style="display:block">'+bars+
     '<line x1="'+pl+'" x2="'+(w-6)+'" y1="'+ty+'" y2="'+ty+'" stroke="#111" stroke-dasharray="4 4"/><text x="'+(pl-4)+'" y="'+(ty+3)+'" font-size="9.5" fill="#111" text-anchor="end">'+DB_DOEL+'</text></svg>';
   var recent=sold.slice().sort(function(a,b){ return a.verkocht_datum<b.verkocht_datum?1:-1; }).slice(0,8);
-  var tbl=recent.length?'<div class="db-scroll" style="max-height:250px;margin-top:.5rem"><table class="db-t"><thead><tr><th>Recent verkocht</th><th>Online</th><th>Verkocht</th><th class="r">Dagen</th></tr></thead><tbody>'+
+  var tbl=recent.length?'<div class="db-scroll" style="max-height:175px;margin-top:.4rem"><table class="db-t"><thead><tr><th>Recent verkocht</th><th>Online</th><th>Verkocht</th><th class="r">Dagen</th></tr></thead><tbody>'+
     recent.map(function(c){ var d=dbOmloop(c); return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td>'+dbCarName(c)+'</td><td>'+pcFmt(c.eerste_online)+'</td><td>'+pcFmt(c.verkocht_datum)+'</td><td class="r"><span class="db-d" style="--c:'+dbBucket(d).c+'">'+d+'d</span></td></tr>'; }).join('')+'</tbody></table></div>':'';
   var dekking=cars.filter(function(c){ return c.status==='verkocht'; }).length;
   document.getElementById('db-omloop').innerHTML='<h3>Omloopsnelheid per maand <span style="font-size:12px;font-weight:400;color:var(--muted)">online &rarr; verkocht &middot; '+sold.length+' van '+dekking+' verkochte auto\'s bekend</span></h3>'+
@@ -2918,7 +2918,7 @@ function renderDash(){
   document.getElementById('db-afprijzen').innerHTML =
     '<h3>Afprijzen <button class="btn small" onclick="openPrijscheck(true)">Prijscheck openen</button></h3>'+
     '<div class="sub">Eerste check na '+PC_EERSTE+' dagen, daarna elke '+PC_HERHAAL+' dagen</div>'+
-    (due.length ? '<div class="db-scroll" style="max-height:330px"><table class="db-t"><thead><tr><th>Auto</th><th class="r">Online</th><th class="r">Over tijd</th><th class="r">Vraagprijs</th></tr></thead><tbody>'+
+    (due.length ? '<div class="db-scroll" style="max-height:260px"><table class="db-t"><thead><tr><th>Auto</th><th class="r">Online</th><th class="r">Over tijd</th><th class="r">Vraagprijs</th></tr></thead><tbody>'+
       due.map(function(c){ var over=pcDiff(pcToday(),pcNextDue(c));
         return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td>'+dbCarName(c)+'</td><td class="r">'+(dbDays(c)===null?'-':dbDays(c)+'d')+'</td><td class="r" style="color:'+(over>=7?'var(--red-mid)':'var(--amber-txt)')+'">'+(over>0?over+'d':'vandaag')+'</td><td class="r">'+fe(c.verkoop)+'</td></tr>';
       }).join('')+'</tbody></table></div>' : '<div class="db-empty">Niets af te prijzen.</div>');
@@ -2928,7 +2928,7 @@ function renderDash(){
   document.getElementById('db-nietonline').innerHTML =
     '<h3>Binnen, nog niet online <span style="font-size:12px;color:var(--muted);font-weight:400">'+nio.length+'</span></h3>'+
     '<div class="sub">Dagen vanaf binnenkomst in Autotelex (anders inkoopdatum)</div>'+
-    (nio.length ? '<div class="db-scroll" style="max-height:330px"><table class="db-t"><thead><tr><th>Auto</th><th class="r">Wacht</th><th>ADS</th><th class="r">Inkoop</th></tr></thead><tbody>'+
+    (nio.length ? '<div class="db-scroll" style="max-height:260px"><table class="db-t"><thead><tr><th>Auto</th><th class="r">Wacht</th><th>ADS</th><th class="r">Inkoop</th></tr></thead><tbody>'+
       nio.map(function(c){ var d=dbSinceBuy(c);
         return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td>'+dbCarName(c)+'</td><td class="r"'+(d>14?' style="color:var(--red-mid);font-weight:600"':'')+'>'+(d===null?'-':d+'d')+'</td><td>'+(c.ads_stock_id?'aangemaakt':'<span style="color:var(--hint)">nee</span>')+'</td><td class="r">'+fe(c.inkoop)+'</td></tr>';
       }).join('')+'</tbody></table></div>' : '<div class="db-empty">Alles wat binnen is staat online.</div>');
