@@ -310,6 +310,7 @@ body{background:#F4F5F7}
 .stat,.tbl-card,.toolbar,.db-card{box-shadow:0 1px 3px rgba(16,24,40,.06);border-color:rgba(0,0,0,.06)!important}
 
 /* ===== DASHBOARD ===== */
+.db-row2e{grid-template-columns:1fr 1fr!important}
 .db-row2{display:grid;grid-template-columns:1.45fr 1fr;gap:1rem;margin-bottom:1rem}.db-row2>*{min-width:0}
 .qs-wrap{position:relative;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:10px;padding:0 12px;height:38px;width:340px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
 .qs-wrap input{border:none;outline:none;font:inherit;font-size:13px;flex:1;background:none}
@@ -319,12 +320,12 @@ body{background:#F4F5F7}
 .qs-all{color:var(--accent);font-weight:600}
 @media(max-width:1300px){.db-row2{grid-template-columns:1fr}}
 @media(max-width:900px){.qs-wrap{width:100%}.topbar{flex-direction:column;align-items:stretch;gap:.6rem}}
-.db-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:1rem}
+.db-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1rem}
 .db-kpi{background:#fff;border-radius:16px;padding:1.1rem 1.2rem;display:flex;gap:14px;align-items:flex-start;box-shadow:0 1px 3px rgba(16,24,40,.06);border:1px solid rgba(0,0,0,.06)}
 .db-ic{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--icbg);color:var(--icc)}
 .db-ic svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .db-kpi .l{font-size:12.5px;font-weight:600;color:#3A3D44}
-.db-kpi .v{font-size:26px;font-weight:600;line-height:1.25;margin:.15rem 0 .2rem;letter-spacing:-.01em}
+.db-kpi .v{font-size:24px;font-weight:600;line-height:1.25;margin:.15rem 0 .2rem;letter-spacing:-.01em}
 .db-kpi .t{font-size:11.5px;color:var(--muted)}
 .up{color:#1E8B47;font-weight:600}.dn{color:#C62828;font-weight:600}
 .db-row3{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
@@ -501,9 +502,13 @@ body{background:#F4F5F7}
       <div class="db-card" id="db-chart-donut"></div>
       <div class="db-card" id="db-chart-gauge"></div>
     </div>
-    <div class="db-row2">
+    <div class="db-row2 db-row2e">
       <div class="db-card" id="db-jaardoel"></div>
+      <div class="db-card" id="db-omloop"></div>
+    </div>
+    <div class="db-row2">
       <div class="db-card" id="db-lev"></div>
+      <div class="db-card" id="db-acties"></div>
     </div>
     <div class="db-card db-stad">
       <div class="db-head"><div><h3>Stadagen online</h3><div class="sub">Vanaf eerste publicatie in Autotelex &middot; klik op een blok om te filteren</div></div>
@@ -512,8 +517,7 @@ body{background:#F4F5F7}
       <div class="db-buckets" id="db-buckets"></div>
       <div id="db-list"></div>
     </div>
-    <div class="db-row3">
-      <div class="db-card" id="db-acties"></div>
+    <div class="db-row2 db-row2e">
       <div class="db-card" id="db-afprijzen"></div>
       <div class="db-card" id="db-nietonline"></div>
     </div>
@@ -2574,7 +2578,10 @@ function dbEur(v){ return '€ '+Math.round(v||0).toLocaleString('nl-NL'); }
 function dbBucket(d){ for(var i=0;i<DB_BUCKETS.length;i++){ if(d>=DB_BUCKETS[i].min && d<=DB_BUCKETS[i].max) return DB_BUCKETS[i]; } return DB_BUCKETS[0]; }
 function dbOnDate(c){ return c.eerste_online || c.online_datum || null; }
 function dbDays(c){ var d=dbOnDate(c); return d ? pcDiff(pcToday(), d) : null; }
-function dbOnline(){ return cars.filter(function(c){ return c.status!=='verkocht' && dbDays(c)!==null; }); }
+function dbOnline(){ return cars.filter(function(c){ return c.status!=='verkocht' && !c.verkocht_datum && dbDays(c)!==null; }); }
+function dbOmloop(c){ if(!c.verkocht_datum || !c.eerste_online) return null; var d=pcDiff(c.verkocht_datum, c.eerste_online); return d===null?null:Math.max(d,0); }
+function dbSoldIn(from, to){ return cars.filter(function(c){ var v=c.verkocht_datum; return v && dbOmloop(c)!==null && v>=from && v<=to; }); }
+function dbAvg(list,f){ if(!list.length) return null; return Math.round(list.reduce(function(s,c){return s+f(c);},0)/list.length); }
 function dbCarName(c){ return '<b>'+pcEsc(c.kenteken||('VIN '+String(c.vin||'').slice(-6)))+'</b> '+pcEsc((c.merk||'')+' '+(c.type||'')); }
 function dbIso(v){ var t=String(v||'').trim(), m=t.match(/^(\d{2})-(\d{2})-(\d{4})/); return m ? m[3]+'-'+m[2]+'-'+m[1] : t; }
 function dbSinceBuy(c){ return pcDiff(pcToday(), c.binnen_datum || dbIso(c.datum)); }
@@ -2584,7 +2591,12 @@ function dbSyncAtx(force){
   if(dbSyncBusy) return Promise.resolve();
   var last=0; try{ last=parseInt(localStorage.getItem('bourg_db_sync')||'0',10)||0; }catch(e){}
   if(!force && Date.now()-last < 3*3600*1000) return Promise.resolve();
-  var todo=cars.filter(function(c){ return c.ads_stock_id && c.status!=='verkocht' && (!c.eerste_online || !c.binnen_datum); });
+  var miss={}; try{ miss=JSON.parse(localStorage.getItem('bourg_db_nosold')||'{}')||{}; }catch(e){}
+  var vandaag=pcToday();
+  // niet-verkocht: altijd checken (datums + of hij in Autotelex verkocht is); verkocht: alleen zolang verkoopdatum ontbreekt (max 1x per dag)
+  var todo=cars.filter(function(c){ if(!c.ads_stock_id) return false;
+    if(c.status!=='verkocht') return !c.verkocht_datum;
+    return !c.verkocht_datum && miss[c.id]!==vandaag; });
   if(!todo.length){ if(force) showToast('Alle Autotelex-datums zijn al bekend'); return Promise.resolve(); }
   dbSyncBusy=true; var n=0, fout=null;
   if(force) showToast('Autotelex-datums ophalen voor '+todo.length+' auto\'s...');
@@ -2596,7 +2608,10 @@ function dbSyncAtx(force){
         if(!r) return;
         var pub=r.initialPublicationDateTime?String(r.initialPublicationDateTime).slice(0,10):null;
         var bin=r.inStockTimestampUtc?String(r.inStockTimestampUtc).slice(0,10):null;
+        var st=String(r.stockStatus||''), sold=r.soldTimestampUtc?String(r.soldTimestampUtc).slice(0,10):(/Sold/i.test(st)&&r.presenceEndDate?String(r.presenceEndDate).slice(0,10):null);
         var upd={};
+        if(sold && sold!==c.verkocht_datum) upd.verkocht_datum=sold;
+        if(!sold && c.status==='verkocht') miss[c.id]=vandaag;
         if(pub && pub!==c.eerste_online) upd.eerste_online=pub;
         if(bin && bin!==c.binnen_datum) upd.binnen_datum=bin;
         if(!Object.keys(upd).length) return;
@@ -2607,7 +2622,9 @@ function dbSyncAtx(force){
   });
   return chain.then(function(){
     dbSyncBusy=false;
-    if(fout){ showToast('Opslaan mislukt: zijn de kolommen eerste_online en binnen_datum aangemaakt?'); return; }
+    for(var k in miss){ if(miss[k]!==vandaag) delete miss[k]; }
+    try{ localStorage.setItem('bourg_db_nosold', JSON.stringify(miss)); }catch(e){}
+    if(fout){ showToast('Opslaan mislukt: ontbreekt er een kolom in Supabase?'); return; }
     try{ localStorage.setItem('bourg_db_sync', String(Date.now())); }catch(e){}
     renderDash();
     if(force||n) showToast(n+' auto\'s bijgewerkt met Autotelex-datums');
@@ -2651,6 +2668,9 @@ function dbKpis(on){
     k('cart','#FFF1E6','#E8620A','Ingekocht deze maand', nu, dbTrend(nu,toen,false)+' t.o.v. zelfde periode vorige maand') +
     k('car','#EAF6EE','#1E8B47','Voorraad online', on.length, dbEur(som)+' inkoopwaarde') +
     k('clock', gem>DB_DOEL?'#FDECEC':'#EAF6EE', gem>DB_DOEL?'#C62828':'#1E8B47', 'Gem. stadagen', gem, '<span class="'+(gem>DB_DOEL?'dn':'up')+'">doel &le; '+DB_DOEL+'</span> dagen online') +
+    (function(){ var t90=pcAdd(today,-90), t180=pcAdd(today,-180);
+      var nuL=dbSoldIn(t90, today), toenL=dbSoldIn(t180, pcAdd(t90,-1)), nuA=dbAvg(nuL,dbOmloop), toenA=dbAvg(toenL,dbOmloop);
+      return k('clock','#F3EEFF','#5B35C9','Omloopsnelheid', nuA===null?'-':nuA+' d', nuA===null?'nog geen verkopen bekend':(toenA?dbTrend(nuA,toenA,true)+' &middot; ':'')+nuL.length+' verkocht laatste 90 dagen'); })() +
     k('truck','#EEF2FF','#2B55C9','Onderweg / besteld', ow.length, dbEur(owE)+' inkoopwaarde') +
     (function(){ var t=0,n=0,m=0; on.forEach(function(c){ var a=dbAfgeprijsd(c); if(a){ m++; if(a.drop>0){ t+=a.drop; n++; } } });
       return k('down','#FDECEC','#C62828','Afgeprijsd (online)', m?dbEur(t):'-', m?(n+' auto\'s &middot; gem. '+dbEur(n?t/n:0)):'prijshistorie nog niet opgehaald'); })();
@@ -2708,11 +2728,13 @@ function dbActies(on){
   var due=pcDueList().length;
   var nio=cars.filter(function(c){ return c.status==='binnen' && !dbOnDate(c); }).length;
   var water=on.filter(dbWater).length;
+  var mis=cars.filter(function(c){ return c.status!=='verkocht' && c.verkocht_datum; }).length;
   var oud=on.filter(function(c){ return dbDays(c)>120; }).length;
   var kans=(typeof b2bKansen==='function' && b2bLoaded) ? b2bKansen().length : 0;
   var afh=(typeof b2bDeals!=='undefined') ? b2bDeals.filter(function(d){ return d.status==='verkocht' && typeof afKlaar==='function' && !afKlaar(d); }).length : 0;
   function a(ic,bg,col,tt,ss,n,onc){ return '<div class="db-act" onclick="'+onc+'"><div class="db-ic" style="--icbg:'+bg+';--icc:'+col+'">'+DB_IC[ic]+'</div><div><div class="tt">'+tt+'</div><div class="ss">'+ss+'</div></div><span class="db-pill" style="--icbg:'+bg+';--icc:'+col+'">'+n+'</span></div>'; }
   var items=[];
+  if(mis) items.push(a('check','#F3EEFF','#5B35C9','Verkocht in Autotelex','Status in dashboard nog niet op verkocht',mis,"dbSelect('mis')"));
   if(due) items.push(a('tag','#FFF1E6','#E8620A','Prijscheck / afprijzen','Prijscheck verlopen',due,'openPrijscheck(true)'));
   if(oud) items.push(a('clock','#FDECEC','#C62828','Langer dan 120 dagen online','Afprijzen of B2B aanbieden',oud,'dbSelect(4)'));
   if(water) items.push(a('down','#FDECEC','#C62828','Vraagprijs onder inkoop','Let op: btw/marge kan verschillen',water,"dbSelect('water')"));
@@ -2804,12 +2826,14 @@ function dbJaardoel(){
 function dbLeveranciers(on){
   var g={};
   on.forEach(function(c){ var l=c.leverancier||'Onbekend'; if(!g[l]) g[l]={l:l,n:0,s:0,o:0,e:0}; var d=dbDays(c); g[l].n++; g[l].s+=d; if(d>90) g[l].o++; g[l].e+=nv(c.inkoop)||0; });
-  var arr=Object.keys(g).map(function(k){ var x=g[k]; x.gem=Math.round(x.s/x.n); return x; }).filter(function(x){ return x.n>=2; });
-  arr.sort(function(a,b){ return b.gem-a.gem; });
+  var jr=pcAdd(pcToday(),-365);
+  cars.forEach(function(c){ var o=dbOmloop(c); if(o===null || c.verkocht_datum<jr) return; var l=c.leverancier||'Onbekend'; if(!g[l]) g[l]={l:l,n:0,s:0,o:0,e:0}; g[l].vn=(g[l].vn||0)+1; g[l].vs=(g[l].vs||0)+o; });
+  var arr=Object.keys(g).map(function(k){ var x=g[k]; x.gem=x.n?Math.round(x.s/x.n):null; x.om=x.vn?Math.round(x.vs/x.vn):null; return x; }).filter(function(x){ return x.n+(x.vn||0)>=2; });
+  arr.sort(function(a,b){ return (b.om===null?-1:b.om)-(a.om===null?-1:a.om) || (b.gem||0)-(a.gem||0); });
   var rows=arr.map(function(x){ var b=dbBucket(x.gem);
-    return '<tr class="ck" onclick="dbLevFilter(\''+pcEsc(x.l).replace(/'/g,"\\'")+'\')"><td>'+pcEsc(x.l)+'</td><td class="r">'+x.n+'</td><td class="r"><span class="db-d" style="--c:'+b.c+'">'+x.gem+'d</span></td><td class="r"'+(x.o?' style="color:var(--red-mid);font-weight:600"':'')+'>'+(x.o||'-')+'</td><td class="r">'+dbEur(x.e)+'</td></tr>'; }).join('');
-  document.getElementById('db-lev').innerHTML='<h3>Stadagen per leverancier</h3><div class="sub">Huidige online voorraad, leveranciers met 2+ auto\'s &middot; klik voor de auto\'s</div>'+
-    (arr.length?'<div class="db-scroll" style="max-height:300px"><table class="db-t"><thead><tr><th>Leverancier</th><th class="r">Online</th><th class="r">Gem.</th><th class="r">&gt;90d</th><th class="r">Inkoop</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="db-empty">Nog te weinig data.</div>');
+    return '<tr class="ck" onclick="dbLevFilter(\''+pcEsc(x.l).replace(/'/g,"\\'")+'\')"><td>'+pcEsc(x.l)+'</td><td class="r">'+(x.vn||'-')+'</td><td class="r">'+(x.om===null?'-':'<span class="db-d" style="--c:'+dbBucket(x.om).c+'">'+x.om+'d</span>')+'</td><td class="r">'+(x.n||'-')+'</td><td class="r">'+(x.gem===null?'-':x.gem+'d')+'</td><td class="r"'+(x.o?' style="color:var(--red-mid);font-weight:600"':'')+'>'+(x.o||'-')+'</td></tr>'; }).join('');
+  document.getElementById('db-lev').innerHTML='<h3>Omloop &amp; stadagen per leverancier</h3><div class="sub">Omloop = gem. dagen online tot verkocht (laatste 12 mnd) &middot; klik voor de huidige auto\'s</div>'+
+    (arr.length?'<div class="db-scroll" style="max-height:300px"><table class="db-t"><thead><tr><th>Leverancier</th><th class="r">Verkocht 12m</th><th class="r">Omloop</th><th class="r">Nu online</th><th class="r">Gem. stad.</th><th class="r">&gt;90d</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="db-empty">Nog te weinig data.</div>');
 }
 var dbLev=null;
 function dbLevFilter(l){ dbSel='lev'; dbLev=l; renderDash(); var el=document.querySelector('.db-stad'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
@@ -2829,6 +2853,34 @@ function dbQuickSearch(q){
 }
 function dbQuickAll(){ var q=document.getElementById('qs').value; switchMainTab('voorraad'); var s=document.getElementById('search'); if(s){ s.value=q; render(); } document.getElementById('qs-res').style.display='none'; }
 
+/* ---- Omloopsnelheid: eerste publicatie -> verkocht (Autotelex) ---- */
+function dbOmloopCard(){
+  var today=pcToday(), MN=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  var y=+today.slice(0,4), m=+today.slice(5,7)-1, maanden=[];
+  for(var i=11;i>=0;i--){ var mm=m-i, yy=y; while(mm<0){ mm+=12; yy--; } maanden.push({k:yy+'-'+('0'+(mm+1)).slice(-2), l:MN[mm], n:0, s:0}); }
+  var idx={}; maanden.forEach(function(x,i){ idx[x.k]=i; });
+  var sold=cars.filter(function(c){ return dbOmloop(c)!==null; });
+  sold.forEach(function(c){ var i=idx[c.verkocht_datum.slice(0,7)]; if(i!==undefined){ maanden[i].n++; maanden[i].s+=dbOmloop(c); } });
+  maanden.forEach(function(x){ x.gem = x.n ? Math.round(x.s/x.n) : null; });
+  var w=560,h=170,pl=26,pb=34,pt=14,bw=(w-pl-10)/12, mx=Math.max(DB_DOEL*1.25, Math.max.apply(null,maanden.map(function(x){return x.gem||0;})))*1.05;
+  function Y(v){ return pt+(h-pt-pb)*(1-v/mx); }
+  var bars='';
+  maanden.forEach(function(x,i){ var cx=pl+i*bw+bw*0.18, bwi=bw*0.64;
+    if(x.gem!==null){ var col=dbBucket(x.gem).c;
+      bars+='<rect x="'+cx+'" y="'+Y(x.gem)+'" width="'+bwi+'" height="'+(Y(0)-Y(x.gem))+'" rx="4" fill="'+col+'"><title>'+x.l+': gem. '+x.gem+' dagen, '+x.n+' verkocht</title></rect>'+
+        '<text x="'+(cx+bwi/2)+'" y="'+(Y(x.gem)-4)+'" font-size="9.5" fill="#333" text-anchor="middle" font-weight="600">'+x.gem+'d</text>'; }
+    bars+='<text x="'+(cx+bwi/2)+'" y="'+(h-19)+'" font-size="10" fill="#999" text-anchor="middle">'+x.l+'</text>'+
+      '<text x="'+(cx+bwi/2)+'" y="'+(h-6)+'" font-size="9" fill="#BBB" text-anchor="middle">'+(x.n||'')+'</text>'; });
+  var ty=Y(DB_DOEL);
+  var svg='<svg viewBox="0 0 '+w+' '+h+'" width="100%" style="display:block">'+bars+
+    '<line x1="'+pl+'" x2="'+(w-6)+'" y1="'+ty+'" y2="'+ty+'" stroke="#111" stroke-dasharray="4 4"/><text x="'+(pl-4)+'" y="'+(ty+3)+'" font-size="9.5" fill="#111" text-anchor="end">'+DB_DOEL+'</text></svg>';
+  var recent=sold.slice().sort(function(a,b){ return a.verkocht_datum<b.verkocht_datum?1:-1; }).slice(0,8);
+  var tbl=recent.length?'<div class="db-scroll" style="max-height:250px;margin-top:.5rem"><table class="db-t"><thead><tr><th>Recent verkocht</th><th>Online</th><th>Verkocht</th><th class="r">Dagen</th></tr></thead><tbody>'+
+    recent.map(function(c){ var d=dbOmloop(c); return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td>'+dbCarName(c)+'</td><td>'+pcFmt(c.eerste_online)+'</td><td>'+pcFmt(c.verkocht_datum)+'</td><td class="r"><span class="db-d" style="--c:'+dbBucket(d).c+'">'+d+'d</span></td></tr>'; }).join('')+'</tbody></table></div>':'';
+  var dekking=cars.filter(function(c){ return c.status==='verkocht'; }).length;
+  document.getElementById('db-omloop').innerHTML='<h3>Omloopsnelheid per maand <span style="font-size:12px;font-weight:400;color:var(--muted)">online &rarr; verkocht &middot; '+sold.length+' van '+dekking+' verkochte auto\'s bekend</span></h3>'+
+    '<div class="sub">Gemiddeld aantal dagen van eerste publicatie tot verkoop in Autotelex; grijs getal = aantal verkocht</div>'+svg+tbl;
+}
 function renderDash(){
   if(!document.getElementById('view-dashboard')) return;
   var on = dbOnline();
@@ -2836,7 +2888,7 @@ function renderDash(){
   var per = DB_BUCKETS.map(function(){ return {n:0, e:0}; });
   on.forEach(function(c){ var b=dbBucket(dbDays(c)); per[b.k].n++; per[b.k].e += nv(c.inkoop)||0; });
 
-  dbKpis(on); dbWeekChart(); dbDonut(on, per); dbGauge(on); dbJaardoel(); dbLeveranciers(on); dbActies(on);
+  dbKpis(on); dbWeekChart(); dbDonut(on, per); dbGauge(on); dbJaardoel(); dbOmloopCard(); dbLeveranciers(on); dbActies(on);
 
   document.getElementById('db-bar').innerHTML = DB_BUCKETS.map(function(b){
     return tot && per[b.k].n ? '<div title="'+b.l+': '+per[b.k].n+'" style="width:'+(per[b.k].n/tot*100)+'%;background:'+b.c+'"></div>' : '';
@@ -2848,6 +2900,7 @@ function renderDash(){
 
   var lijst, titel;
   if(dbSel==='water'){ lijst=on.filter(dbWater); titel='Vraagprijs onder inkoopprijs'; }
+  else if(dbSel==='mis'){ lijst=cars.filter(function(c){ return c.status!=='verkocht' && c.verkocht_datum && dbDays(c)!==null; }); titel='Verkocht in Autotelex, status nog niet verkocht'; }
   else if(dbSel==='lev'){ lijst=on.filter(function(c){ return (c.leverancier||'Onbekend')===dbLev; }); titel='Leverancier: '+pcEsc(dbLev); }
   else if(dbSel!==null){ lijst = on.filter(function(c){ return dbBucket(dbDays(c)).k===dbSel; }); titel = DB_BUCKETS[dbSel].l; }
   else { lijst = on.filter(function(c){ return dbDays(c)>60; }); titel = 'Aandacht: langer dan 60 dagen online'; }
