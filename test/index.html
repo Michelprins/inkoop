@@ -436,7 +436,8 @@ tbody tr:hover td{background:#FFF6F1}
     <button class="main-tab" id="tab-btn-b2b" onclick="switchMainTab('b2b')">&#129309; B2B netwerk<span id="b2b-badge" class="kv-badge" style="display:none;margin-left:4px"></span></button>
   </div>
   <div id="view-dashboard">
-    <div class="db-sec">Stadagen online (vanaf advertentiedatum Autotelex)</div>
+    <div class="db-sec">Stadagen online (vanaf eerste publicatie in Autotelex)</div>
+    <div style="float:right;margin-top:-1.6rem"><button class="btn small" onclick="dbSyncAtx(true)">&#8635; Autotelex-datums ophalen</button></div>
     <div class="db-kpis" id="db-kpis"></div>
     <div class="db-bar" id="db-bar"></div>
     <div class="db-buckets" id="db-buckets"></div>
@@ -1351,6 +1352,7 @@ function load() {
     render();
     updateStats();
     renderDash();
+    dbSyncAtx(false);
     loadB2B();
     pcAfterLoad();
   }).catch(function() { showLoading(false); showToast('Fout bij laden'); });
@@ -2499,10 +2501,47 @@ var DB_BUCKETS = [
 var dbSel = null;
 function dbEur(v){ return '€ '+Math.round(v||0).toLocaleString('nl-NL'); }
 function dbBucket(d){ for(var i=0;i<DB_BUCKETS.length;i++){ if(d>=DB_BUCKETS[i].min && d<=DB_BUCKETS[i].max) return DB_BUCKETS[i]; } return DB_BUCKETS[0]; }
-function dbOnline(){ return cars.filter(function(c){ return c.status!=='verkocht' && c.online_datum && pcDaysOnline(c)!==null; }); }
+function dbOnDate(c){ return c.eerste_online || c.online_datum || null; }
+function dbDays(c){ var d=dbOnDate(c); return d ? pcDiff(pcToday(), d) : null; }
+function dbOnline(){ return cars.filter(function(c){ return c.status!=='verkocht' && dbDays(c)!==null; }); }
 function dbCarName(c){ return '<b>'+pcEsc(c.kenteken||('VIN '+String(c.vin||'').slice(-6)))+'</b> '+pcEsc((c.merk||'')+' '+(c.type||'')); }
 function dbIso(v){ var t=String(v||'').trim(), m=t.match(/^(\d{2})-(\d{2})-(\d{4})/); return m ? m[3]+'-'+m[2]+'-'+m[1] : t; }
-function dbSinceBuy(c){ return pcDiff(pcToday(), dbIso(c.datum)); }
+function dbSinceBuy(c){ return pcDiff(pcToday(), c.binnen_datum || dbIso(c.datum)); }
+/* Echte datums uit Autotelex: eerste publicatie + binnenkomst (stock summary) */
+var dbSyncBusy=false;
+function dbSyncAtx(force){
+  if(dbSyncBusy) return Promise.resolve();
+  var last=0; try{ last=parseInt(localStorage.getItem('bourg_db_sync')||'0',10)||0; }catch(e){}
+  if(!force && Date.now()-last < 3*3600*1000) return Promise.resolve();
+  var todo=cars.filter(function(c){ return c.ads_stock_id && c.status!=='verkocht' && (!c.eerste_online || !c.binnen_datum); });
+  if(!todo.length){ if(force) showToast('Alle Autotelex-datums zijn al bekend'); return Promise.resolve(); }
+  dbSyncBusy=true; var n=0, fout=null;
+  if(force) showToast('Autotelex-datums ophalen voor '+todo.length+' auto\'s...');
+  var chain=Promise.resolve();
+  todo.forEach(function(c){
+    chain=chain.then(function(){
+      if(fout) return;
+      return adsApiFetch('GET','/api/v2/stock/'+encodeURIComponent(c.ads_stock_id)+'/summary',null).catch(function(){ return null; }).then(function(r){
+        if(!r) return;
+        var pub=r.initialPublicationDateTime?String(r.initialPublicationDateTime).slice(0,10):null;
+        var bin=r.inStockTimestampUtc?String(r.inStockTimestampUtc).slice(0,10):null;
+        var upd={};
+        if(pub && pub!==c.eerste_online) upd.eerste_online=pub;
+        if(bin && bin!==c.binnen_datum) upd.binnen_datum=bin;
+        if(!Object.keys(upd).length) return;
+        return apiFetch('PATCH','autos?id=eq.'+c.id,upd).then(function(){ for(var k in upd) c[k]=upd[k]; n++; if(n%20===0) renderDash(); })
+          .catch(function(e){ fout=e; });
+      });
+    });
+  });
+  return chain.then(function(){
+    dbSyncBusy=false;
+    if(fout){ showToast('Opslaan mislukt: zijn de kolommen eerste_online en binnen_datum aangemaakt?'); return; }
+    try{ localStorage.setItem('bourg_db_sync', String(Date.now())); }catch(e){}
+    renderDash();
+    if(force||n) showToast(n+' auto\'s bijgewerkt met Autotelex-datums');
+  });
+}
 function dbSelect(k){ dbSel = (dbSel===k) ? null : k; renderDash(); }
 
 function renderDash(){
@@ -2510,7 +2549,7 @@ function renderDash(){
   var on = dbOnline();
   var tot = on.length, som = 0, dagen = 0;
   var per = DB_BUCKETS.map(function(){ return {n:0, e:0}; });
-  on.forEach(function(c){ var d=pcDaysOnline(c), b=dbBucket(d); per[b.k].n++; per[b.k].e += nv(c.inkoop)||0; som += nv(c.inkoop)||0; dagen += d; });
+  on.forEach(function(c){ var d=dbDays(c), b=dbBucket(d); per[b.k].n++; per[b.k].e += nv(c.inkoop)||0; som += nv(c.inkoop)||0; dagen += d; });
 
   document.getElementById('db-kpis').innerHTML =
     '<span>Online: <b>'+tot+'</b> auto\'s</span>'+
@@ -2529,13 +2568,13 @@ function renderDash(){
 
   // Lijst: geselecteerde bucket, of anders alles vanaf 61 dagen
   var lijst, titel;
-  if(dbSel!==null){ var sb=DB_BUCKETS[dbSel]; lijst = on.filter(function(c){ return dbBucket(pcDaysOnline(c)).k===dbSel; }); titel = sb.l; }
-  else { lijst = on.filter(function(c){ return pcDaysOnline(c)>60; }); titel = 'Aandacht: langer dan 60 dagen online'; }
-  lijst.sort(function(a,b){ return pcDaysOnline(b)-pcDaysOnline(a); });
+  if(dbSel!==null){ var sb=DB_BUCKETS[dbSel]; lijst = on.filter(function(c){ return dbBucket(dbDays(c)).k===dbSel; }); titel = sb.l; }
+  else { lijst = on.filter(function(c){ return dbDays(c)>60; }); titel = 'Aandacht: langer dan 60 dagen online'; }
+  lijst.sort(function(a,b){ return dbDays(b)-dbDays(a); });
   var rows = lijst.map(function(c){
-    var d=pcDaysOnline(c), h=Array.isArray(c.prijs_historie)?c.prijs_historie.length:0;
+    var d=dbDays(c), h=Array.isArray(c.prijs_historie)?c.prijs_historie.length:0;
     return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td><span class="db-d" style="--c:'+dbBucket(d).c+'">'+d+'d</span></td><td>'+dbCarName(c)+'</td>'+
-      '<td>'+pcEsc(c.leverancier||'-')+'</td><td>'+pcFmt(c.online_datum)+'</td><td class="r">'+fe(c.inkoop)+'</td><td class="r">'+fe(c.verkoop)+'</td><td class="r">'+(h||'-')+'</td></tr>';
+      '<td>'+pcEsc(c.leverancier||'-')+'</td><td>'+pcFmt(dbOnDate(c))+(c.eerste_online?'':' <span title="Nog niet uit Autotelex opgehaald" style="color:var(--hint)">*</span>')+'</td><td class="r">'+fe(c.inkoop)+'</td><td class="r">'+fe(c.verkoop)+'</td><td class="r">'+(h||'-')+'</td></tr>';
   }).join('');
   document.getElementById('db-list').innerHTML =
     '<h3>'+titel+' <span style="font-size:12px;color:var(--muted);font-weight:400">'+lijst.length+' auto\'s'+(dbSel!==null?' &middot; <a href="#" onclick="dbSelect('+dbSel+');return false" style="color:var(--accent)">toon aandachtlijst</a>':' &middot; klik op een blok om te filteren')+'</span></h3>'+
@@ -2548,16 +2587,16 @@ function renderDash(){
     '<div class="sub">Eerste check na '+PC_EERSTE+' dagen online, daarna elke '+PC_HERHAAL+' dagen</div>'+
     (due.length ? '<table class="db-t"><thead><tr><th>Auto</th><th class="r">Online</th><th class="r">Over tijd</th><th class="r">Vraagprijs</th></tr></thead><tbody>'+
       due.map(function(c){ var over=pcDiff(pcToday(),pcNextDue(c));
-        return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td>'+dbCarName(c)+'</td><td class="r">'+pcDaysOnline(c)+'d</td><td class="r" style="color:'+(over>=7?'var(--red-mid)':'var(--amber-txt)')+'">'+(over>0?over+'d':'vandaag')+'</td><td class="r">'+fe(c.verkoop)+'</td></tr>';
+        return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td>'+dbCarName(c)+'</td><td class="r">'+dbDays(c)+'d</td><td class="r" style="color:'+(over>=7?'var(--red-mid)':'var(--amber-txt)')+'">'+(over>0?over+'d':'vandaag')+'</td><td class="r">'+fe(c.verkoop)+'</td></tr>';
       }).join('')+'</tbody></table>' : '<div class="db-empty">Niets af te prijzen.</div>');
 
   // Binnen maar niet online
-  var nio = cars.filter(function(c){ return c.status==='binnen' && !c.online_datum; })
+  var nio = cars.filter(function(c){ return c.status==='binnen' && !dbOnDate(c); })
     .sort(function(a,b){ return (dbSinceBuy(b)||0)-(dbSinceBuy(a)||0); });
   document.getElementById('db-nietonline').innerHTML =
     '<h3>Binnen, nog niet online <span style="font-size:12px;color:var(--muted);font-weight:400">'+nio.length+' auto\'s</span></h3>'+
-    '<div class="sub">Status binnen, maar geen advertentiedatum in Autotelex. Dagen geteld vanaf inkoopdatum.</div>'+
-    (nio.length ? '<table class="db-t"><thead><tr><th>Auto</th><th class="r">Sinds inkoop</th><th>ADS</th><th class="r">Inkoop</th></tr></thead><tbody>'+
+    '<div class="sub">Status binnen, maar nog niet online. Dagen vanaf binnenkomst in Autotelex (of inkoopdatum als die er niet is).</div>'+
+    (nio.length ? '<table class="db-t"><thead><tr><th>Auto</th><th class="r">Wacht</th><th>ADS</th><th class="r">Inkoop</th></tr></thead><tbody>'+
       nio.map(function(c){ var d=dbSinceBuy(c);
         return '<tr class="ck" onclick="editCar(\''+c.id+'\')"><td>'+dbCarName(c)+'</td><td class="r"'+(d>14?' style="color:var(--red-mid);font-weight:600"':'')+'>'+(d===null?'-':d+'d')+'</td><td>'+(c.ads_stock_id?'aangemaakt':'<span style="color:var(--hint)">nee</span>')+'</td><td class="r">'+fe(c.inkoop)+'</td></tr>';
       }).join('')+'</tbody></table>' : '<div class="db-empty">Alles wat binnen is staat online.</div>');
